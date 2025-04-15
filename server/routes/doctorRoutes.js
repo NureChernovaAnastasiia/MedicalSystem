@@ -1,4 +1,11 @@
-const Router = require('express')
-const router = new Router()
+const express = require('express');
+const router = express.Router();
+const doctorController = require('../controllers/doctorController');
 
-module.exports = router
+router.get('/', doctorController.getAll);
+router.get('/:id', doctorController.getById);
+router.post('/', doctorController.create);
+router.put('/:id', doctorController.update);
+router.delete('/:id', doctorController.delete);
+
+module.exports = router;
