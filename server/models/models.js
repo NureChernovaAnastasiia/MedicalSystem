@@ -123,7 +123,7 @@ const LabTestInfo = sequelize.define("LabTestInfo", {
   name: { type: DataTypes.STRING, allowNull: false },
   price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   description: { type: DataTypes.TEXT },
-  duration_minutes: { type: DataTypes.INTEGER },
+  duration_days: { type: DataTypes.INTEGER },
 });
 
 // Hospital Lab Service
