@@ -1,13 +1,24 @@
 const { Router } = require('express');
 const userController = require('../controllers/userController');
-const router = Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const checkRole = require('../middleware/checkRoleMiddleware');
 
-router.post('/registration', userController.registration);
+const router = Router();
+
+// login доступний усім
 router.post('/login', userController.login);
+
+// registration — можна зробити перевірку ролі у самому контроллері
+router.post('/registration', authMiddleware, userController.registration);
+
+// токен перевірки
 router.get('/auth', authMiddleware, userController.check);
-router.put('/update/:id', userController.update); 
-router.delete('/delete/:id', userController.delete); 
+
+// тільки авторизовані
 router.get('/:id', authMiddleware, userController.getUserById);
+router.put('/update/:id', authMiddleware, userController.update);
+
+// тільки Admin може видаляти
+router.delete('/delete/:id', authMiddleware, checkRole('Admin'), userController.delete);
 
 module.exports = router;
