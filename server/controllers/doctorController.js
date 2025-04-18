@@ -1,10 +1,10 @@
-const { Doctor } = require('../models/models');
+const { Doctor, Hospital, User } = require('../models/models');
 const ApiError = require('../error/ApiError');
 
 class DoctorController {
     async getAll(req, res, next) {
         try {
-            const items = await Doctor.findAll();
+            const items = await Doctor.findAll({ include: Hospital });
             return res.json(items);
         } catch (e) {
             console.error('getAll error:', e);
@@ -14,7 +14,7 @@ class DoctorController {
 
     async getById(req, res, next) {
         try {
-            const item = await Doctor.findByPk(req.params.id);
+            const item = await Doctor.findByPk(req.params.id, { include: Hospital });
             if (!item) return next(ApiError.notFound('Лікаря не знайдено'));
             return res.json(item);
         } catch (e) {
@@ -25,18 +25,56 @@ class DoctorController {
 
     async create(req, res, next) {
         try {
-            const created = await Doctor.create(req.body);
-            return res.json(created);
+          // 🔐 Перевірка прав доступу
+          if (req.user.role !== 'Admin') {
+            return next(ApiError.forbidden('Тільки адміністратор може створювати лікарів вручну'));
+          }
+      
+          const { email, first_name, last_name, middle_name = '', hospital_id } = req.body;
+      
+          // 🔎 Знаходимо користувача за email
+          const user = await User.findOne({ where: { email } });
+          if (!user || user.role !== 'Doctor') {
+            return next(ApiError.badRequest('Користувач з таким email не є лікарем або не існує'));
+          }
+      
+          // 📛 Перевіряємо, чи лікар вже існує
+          const existingDoctor = await Doctor.findOne({ where: { user_id: user.id } });
+          if (existingDoctor) {
+            return next(ApiError.badRequest('Цей лікар вже існує в базі'));
+          }
+      
+          // ✅ Створюємо лікаря
+          const doctor = await Doctor.create({
+            user_id: user.id,
+            hospital_id,
+            first_name,
+            last_name,
+            middle_name,
+            email,
+          });
+      
+          return res.json(doctor);
         } catch (e) {
-            console.error('create error:', e);
-            return next(ApiError.badRequest('Не вдалося створити лікаря'));
+          console.error('❌ create doctor error:', e.message);
+          return next(ApiError.internal('Не вдалося створити лікаря'));
         }
-    }
+      }
+      
 
     async update(req, res, next) {
         try {
             const item = await Doctor.findByPk(req.params.id);
             if (!item) return next(ApiError.notFound('Лікаря не знайдено'));
+
+            const { hospital_id } = req.body;
+            if (hospital_id) {
+                const hospitalExists = await Hospital.findByPk(hospital_id);
+                if (!hospitalExists) {
+                    return next(ApiError.badRequest('Вказана лікарня не знайдена'));
+                }
+            }
+
             await item.update(req.body);
             return res.json(item);
         } catch (e) {
@@ -49,6 +87,7 @@ class DoctorController {
         try {
             const item = await Doctor.findByPk(req.params.id);
             if (!item) return next(ApiError.notFound('Лікаря не знайдено'));
+
             await item.destroy();
             return res.json({ message: 'Лікаря видалено' });
         } catch (e) {
