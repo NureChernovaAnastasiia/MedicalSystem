@@ -1,127 +1,195 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { User } = require('../models/models');
-const ApiError = require('../error/ApiError');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { User, Doctor, Patient } = require("../models/models");
+const ApiError = require("../error/ApiError");
 
-// Генерація JWT токена
 const generateJwt = (id, email, role) => {
-    return jwt.sign(
-        { id, email, role },
-        process.env.SECRET_KEY,
-        { expiresIn: '24h' }
-    );
+  if (!process.env.SECRET_KEY) {
+    throw new Error("SECRET_KEY is not defined in environment variables");
+  }
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
+    expiresIn: "24h",
+  });
 };
 
 class UserController {
-    async registration(req, res, next) {
-        try {
-            const { email, password, role } = req.body;
+  async registration(req, res, next) {
+    const { email, password, role, username, hospital_id } = req.body;
 
-            if (!email || !password) {
-                return next(ApiError.badRequest('Некоректний email або пароль'));
-            }
-
-            const candidate = await User.findOne({ where: { email } });
-            if (candidate) {
-                return next(ApiError.badRequest('Користувач з таким email вже існує'));
-            }
-
-            const hashPassword = await bcrypt.hash(password, 5);
-            const user = await User.create({ email, password: hashPassword, role });
-
-            const token = generateJwt(user.id, user.email, user.role);
-            return res.json({ token });
-        } catch (e) {
-            console.error('registration error:', e);
-            return next(ApiError.internal('Помилка реєстрації'));
-        }
+    if (!email || !password || !role) {
+      return next(ApiError.badRequest("Некоректний email, пароль або роль"));
     }
 
-    async login(req, res, next) {
-        try {
-            const { email, password } = req.body;
-            const user = await User.findOne({ where: { email } });
+    try {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return next(ApiError.badRequest("Користувач з таким email вже існує"));
+      }
 
-            if (!user) {
-                return next(ApiError.internal('Користувача не знайдено'));
-            }
+      const userCount = await User.count();
 
-            const comparePassword = await bcrypt.compare(password, user.password);
-            if (!comparePassword) {
-                return next(ApiError.internal('Вказано невірний пароль'));
-            }
+      if (userCount === 0 && role !== "Admin") {
+        return next(
+          ApiError.forbidden("Першим може бути тільки адміністратор")
+        );
+      }
 
-            const token = generateJwt(user.id, user.email, user.role);
-            return res.json({ token });
-        } catch (e) {
-            console.error('login error:', e);
-            return next(ApiError.internal('Помилка входу'));
+      if (userCount > 0 && !req.user) {
+        return next(ApiError.forbidden("Потрібна авторизація"));
+      }
+
+      const hashPassword = await bcrypt.hash(password, 5);
+      const user = await User.create({
+        username: username || email,
+        email,
+        password: hashPassword,
+        role,
+      });
+
+      // 🔁 Якщо реєструється Doctor — створити запис у Doctor
+      if (role === "Doctor") {
+        if (!hospital_id) {
+          return next(
+            ApiError.badRequest("Для лікаря потрібно вказати hospital_id")
+          );
         }
-    }
 
-    async getUserById(req, res, next) {
-        try {
-            const { id } = req.params;
-            const user = await User.findByPk(id);
-            if (!user) {
-                return next(ApiError.badRequest('Користувача не знайдено'));
-            }
-            return res.json(user);
-        } catch (e) {
-            console.error('getUserById error:', e);
-            return next(ApiError.internal('Помилка отримання даних користувача'));
+        await Doctor.create({
+          user_id: user.id,
+          hospital_id,
+          first_name: username || email,
+          last_name: "",
+          middle_name: "",
+          email,
+        });
+      }
+
+      if (role === 'Patient') {
+        if (!req.user || (req.user.role !== 'Doctor' && req.user.role !== 'Admin')) {
+          return next(ApiError.forbidden('Тільки лікар або адміністратор може створити пацієнта'));
         }
-    }
-
-    async check(req, res, next) {
-        try {
-            const token = generateJwt(req.user.id, req.user.email, req.user.role);
-            return res.json({ token, role: req.user.role });
-        } catch (e) {
-            console.error('check error:', e);
-            return next(ApiError.internal('Помилка перевірки токена'));
+      
+        let doctorId;
+        if (req.user.role === 'Doctor') {
+          const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+          if (!doctor) return next(ApiError.badRequest('Лікаря не знайдено'));
+          doctorId = doctor.id;
+        } else if (req.user.role === 'Admin') {
+          // Адмін має явно передати doctor_id
+          doctorId = req.body.doctor_id;
+          if (!doctorId) return next(ApiError.badRequest('Потрібно вказати doctor_id'));
         }
+      
+        const doctor = await Doctor.findByPk(doctorId);
+        if (!doctor) return next(ApiError.badRequest('Лікаря не знайдено'));
+      
+        await Patient.create({
+          user_id: user.id,
+          doctor_id: doctorId,
+          hospital_id: doctor.hospital_id,
+          first_name: username || email,
+          last_name: '',
+          middle_name: '',
+          email,
+        });
+      }      
+      const token = generateJwt(user.id, user.email, user.role);
+      return res.json({ token });
+    } catch (e) {
+      console.error("❌ registration error:", e.message);
+      return next(ApiError.internal("Помилка реєстрації"));
     }
+  }
 
-    async update(req, res, next) {
-        try {
-            const { id } = req.params;
-            const { email, password, role } = req.body;
+  async login(req, res, next) {
+    const { email, password } = req.body;
 
-            const user = await User.findByPk(id);
-            if (!user) {
-                return next(ApiError.badRequest('Користувача не знайдено'));
-            }
+    try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) return next(ApiError.badRequest("Користувача не знайдено"));
 
-            user.email = email || user.email;
-            if (password) {
-                user.password = await bcrypt.hash(password, 5);
-            }
-            user.role = role || user.role;
-            await user.save();
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) return next(ApiError.badRequest("Невірний пароль"));
 
-            return res.json(user);
-        } catch (e) {
-            console.error('update error:', e);
-            return next(ApiError.internal('Помилка оновлення'));
-        }
+      const token = generateJwt(user.id, user.email, user.role);
+      return res.json({ token });
+    } catch (e) {
+      console.error("❌ login error:", e.message);
+      return next(ApiError.internal("Помилка входу"));
     }
+  }
 
-    async delete(req, res, next) {
-        try {
-            const { id } = req.params;
-            const user = await User.findByPk(id);
-            if (!user) {
-                return next(ApiError.badRequest('Користувача не знайдено'));
-            }
-
-            await user.destroy();
-            return res.json({ message: 'Користувача видалено' });
-        } catch (e) {
-            console.error('delete error:', e);
-            return next(ApiError.internal('Помилка видалення'));
-        }
+  async check(req, res, next) {
+    try {
+      const token = generateJwt(req.user.id, req.user.email, req.user.role);
+      return res.json({ token, role: req.user.role });
+    } catch (e) {
+      console.error("❌ check error:", e.message);
+      return next(ApiError.internal("Помилка перевірки токена"));
     }
+  }
+
+  async getUserById(req, res, next) {
+    const { id } = req.params;
+    try {
+      const user = await User.findByPk(id);
+      if (!user) return next(ApiError.badRequest("Користувача не знайдено"));
+
+      if (req.user.role === "Patient" && req.user.id != id) {
+        return next(ApiError.forbidden("Немає доступу"));
+      }
+
+      return res.json(user);
+    } catch (e) {
+      console.error("❌ getUserById error:", e.message);
+      return next(ApiError.internal("Помилка отримання користувача"));
+    }
+  }
+
+  async update(req, res, next) {
+    const { id } = req.params;
+    const { email, password } = req.body;
+
+    try {
+      const user = await User.findByPk(id);
+      if (!user) return next(ApiError.badRequest("Користувача не знайдено"));
+
+      if (req.user.role === "Patient" && req.user.id != id) {
+        return next(ApiError.forbidden("Немає доступу"));
+      }
+
+      user.email = email || user.email;
+      if (password) {
+        user.password = await bcrypt.hash(password, 5);
+      }
+
+      await user.save();
+      return res.json(user);
+    } catch (e) {
+      console.error("❌ update error:", e.message);
+      return next(ApiError.internal("Помилка оновлення"));
+    }
+  }
+
+  async delete(req, res, next) {
+    const { id } = req.params;
+    try {
+      if (req.user.role !== "Admin") {
+        return next(
+          ApiError.forbidden("Тільки адміністратор може видаляти користувачів")
+        );
+      }
+
+      const user = await User.findByPk(id);
+      if (!user) return next(ApiError.badRequest("Користувача не знайдено"));
+
+      await user.destroy();
+      return res.json({ message: "Користувача видалено" });
+    } catch (e) {
+      console.error("❌ delete error:", e.message);
+      return next(ApiError.internal("Помилка видалення"));
+    }
+  }
 }
 
 module.exports = new UserController();
