@@ -1,3 +1,4 @@
+// middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
@@ -18,7 +19,9 @@ module.exports = function (req, res, next) {
         req.user = decoded;
         next();
     } catch (e) {
-        console.error('authMiddleware error:', e);
+        console.error('authMiddleware error:', e.message);
         return res.status(401).json({ message: "Користувач не авторизований" });
     }
 };
+
+
