@@ -20,6 +20,19 @@ const Hospital = sequelize.define("Hospital", {
   address: { type: DataTypes.TEXT },
   phone: { type: DataTypes.STRING },
   email: { type: DataTypes.STRING },
+  // Type of hospital: Public or Private
+  type: {
+    type: DataTypes.ENUM("Государственная", "Частная"), // You can also use "Public", "Private" if needed
+    allowNull: false,
+    defaultValue: "Государственная",
+  },
+
+  // Working hours (example: Mon-Fri 08:00-17:00)
+  working_hours: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "Пн-Пт 08:00-17:00",
+  },
 });
 
 // Hospital Staff
@@ -115,7 +128,15 @@ const Prescription = sequelize.define("Prescription", {
   dosage: { type: DataTypes.STRING },
   instructions: { type: DataTypes.TEXT },
   prescribed_date: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-});
+    // Форма випуску (таблетки, краплі, мазь тощо)
+    form: { type: DataTypes.STRING },
+    // Скільки одиниць приймати (наприклад: 1 таблетка, 5 мл)
+    quantity_per_dose: { type: DataTypes.STRING },
+    // Частота прийому (наприклад: 2 рази на день)
+    frequency: { type: DataTypes.STRING },
+    // Строк дії рецепту (дата, до якої рецепт дійсний)
+    prescription_expiration: { type: DataTypes.DATE }
+  });
 
 // Lab Test Info
 const LabTestInfo = sequelize.define("LabTestInfo", {
@@ -124,7 +145,10 @@ const LabTestInfo = sequelize.define("LabTestInfo", {
   price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   description: { type: DataTypes.TEXT },
   duration_days: { type: DataTypes.INTEGER },
-});
+   preparation: { type: DataTypes.TEXT },
+   indications: { type: DataTypes.TEXT },
+   is_ready: { type: DataTypes.BOOLEAN, defaultValue: false }
+ });
 
 // Hospital Lab Service
 const HospitalLabService = sequelize.define("HospitalLabService", {
@@ -184,6 +208,46 @@ const Review = sequelize.define("Review", {
     validate: { min: 1, max: 5 },
   },
   comment: { type: DataTypes.TEXT },
+});
+
+// Medical Service Info
+const MedicalServiceInfo = sequelize.define("MedicalServiceInfo", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, allowNull: false },
+  price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+  description: { type: DataTypes.TEXT },
+  preparation: { type: DataTypes.TEXT, allowNull: true },
+  indications: { type: DataTypes.TEXT, allowNull: true },
+  duration_minutes: { type: DataTypes.INTEGER },
+  is_ready: { type: DataTypes.BOOLEAN, defaultValue: false }
+});
+
+// Hospital Medical Service (many-to-many hospital ↔ service)
+const HospitalMedicalService = sequelize.define("HospitalMedicalService", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  hospital_id: { type: DataTypes.INTEGER, allowNull: false },
+  medical_service_info_id: { type: DataTypes.INTEGER, allowNull: false },
+  doctor_id: { type: DataTypes.INTEGER, allowNull: false } // Виконує процедуру
+});
+
+// Schedule for medical service
+const MedicalServiceSchedule = sequelize.define("MedicalServiceSchedule", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  hospital_medical_service_id: { type: DataTypes.INTEGER, allowNull: false },
+  appointment_date: { type: DataTypes.DATEONLY, allowNull: false },
+  start_time: { type: DataTypes.DATE, allowNull: false },
+  end_time: { type: DataTypes.DATE, allowNull: false },
+  is_booked: { type: DataTypes.BOOLEAN, defaultValue: false }
+});
+
+// Actual service record
+const MedicalService = sequelize.define("MedicalService", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  patient_id: { type: DataTypes.INTEGER, allowNull: false },
+  doctor_id: { type: DataTypes.INTEGER, allowNull: false },
+  medical_service_schedule_id: { type: DataTypes.INTEGER, allowNull: false },
+  results: { type: DataTypes.TEXT },
+  notes: { type: DataTypes.TEXT }
 });
 
 // User
@@ -274,6 +338,39 @@ LabTestInfo.belongsToMany(Hospital, {
   otherKey: "hospital_id",
 });
 
+// Many-to-many Hospital <-> MedicalServiceInfo
+Hospital.belongsToMany(MedicalServiceInfo, {
+  through: HospitalMedicalService,
+  foreignKey: "hospital_id",
+  otherKey: "medical_service_info_id"
+});
+MedicalServiceInfo.belongsToMany(Hospital, {
+  through: HospitalMedicalService,
+  foreignKey: "medical_service_info_id",
+  otherKey: "hospital_id"
+});
+
+// Schedule and bookings
+HospitalMedicalService.hasMany(MedicalServiceSchedule, {
+  foreignKey: "hospital_medical_service_id"
+});
+MedicalServiceSchedule.belongsTo(HospitalMedicalService, {
+  foreignKey: "hospital_medical_service_id"
+});
+
+MedicalServiceSchedule.hasMany(MedicalService, {
+  foreignKey: "medical_service_schedule_id"
+});
+MedicalService.belongsTo(MedicalServiceSchedule, {
+  foreignKey: "medical_service_schedule_id"
+});
+
+Doctor.hasMany(MedicalService, { foreignKey: "doctor_id" });
+MedicalService.belongsTo(Doctor, { foreignKey: "doctor_id" });
+
+Patient.hasMany(MedicalService, { foreignKey: "patient_id" });
+MedicalService.belongsTo(Patient, { foreignKey: "patient_id" });
+
 module.exports = {
   User,
   Hospital,
@@ -291,4 +388,8 @@ module.exports = {
   FinancialReport,
   Analytics,
   Review,
-}
+  MedicalServiceInfo,
+  HospitalMedicalService,
+  MedicalServiceSchedule,
+  MedicalService,
+};
