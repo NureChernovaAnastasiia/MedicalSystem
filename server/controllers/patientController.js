@@ -84,47 +84,81 @@ class PatientController {
       const user = await User.findByPk(patient.user_id);
       if (!user) return next(ApiError.badRequest("Користувача не знайдено"));
 
+      // ===== PATIENT: can update own email, phone, photo_url, password
       if (req.user.role === "Patient") {
         if (req.user.id !== patient.user_id) {
           return next(ApiError.forbidden("Немає доступу"));
         }
 
         const { email, phone, photo_url, password } = req.body;
-        if (email) {
+
+        if (email && email !== user.email) {
+          const existing = await User.findOne({ where: { email } });
+          if (existing && existing.id !== user.id) {
+            return next(ApiError.badRequest("Цей email вже зайнятий"));
+          }
           user.email = email;
           patient.email = email;
         }
+
         if (phone) patient.phone = phone;
         if (photo_url) patient.photo_url = photo_url;
-        if (password) user.password = await bcrypt.hash(password, 5);
+
+        if (password) {
+          user.password = await bcrypt.hash(password, 5);
+        }
 
         await user.save();
         await patient.save();
         return res.json(patient);
       }
 
+      // ===== DOCTOR: can update patient from their hospital
       if (req.user.role === "Doctor") {
-        const doctor = await Doctor.findOne({
-          where: { user_id: req.user.id },
-        });
+        const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+        if (!doctor) return next(ApiError.badRequest("Доктор не знайдений"));
+
         if (doctor.hospital_id !== patient.hospital_id) {
-          return next(
-            ApiError.forbidden("Пацієнт не належить до цієї лікарні")
-          );
+          return next(ApiError.forbidden("Пацієнт не належить до цієї лікарні"));
+        }
+
+        // Якщо передається doctor_id — перевіряємо лікаря
+        if (req.body.doctor_id) {
+          const newDoctor = await Doctor.findByPk(req.body.doctor_id);
+          if (!newDoctor) return next(ApiError.badRequest("Лікаря не знайдено"));
+          if (newDoctor.hospital_id !== patient.hospital_id) {
+            return next(ApiError.forbidden("Новий лікар не з цієї лікарні"));
+          }
         }
 
         await patient.update(req.body);
         return res.json(patient);
       }
 
+      // ===== ADMIN: full access (без перевірки лікарні)
       if (req.user.role === "Admin") {
+        if (req.body.doctor_id) {
+          const newDoctor = await Doctor.findByPk(req.body.doctor_id);
+          if (!newDoctor) return next(ApiError.badRequest("Лікаря не знайдено"));
+        }
+
+        if (req.body.email && req.body.email !== user.email) {
+          const existing = await User.findOne({ where: { email: req.body.email } });
+          if (existing && existing.id !== user.id) {
+            return next(ApiError.badRequest("Цей email вже зайнятий"));
+          }
+          user.email = req.body.email;
+          patient.email = req.body.email;
+        }
+
+        await user.save();
         await patient.update(req.body);
         return res.json(patient);
       }
 
       return next(ApiError.forbidden("Немає доступу"));
     } catch (e) {
-      console.error("update error:", e);
+      console.error("❌ update error:", e);
       return next(ApiError.internal("Помилка оновлення пацієнта"));
     }
   }
@@ -156,6 +190,35 @@ class PatientController {
       return next(ApiError.internal("Помилка видалення пацієнта"));
     }
   }
+
+  // Get all patients for a specific doctor
+async getByDoctor(req, res, next) {
+  try {
+    const { doctorId } = req.params;
+
+    // Перевірка прав доступу
+    if (req.user.role === 'Doctor') {
+      const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+      if (!doctor || doctor.id !== parseInt(doctorId)) {
+        return next(ApiError.forbidden("Немає доступу до пацієнтів іншого лікаря"));
+      }
+    }
+
+    // Admin може бачити всіх
+    if (req.user.role !== 'Admin' && req.user.role !== 'Doctor') {
+      return next(ApiError.forbidden("Недостатньо прав"));
+    }
+
+    const patients = await Patient.findAll({
+      where: { doctor_id: doctorId },
+    });
+
+    return res.json(patients);
+  } catch (e) {
+    console.error("getByDoctor error:", e);
+    return next(ApiError.internal("Не вдалося отримати пацієнтів лікаря"));
+  }
+}
 }
 
 module.exports = new PatientController();
