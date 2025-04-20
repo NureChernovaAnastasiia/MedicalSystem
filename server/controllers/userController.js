@@ -46,7 +46,7 @@ class UserController {
         role,
       });
 
-      // 🔁 Якщо реєструється Doctor — створити запис у Doctor
+      // Doctor auto-create in both Doctor + HospitalStaff
       if (role === "Doctor") {
         if (!hospital_id) {
           return next(
@@ -54,7 +54,7 @@ class UserController {
           );
         }
 
-        await Doctor.create({
+        const doctor = await Doctor.create({
           user_id: user.id,
           hospital_id,
           first_name: username || email,
@@ -62,37 +62,58 @@ class UserController {
           middle_name: "",
           email,
         });
+
+        // 🧑‍⚕️ Also create in HospitalStaff
+        await HospitalStaff.create({
+          user_id: user.id,
+          hospital_id,
+          first_name: doctor.first_name,
+          last_name: doctor.last_name,
+          middle_name: doctor.middle_name,
+          position: "Doctor",
+          email,
+        });
       }
 
-      if (role === 'Patient') {
-        if (!req.user || (req.user.role !== 'Doctor' && req.user.role !== 'Admin')) {
-          return next(ApiError.forbidden('Тільки лікар або адміністратор може створити пацієнта'));
+      if (role === "Patient") {
+        if (
+          !req.user ||
+          (req.user.role !== "Doctor" && req.user.role !== "Admin")
+        ) {
+          return next(
+            ApiError.forbidden(
+              "Тільки лікар або адміністратор може створити пацієнта"
+            )
+          );
         }
-      
+
         let doctorId;
-        if (req.user.role === 'Doctor') {
-          const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
-          if (!doctor) return next(ApiError.badRequest('Лікаря не знайдено'));
+        if (req.user.role === "Doctor") {
+          const doctor = await Doctor.findOne({
+            where: { user_id: req.user.id },
+          });
+          if (!doctor) return next(ApiError.badRequest("Лікаря не знайдено"));
           doctorId = doctor.id;
-        } else if (req.user.role === 'Admin') {
+        } else if (req.user.role === "Admin") {
           // Адмін має явно передати doctor_id
           doctorId = req.body.doctor_id;
-          if (!doctorId) return next(ApiError.badRequest('Потрібно вказати doctor_id'));
+          if (!doctorId)
+            return next(ApiError.badRequest("Потрібно вказати doctor_id"));
         }
-      
+
         const doctor = await Doctor.findByPk(doctorId);
-        if (!doctor) return next(ApiError.badRequest('Лікаря не знайдено'));
-      
+        if (!doctor) return next(ApiError.badRequest("Лікаря не знайдено"));
+
         await Patient.create({
           user_id: user.id,
           doctor_id: doctorId,
           hospital_id: doctor.hospital_id,
           first_name: username || email,
-          last_name: '',
-          middle_name: '',
+          last_name: "",
+          middle_name: "",
           email,
         });
-      }      
+      }
       const token = generateJwt(user.id, user.email, user.role);
       return res.json({ token });
     } catch (e) {
