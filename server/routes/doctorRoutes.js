@@ -7,6 +7,8 @@ const checkRole = require('../middleware/checkRoleMiddleware');
 router.get('/', authMiddleware, doctorController.getAll);
 router.get('/:id', authMiddleware, doctorController.getById);
 
+router.get("/by-hospital/:hospitalId", doctorController.getByHospital);
+
 // ❗️тільки для Admin
 router.post('/', authMiddleware, checkRole('Admin'), doctorController.create);
 router.put('/:id', authMiddleware, checkRole('Admin'), doctorController.update);

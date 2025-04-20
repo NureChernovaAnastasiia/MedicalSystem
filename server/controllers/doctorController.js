@@ -95,6 +95,27 @@ class DoctorController {
             return next(ApiError.internal('Помилка видалення лікаря'));
         }
     }
+    // Get all doctors by hospital ID
+async getByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+  
+      const hospital = await Hospital.findByPk(hospitalId);
+      if (!hospital) {
+        return next(ApiError.notFound("Лікарню не знайдено"));
+      }
+  
+      const doctors = await Doctor.findAll({
+        where: { hospital_id: hospitalId },
+        include: [Hospital],
+      });
+  
+      return res.json(doctors);
+    } catch (e) {
+      console.error("getByHospital error:", e);
+      return next(ApiError.internal("Помилка отримання лікарів по лікарні"));
+    }
+  }  
 }
 
 module.exports = new DoctorController();
