@@ -21,4 +21,7 @@ router.put('/:id', checkRole('Doctor', 'Admin', 'Patient'), patientController.up
 // Delete patient (Doctor, Admin)
 router.delete('/:id', checkRole('Doctor', 'Admin'), patientController.delete);
 
+// Отримати всіх пацієнтів конкретного лікаря (Doctor, Admin)
+router.get("/by-doctor/:doctorId", checkRole("Doctor", "Admin"), patientController.getByDoctor);
+
 module.exports = router;
