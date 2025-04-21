@@ -1,23 +1,39 @@
 class ApiError extends Error {
     constructor(status, message) {
-        super();
+        super(message);
         this.status = status;
-        this.message = message;
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
     }
 
-    // Метод для створення помилки "поганий запит" (404)
-    static badRequest(message) {
+    // 🔁 400 Bad Request — Невірні або неповні дані
+    static badRequest(message = "Bad Request") {
+        return new ApiError(400, message);
+    }
+
+    // 🔒 401 Unauthorized — Неавторизований
+    static unauthorized(message = "Unauthorized") {
+        return new ApiError(401, message);
+    }
+
+    // 🚫 403 Forbidden — Немає прав
+    static forbidden(message = "Forbidden") {
+        return new ApiError(403, message);
+    }
+
+    // ❌ 404 Not Found — Ресурс не знайдено
+    static notFound(message = "Not Found") {
         return new ApiError(404, message);
     }
 
-    // Метод для створення внутрішньої помилки сервера (500)
-    static internal(message) {
-        return new ApiError(500, message);
+    // ⚠️ 409 Conflict — Конфлікт (наприклад, дублікат email)
+    static conflict(message = "Conflict") {
+        return new ApiError(409, message);
     }
 
-    // Метод для створення помилки "заборонено" (403)
-    static forbidden(message) {
-        return new ApiError(403, message);
+    // 💥 500 Internal Server Error — Внутрішня помилка
+    static internal(message = "Internal Server Error") {
+        return new ApiError(500, message);
     }
 }
 
