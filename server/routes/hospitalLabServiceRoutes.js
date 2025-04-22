@@ -1,11 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const hospitalLabServiceController = require('../controllers/hospitalLabServiceController');
+const Router = require('express');
+const router = new Router();
+const controller = require('../controllers/hospitalLabServiceController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.get('/', hospitalLabServiceController.getAll);
-router.get('/:id', hospitalLabServiceController.getById);
-router.post('/', hospitalLabServiceController.create);
-router.put('/:id', hospitalLabServiceController.update);
-router.delete('/:id', hospitalLabServiceController.delete);
+// 🔓 Публічні маршрути (всі можуть дивитися)
+router.get('/', controller.getAll); // Усі послуги
+router.get('/:id', controller.getById); // Послуга за ID
+router.get('/hospital/:hospitalId', controller.getByHospital); // Послуги в лікарні
+
+// 🔐 Захищені маршрути (Admin / Doctor)
+router.post('/', authMiddleware, controller.create);
+router.put('/:id', authMiddleware, controller.update);
+router.delete('/:id', authMiddleware, controller.delete);
 
 module.exports = router;
