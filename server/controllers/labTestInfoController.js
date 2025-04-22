@@ -1,61 +1,106 @@
-const { LabTestInfo } = require('../models/models');
+const { LabTestInfo, HospitalLabService } = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { Op } = require('sequelize');
 
 class LabTestInfoController {
-    async getAll(req, res, next) {
-        try {
-            const items = await LabTestInfo.findAll();
-            return res.json(items);
-        } catch (e) {
-            console.error('getAll error:', e);
-            return next(ApiError.internal('Не вдалося отримати список лабораторних тестів'));
-        }
-    }
+  // 🔓 Отримати всі тести
+  async getAll(req, res, next) {
+    try {
+      const { name } = req.query;
+      const whereClause = {};
 
-    async getById(req, res, next) {
-        try {
-            const item = await LabTestInfo.findByPk(req.params.id);
-            if (!item) return next(ApiError.notFound('Лабораторний тест не знайдено'));
-            return res.json(item);
-        } catch (e) {
-            console.error('getById error:', e);
-            return next(ApiError.internal('Помилка отримання лабораторного тесту'));
-        }
-    }
+      if (name) {
+        whereClause.name = { [Op.iLike]: `%${name}%` };
+      }
 
-    async create(req, res, next) {
-        try {
-            const created = await LabTestInfo.create(req.body);
-            return res.json(created);
-        } catch (e) {
-            console.error('create error:', e);
-            return next(ApiError.badRequest('Не вдалося створити лабораторний тест'));
-        }
+      const tests = await LabTestInfo.findAll({ where: whereClause });
+      return res.json(tests);
+    } catch (e) {
+      console.error('getAll error:', e);
+      return next(ApiError.internal('Не вдалося отримати список тестів'));
     }
+  }
 
-    async update(req, res, next) {
-        try {
-            const item = await LabTestInfo.findByPk(req.params.id);
-            if (!item) return next(ApiError.notFound('Лабораторний тест не знайдено'));
-            await item.update(req.body);
-            return res.json(item);
-        } catch (e) {
-            console.error('update error:', e);
-            return next(ApiError.internal('Помилка оновлення лабораторного тесту'));
-        }
+  // 🔓 Отримати тест по ID
+  async getById(req, res, next) {
+    try {
+      const test = await LabTestInfo.findByPk(req.params.id);
+      if (!test) return next(ApiError.notFound('Тест не знайдено'));
+      return res.json(test);
+    } catch (e) {
+      console.error('getById error:', e);
+      return next(ApiError.internal('Помилка отримання тесту'));
     }
+  }
 
-    async delete(req, res, next) {
-        try {
-            const item = await LabTestInfo.findByPk(req.params.id);
-            if (!item) return next(ApiError.notFound('Лабораторний тест не знайдено'));
-            await item.destroy();
-            return res.json({ message: 'Лабораторний тест видалено' });
-        } catch (e) {
-            console.error('delete error:', e);
-            return next(ApiError.internal('Помилка видалення лабораторного тесту'));
-        }
+  // 🔓 Отримати всі тести доступні в лікарні
+  async getByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+
+      const services = await HospitalLabService.findAll({
+        where: { hospital_id: hospitalId },
+        include: [LabTestInfo],
+      });
+
+      const tests = services.map(s => s.LabTestInfo);
+      return res.json(tests);
+    } catch (e) {
+      console.error('getByHospital error:', e);
+      return next(ApiError.internal('Не вдалося отримати тести для лікарні'));
     }
+  }
+
+  // 🔐 Створити (Admin only)
+  async create(req, res, next) {
+    try {
+      if (req.user.role !== 'Admin') {
+        return next(ApiError.forbidden('Доступ заборонено'));
+      }
+
+      const created = await LabTestInfo.create(req.body);
+      return res.json(created);
+    } catch (e) {
+      console.error('create error:', e);
+      return next(ApiError.badRequest('Не вдалося створити тест'));
+    }
+  }
+
+  // 🔐 Оновити (Admin only)
+  async update(req, res, next) {
+    try {
+      if (req.user.role !== 'Admin') {
+        return next(ApiError.forbidden('Доступ заборонено'));
+      }
+
+      const test = await LabTestInfo.findByPk(req.params.id);
+      if (!test) return next(ApiError.notFound('Тест не знайдено'));
+
+      await test.update(req.body);
+      return res.json(test);
+    } catch (e) {
+      console.error('update error:', e);
+      return next(ApiError.internal('Помилка оновлення тесту'));
+    }
+  }
+
+  // 🔐 Видалити (Admin only)
+  async delete(req, res, next) {
+    try {
+      if (req.user.role !== 'Admin') {
+        return next(ApiError.forbidden('Доступ заборонено'));
+      }
+
+      const test = await LabTestInfo.findByPk(req.params.id);
+      if (!test) return next(ApiError.notFound('Тест не знайдено'));
+
+      await test.destroy();
+      return res.json({ message: 'Тест видалено' });
+    } catch (e) {
+      console.error('delete error:', e);
+      return next(ApiError.internal('Помилка видалення тесту'));
+    }
+  }
 }
 
 module.exports = new LabTestInfoController();
