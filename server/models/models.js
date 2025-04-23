@@ -332,6 +332,17 @@ LabTest.belongsTo(LabTestSchedule, { foreignKey: "lab_test_schedule_id" });
 HospitalLabService.hasMany(LabTestSchedule, {
   foreignKey: "hospital_lab_service_id",
 });
+
+
+HospitalLabService.belongsTo(Hospital, { foreignKey: "hospital_id" });
+Hospital.hasMany(HospitalLabService, { foreignKey: "hospital_id" });
+
+HospitalLabService.belongsTo(Doctor, { foreignKey: "doctor_id" });
+Doctor.hasMany(HospitalLabService, { foreignKey: "doctor_id" });
+
+HospitalLabService.belongsTo(LabTestInfo, { foreignKey: "lab_test_info_id" });
+LabTestInfo.hasMany(HospitalLabService, { foreignKey: "lab_test_info_id" });
+
 LabTestSchedule.belongsTo(HospitalLabService, {
   foreignKey: "hospital_lab_service_id",
 });
