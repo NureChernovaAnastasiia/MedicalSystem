@@ -1,5 +1,6 @@
 import {BrowserRouter} from "react-router-dom";
 import NavBar from "./components/navbars/NavBar";
+import DefaultFooter from './components/navbars/DefaultFooter';
 import AppRouter from "./components/AppRouter";
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
     <BrowserRouter>
       <NavBar />
       <AppRouter />
+      <DefaultFooter />
     </BrowserRouter>
   );
 }

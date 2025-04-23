@@ -1,28 +1,38 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import "../../style/DefaultFooter.css";
 import logo from "../../img/Logo.png";
+import { ABOUTUS_ROUTE, MAIN_ROUTE, SERVICES_ROUTE } from "../../utils/consts";
 
 const DefaultFooter = () => {
   return (
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-logo">
-          <img src={logo} alt="Logo" />
+          <NavLink to={MAIN_ROUTE}>
+            <img src={logo} alt="Logo" />
+          </NavLink>
         </div>
 
         <div className="footer-section">
           <h3>Сервіс</h3>
           <ul>
-            <li><a href="/services">Послуги</a></li>
-            <li><a href="/about">Про нас</a></li>
+            <li>
+              <NavLink to={SERVICES_ROUTE}>Послуги</NavLink>
+            </li>
+            <li>
+              <NavLink to={ABOUTUS_ROUTE}>Про нас</NavLink>
+            </li>
           </ul>
         </div>
 
         <div className="footer-section">
           <h3>Контакти</h3>
           <ul>
-            <li><a href="mailto:support@lifeline.com" className="email">
-                Електронна пошта support@lifeline.com</a></li>
+            <li className="email-label">Електронна пошта</li>
+              <a href="mailto:support@lifeline.com" className="email">
+                support@lifeline.com
+              </a>
           </ul>
         </div>
 
