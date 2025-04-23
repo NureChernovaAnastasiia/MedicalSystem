@@ -26,21 +26,18 @@ body {
     z-index: 1;
   }
   
-  /* Logo */
   .header-logo {
     width: 140px;
     height: auto;
     object-fit: contain;
   }
   
-  /* Navigation */
   .nav-links {
     display: flex;
     align-items: center;
     gap: 40px;
   }
   
-  /* Послуги */
   .services,
   .about {
     font-family: 'Montserrat', sans-serif;
@@ -75,7 +72,6 @@ body {
     background-color: #008d77;
   }
   
-  /* Optional: Responsive Scaling */
   @media (min-width: 1440px) {
     .header {
       height: 85px;

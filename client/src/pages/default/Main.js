@@ -1,4 +1,6 @@
 import React, { useState, useEffect  } from 'react';
+import { NavLink } from "react-router-dom";
+import { ABOUTUS_ROUTE, LOGIN_ROUTE } from '../../utils/consts';
 import '../../style/Main.css';
 
 import bannerImage from '../../img/Healthcare.png';
@@ -75,9 +77,9 @@ const Main = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % reviews.length);
-    }, 5000); // змінюється кожні 5 секунд
+    }, 5000); 
 
-    return () => clearInterval(interval); // очищення при розмонтуванні
+    return () => clearInterval(interval); 
   }, []);
 
   const { img, name, age, stars, quote } = reviews[current];
@@ -85,7 +87,6 @@ const Main = () => {
   return (
     <div className="homepage">
 
-      {/* Головний банер */}
       <div className="banner">
         <div className="banner-graphic">
           <div className="ellipse">
@@ -98,13 +99,14 @@ const Main = () => {
             Записуйтеся до лікаря онлайн, зберігайте історію прийомів та отримуйте результати аналізів в один клік!
           </p>
           <div className="banner-buttons">
-            <button className="join-btn">Приєднатися</button>
-            <a href="#" className="learn-more">Дізнатися більше</a>
+            <NavLink to={LOGIN_ROUTE}>
+              <button className="join-btn">Приєднатися</button>
+            </NavLink>
+            <NavLink className="learn-more" to={ABOUTUS_ROUTE}>Дізнатися більше</NavLink>
           </div>
         </div>
       </div>
 
-      {/* Інформаційна секція */}
       <div className="info-section">
         <h2 className="info-title">Що дає LifeLine?</h2>
         <div className="info-cards">
@@ -115,7 +117,6 @@ const Main = () => {
         </div>
       </div>
 
-      {/* Відгуки користувачів */}
       <div className="reviews-section">
         <h2 className="reviews-title">Що кажуть наші користувачі?</h2>
         <div className="review-wrapper">

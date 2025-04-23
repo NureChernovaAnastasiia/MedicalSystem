@@ -1,4 +1,6 @@
 import React from 'react';
+import { NavLink } from "react-router-dom";
+import { LOGIN_ROUTE } from '../../utils/consts';
 import online from "../../img/Fromhome.jpg";
 import card from "../../img/Medicalcard.jpg";
 import med from "../../img/Medicine.png";
@@ -65,7 +67,9 @@ const Services = () => {
 
       <div className="get-started">
         <p className="get-started-text">Готові скористатися зручними медичними послугами?</p>
-        <button className="get-started-btn">Розпочати</button>
+        <NavLink to={LOGIN_ROUTE}>
+            <button className="get-started-btn">Розпочати</button>
+        </NavLink>
       </div>
     </section>
   );
