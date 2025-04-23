@@ -346,6 +346,9 @@ LabTestInfo.hasMany(HospitalLabService, { foreignKey: "lab_test_info_id" });
 LabTestSchedule.belongsTo(HospitalLabService, {
   foreignKey: "hospital_lab_service_id",
 });
+HospitalLabService.belongsTo(Hospital, {
+  foreignKey: "hospital_id"
+});
 
 // Many-to-many: Hospital - LabTestInfo
 Hospital.belongsToMany(LabTestInfo, {
