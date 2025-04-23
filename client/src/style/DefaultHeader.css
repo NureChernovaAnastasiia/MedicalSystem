@@ -27,7 +27,7 @@ body {
   }
   
   /* Logo */
-  .logo {
+  .header-logo {
     width: 140px;
     height: auto;
     object-fit: contain;
@@ -81,7 +81,7 @@ body {
       height: 85px;
     }
   
-    .logo {
+    .header-logo {
       width: 120px;
     }
   

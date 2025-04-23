@@ -9,7 +9,7 @@ const Header = () => {
     <div className="header">
       <div className="header-content">
         <NavLink to={MAIN_ROUTE}>
-          <img src={logo} alt="Logo" className="logo" />
+          <img src={logo} alt="Logo" className="header-logo" />
         </NavLink>
         <div className="nav-links">
           <NavLink className="services" to={SERVICES_ROUTE}>Послуги</NavLink>

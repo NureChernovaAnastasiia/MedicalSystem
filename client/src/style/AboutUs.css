@@ -1,0 +1,262 @@
+.about-page {
+    font-family: 'Montserrat', sans-serif;
+    padding: 40px 0;
+    box-sizing: border-box;
+  }
+  
+  .hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 120px;
+    margin-bottom: 80px;
+  }
+  
+  .hero-text h1 {
+    color: #00C3A1;
+    font-size: 70px;
+    font-weight: 700;
+    max-width: 680px;
+    line-height: 1.2;
+    margin-bottom: 0px;
+  }
+  
+  .hero-text h3 {
+    font-size: 28px;
+    font-weight: 400;
+    color: #333;
+    margin-top: 5px;
+    margin-bottom: 40px;
+  }
+  
+  .hero-text p {
+    font-size: 20px;
+    font-style: italic;
+    color: #333;
+    max-width: 660px;
+  }
+  
+  .hero-image img {
+    width: 550px;
+    height: auto;
+    border-radius: 40px;
+  }  
+  
+  .who-we-are {
+    margin-bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .header-box {
+    width: 100%;
+    margin-bottom: 50px;
+    position: relative;
+  }
+  
+  .rectangle {
+    position: relative;
+    background-color: #E2F6F2;
+    border-radius: 0 50px 50px 0;
+    width: 50%;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Центрування по горизонталі */
+    padding: 0 40px;
+  }
+  
+  .rectangle h2 {
+    font-size: 32px;
+    font-style: italic;
+    font-weight: 500;
+    color: #333;
+    margin: 0; /* Прибираємо зайві зовнішні відступи */
+  }
+  
+  .content-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 150px;
+    padding-top: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .logo-container {
+    flex-shrink: 0;
+  }
+  
+  .logo {
+    width: 250px;
+    height: auto;
+  }
+  
+  .description {
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 200;
+    color: #333;
+    max-width: 800px;
+    line-height: 2;
+  }
+  
+  .features {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 100px;
+    gap: -1; /* Без проміжків між картками */
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .feature {
+    flex: 1;
+    min-width: 0;
+    background-color: #E2F6F2;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    border-radius: 0; /* Прибираємо заокруглення */
+    border-right: 1px solid #fff; /* Тонка межа між картками */
+  }
+  
+  /* Щоб остання картка не мала правої межі */
+  .feature:last-child {
+    border-right: none;
+  }
+  
+  .feature-icon img {
+    height: 100px;
+    margin-bottom: 20px;
+  }
+  
+  .feature h3 {
+    font-size: 28px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .feature p {
+    font-size: 18px;
+    font-style: italic;
+    color: #333;
+    line-height: 2;
+  }  
+  
+  .mission {
+    text-align: center;
+    margin-bottom: 100px;
+  }
+
+  .quote {
+    font-size: 26px;
+    font-style: italic;
+    font-weight: 500;
+    color: #00C3A1;
+    margin-bottom: 50px;
+  }
+  
+  .values {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    text-align: center;
+  }
+  
+  .value-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 250px;
+  }
+  
+  .value-circle {
+    width: 200px;
+    height: 200px;
+    background-color: #fff;
+    border: 2px solid #00C3A1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .value-circle h3 {
+    color: #00C3A1;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+  }
+  
+  .value-description {
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 200;
+    color: #000;
+    margin-top: 15px;
+    line-height: 1.4;
+  } 
+  
+  .feature, .value-circle {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .feature:hover, .value-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .why-lifeline {
+    margin-bottom: 80px;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .why-lifeline .content {
+    display: flex;
+    gap: 110px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 1400px;
+    width: 100%;
+    padding: 0 20px;
+  }
+  
+  .why-lifeline .image img {
+    width: 500px;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+  
+  .why-lifeline .reasons {
+    max-width: 700px;
+    width: 100%;
+    text-align: left;
+    word-wrap: break-word;
+  }
+  
+  .why-lifeline .reasons p {
+    font-size: 20px;
+    font-style: italic;
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.6;
+  }
+  
+  .why-lifeline .reasons p strong {
+    font-size: 22px;
+    color: #00C3A1;
+    font-style: normal;
+  }
+  
