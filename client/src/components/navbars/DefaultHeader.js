@@ -1,6 +1,6 @@
 import React from "react";
 import "../../style/DefaultHeader.css";
-import logo from "../../img/Logo.png"; // Переконайся, що цей шлях до зображення вірний
+import logo from "../../img/Logo.png"; 
 
 const Header = () => {
     return (
