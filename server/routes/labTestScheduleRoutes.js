@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const labTestScheduleController = require('../controllers/labTestScheduleController');
+const authMiddleware = require('../middleware/authMiddleware');
+
+router.use(authMiddleware); // Авторизація обовʼязкова
 
 router.get('/', labTestScheduleController.getAll);
 router.get('/:id', labTestScheduleController.getById);
