@@ -1,0 +1,138 @@
+/* Основні стилі */
+.servicess {
+    padding: 30px 0;
+    background-color: #f7f9fc;
+  }
+  
+  /* Заголовки */
+  .services-header {
+    text-align: left;
+    margin: 40px 80px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .services-title {
+    font-size: 32px;
+    font-weight: 700; /* Замінили на bold (700) */
+    color: #00C3A1; /* Змінили колір на основний зелений */
+    margin: 10px 0;
+  }
+  
+  .services-subtitle {
+    font-size: 22px;
+    color: #333333; /* Змінили колір на темний відтінок для кращого контрасту */
+    font-style: italic;  
+  }
+  
+  .services-intro-wrapper {
+    width: 100%;
+    background-color: #E2F6F2; /* світло-зелений фон */
+    padding: 40px 0; /* вертикальні відступи */
+  }
+  
+  .services-intro {
+    text-align: center;
+  }
+  
+  .services-intro-title {
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 18px;
+    color: #333333;
+    margin: 0;
+  }
+  
+  /* Блоки послуг */
+  .service-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 60px 80px;
+    gap: 30px;
+  }
+  
+  .service-img {
+    width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .service-info {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .service-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #00C3A1; /* Змінили колір на зелений для акценту */
+    margin: 10px 0;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .service-desc {
+    font-size: 20px;
+    color: #333333; /* Змінили на нейтральний сірий */
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    line-height: 1.4;
+  }
+  
+  /* Кнопка "Розпочати" */
+  .get-started {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .get-started-text {
+    font-size: 30px;
+    color: #333333; /* Темний колір для тексту */
+    margin-bottom: 40px;
+    font-weight: 10;
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+  }
+  
+  .get-started-btn {
+    box-sizing: border-box;
+    background: #E2F6F2;
+    border: 2px solid #00C3A1;
+    border-radius: 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 35px;
+    color: #333333;
+    cursor: pointer;
+    padding: 20px 40px; /* Додано більше простору зверху/знизу та з боків */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .get-started-btn:hover {
+    background-color: #d3f0eb;
+    border-color: #00a88c;
+  }
+  
+  /* Медіа-запит для адаптивності */
+  @media (max-width: 1200px) {
+    .service-group {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .service-img,
+    .service-info {
+      width: 90%;
+    }
+  }
+  
