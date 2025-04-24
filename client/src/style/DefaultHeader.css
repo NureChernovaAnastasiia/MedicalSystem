@@ -49,7 +49,7 @@ body {
     text-decoration: none;
   }
   
-  .login-button {
+  .login-btn {
     background-color: #00C3A1;
     color: #FFFFFF;
     font-family: 'Montserrat', sans-serif;
@@ -64,11 +64,11 @@ body {
     transition: background-color 0.3s ease;
   }
   
-  .login-button:hover {
+  .login-btn:hover {
     background-color: #00a68a;
   }
   
-  .login-button:active {
+  .login-btn:active {
     background-color: #008d77;
   }
   

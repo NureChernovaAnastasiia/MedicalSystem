@@ -15,7 +15,7 @@ const Header = () => {
           <NavLink className="services" to={SERVICES_ROUTE}>Послуги</NavLink>
           <NavLink className="about" to={ABOUTUS_ROUTE}>Про нас</NavLink>
           <NavLink to={LOGIN_ROUTE}>
-            <button className="login-button">Увійти</button>
+            <button className="login-btn">Увійти</button>
           </NavLink>
         </div>
       </div>
