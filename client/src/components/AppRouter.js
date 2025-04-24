@@ -1,39 +1,44 @@
-import React, { useContext } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { publicRoutes } from "../routes";
-import { Context } from "../index";
-import { ADMIN_PANEL_ROUTE, PATIENT_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, MAIN_ROUTE } from "../utils/consts";
-import AdminPanel from "../pages/adminpanel/AdminPanel"; // Импорт компонента AdminPanel
-import PatientPanel from "../pages/patientpanel/PatientPanel"; // Импорт компонента PatientPanel
-import DoctorPanel from "../pages/doctorpanel/DoctorPanel"; // Импорт компонента PatientPanel
+import React, { useContext } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Context } from '../index';
+import { observer } from 'mobx-react-lite';
+import { adminRoutes, doctorRoutes, patientRoutes, publicRoutes } from '../routes';
+import {
+  MAIN_ROUTE,
+} from '../utils/consts';
 
-const AppRouter = () => {
+const AppRouter = observer(() => {
   const { user } = useContext(Context);
+
+  const renderPrivateRoutes = () => {
+    if (user.role === 'Admin') {
+      return adminRoutes.map(({ path, Component }) => (
+        <Route key={path} path={path} element={<Component />} />
+      ));
+    } else if (user.role === 'Doctor') {
+      return doctorRoutes.map(({ path, Component }) => (
+        <Route key={path} path={path} element={<Component />} />
+      ));
+    } else if (user.role === 'Patient') {
+      return patientRoutes.map(({ path, Component }) => (
+        <Route key={path} path={path} element={<Component />} />
+      ));
+    }
+    return null;
+  };
 
   return (
     <Routes>
-      {user.isAuth ? (
-        // В зависимости от роли, рендерим разные панели
-        <>
-          {user.role === "admin" && (
-            <Route path={ADMIN_PANEL_ROUTE} element={<AdminPanel />} />
-          )}
-          {user.role === "patient" && (
-            <Route path={PATIENT_PANEL_ROUTE} element={<PatientPanel />} />
-          )}
-          {user.role === "doctor" && (
-            <Route path={DOCTOR_PANEL_ROUTE} element={<DoctorPanel />} />
-          )}
-        </>
-      ) : (
-        // Публичные маршруты
-        publicRoutes.map(({ path, Component }) => (
-          <Route key={path} path={path} element={<Component />} />
-        ))
-      )}
-      <Route path="*" element={<Navigate to={MAIN_ROUTE} />} />
+      {publicRoutes.map(({ path, Component }) => (
+        <Route key={path} path={path} element={<Component />} />
+      ))}
+
+      {user.isAuth && renderPrivateRoutes()}
+
+      {/* Перенаправлення за замовчуванням */}
+      <Route path="*" element={<Navigate to={MAIN_ROUTE} replace />} />
     </Routes>
   );
-};
+});
 
 export default AppRouter;

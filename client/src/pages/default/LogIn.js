@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../style/LogIn.css';
 import logo from "../../img/Logo.png";
 import unlockIcon from "../../img/icons/unlock.png";       
 import lockIcon from "../../img/icons/lock.png"; 
+import {Context} from "../../index";
+import { login, check } from '../../http/userAPI';
+import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, PATIENT_PANEL_ROUTE } from '../../utils/consts';
 
 const LogIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const { user } = useContext(Context);
+  const navigate = useNavigate();
 
   const validateEmailOrPhone = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -16,23 +22,44 @@ const LogIn = () => {
     return emailRegex.test(value) || phoneRegex.test(value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {};
-
+  
     if (!email) {
       newErrors.email = 'Це поле є обов’язковим';
     } else if (!validateEmailOrPhone(email)) {
       newErrors.email = 'Невірний формат email або номеру телефону';
     }
-
+  
     if (!password) {
       newErrors.password = 'Це поле є обов’язковим';
     }
-
+  
     setErrors(newErrors);
-
+  
     if (Object.keys(newErrors).length === 0) {
-      console.log("Логін успішний:", { email, password });
+      try {
+        await login(email, password);
+        const userData = await check();
+
+        user.setUser(userData);
+        user.setIsAuth(true);
+        user.setRole(userData.role);
+
+        // Визначаємо маршрут за роллю
+        let redirectPath = "/";
+        if (userData.role === "Admin") redirectPath = ADMIN_PANEL_ROUTE;
+        else if (userData.role === "Patient") redirectPath = PATIENT_PANEL_ROUTE;
+        else if (userData.role === "Doctor") redirectPath = DOCTOR_PANEL_ROUTE;
+
+        // Зберігаємо шлях та роль
+        localStorage.setItem("lastRoute", redirectPath);
+        localStorage.setItem("token", "user_token");  // тут має бути токен
+
+        navigate(redirectPath);
+      } catch (e) {
+        console.error("Помилка при вході:", e);
+      }
     }
   };
 

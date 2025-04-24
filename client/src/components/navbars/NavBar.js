@@ -8,10 +8,10 @@ const NavBar = () => {
   const { user } = useContext(Context);
 
   if (user.isAuth) {
-    if (user.role === "admin") {
+    if (user.role === "Admin") {
       return <AdminNavBar />;
     }
-    if (user.role === "patient") {
+    if (user.role === "Patient") {
       return <PatientNavBar />;
     }
     // Добавьте для медперсонала

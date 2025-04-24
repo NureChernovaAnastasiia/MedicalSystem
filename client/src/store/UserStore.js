@@ -4,7 +4,8 @@ export default class User {
   constructor() {
     this._isAuth = false;
     this._user = {};
-    this._role = "";  // Добавляем роль
+    this._role = "";
+    this._currentPath = ""; // зберігаємо шлях
     makeAutoObservable(this);
   }
 
@@ -20,6 +21,10 @@ export default class User {
     this._role = role;
   }
 
+  setCurrentPath(path) {
+    this._currentPath = path;
+  }
+
   get isAuth() {
     return this._isAuth;
   }
@@ -30,5 +35,9 @@ export default class User {
 
   get role() {
     return this._role;
+  }
+
+  get currentPath() {
+    return this._currentPath;
   }
 }
