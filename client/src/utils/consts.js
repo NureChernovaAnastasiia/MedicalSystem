@@ -5,4 +5,4 @@ export const LOGIN_ROUTE = '/login';
 export const DOCTOR_PANEL_ROUTE = '/docpanel';
 export const PATIENT_PANEL_ROUTE = '/patpanel';
 export const ADMIN_PANEL_ROUTE = '/adminpanel';
-
+export const PATIENT_MEDCARD_ROUTE = '/medcard';

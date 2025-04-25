@@ -12,9 +12,14 @@ const AppRouter = observer(() => {
 
   useEffect(() => {
     if (user.isAuth && user.role) {
-      if (user.role === "Admin") navigate(ADMIN_PANEL_ROUTE);
-      else if (user.role === "Doctor") navigate(DOCTOR_PANEL_ROUTE);
-      else if (user.role === "Patient") navigate(PATIENT_PANEL_ROUTE);
+      // Перевірка на першочергове завантаження після авторизації
+      if (!localStorage.getItem("hasNavigated")) {
+        localStorage.setItem("hasNavigated", "true");
+  
+        if (user.role === "Admin") navigate(ADMIN_PANEL_ROUTE);
+        else if (user.role === "Doctor") navigate(DOCTOR_PANEL_ROUTE);
+        else if (user.role === "Patient") navigate(PATIENT_PANEL_ROUTE);
+      }
     }
   }, [user.isAuth, user.role, navigate]);
 
