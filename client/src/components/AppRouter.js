@@ -1,30 +1,30 @@
-import React, { useContext } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { observer } from "mobx-react-lite";
 import { Context } from '../index';
-import { observer } from 'mobx-react-lite';
+
 import { adminRoutes, doctorRoutes, patientRoutes, publicRoutes } from '../routes';
-import {
-  MAIN_ROUTE,
-} from '../utils/consts';
+import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, MAIN_ROUTE, PATIENT_PANEL_ROUTE } from '../utils/consts';
 
 const AppRouter = observer(() => {
   const { user } = useContext(Context);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user.isAuth && user.role) {
+      if (user.role === "Admin") navigate(ADMIN_PANEL_ROUTE);
+      else if (user.role === "Doctor") navigate(DOCTOR_PANEL_ROUTE);
+      else if (user.role === "Patient") navigate(PATIENT_PANEL_ROUTE);
+    }
+  }, [user.isAuth, user.role, navigate]);
 
   const renderPrivateRoutes = () => {
-    if (user.role === 'Admin') {
-      return adminRoutes.map(({ path, Component }) => (
-        <Route key={path} path={path} element={<Component />} />
-      ));
-    } else if (user.role === 'Doctor') {
-      return doctorRoutes.map(({ path, Component }) => (
-        <Route key={path} path={path} element={<Component />} />
-      ));
-    } else if (user.role === 'Patient') {
-      return patientRoutes.map(({ path, Component }) => (
-        <Route key={path} path={path} element={<Component />} />
-      ));
+    switch (user.role) {
+      case 'Admin': return adminRoutes;
+      case 'Doctor': return doctorRoutes;
+      case 'Patient': return patientRoutes;
+      default: return [];
     }
-    return null;
   };
 
   return (
@@ -33,9 +33,10 @@ const AppRouter = observer(() => {
         <Route key={path} path={path} element={<Component />} />
       ))}
 
-      {user.isAuth && renderPrivateRoutes()}
+      {user.isAuth && user.role && renderPrivateRoutes().map(({ path, Component }) => (
+        <Route key={path} path={path} element={<Component />} />
+      ))}
 
-      {/* Перенаправлення за замовчуванням */}
       <Route path="*" element={<Navigate to={MAIN_ROUTE} replace />} />
     </Routes>
   );

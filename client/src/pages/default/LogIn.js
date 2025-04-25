@@ -6,7 +6,7 @@ import unlockIcon from "../../img/icons/unlock.png";
 import lockIcon from "../../img/icons/lock.png"; 
 import {Context} from "../../index";
 import { login, check } from '../../http/userAPI';
-import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, PATIENT_PANEL_ROUTE } from '../../utils/consts';
+import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, MAIN_ROUTE, PATIENT_PANEL_ROUTE } from '../../utils/consts';
 
 const LogIn = () => {
   const [email, setEmail] = useState('');
@@ -41,20 +41,21 @@ const LogIn = () => {
       try {
         await login(email, password);
         const userData = await check();
+        const role = userData.role;
 
         user.setUser(userData);
         user.setIsAuth(true);
         user.setRole(userData.role);
 
         // Визначаємо маршрут за роллю
-        let redirectPath = "/";
+        let redirectPath = MAIN_ROUTE;
         if (userData.role === "Admin") redirectPath = ADMIN_PANEL_ROUTE;
         else if (userData.role === "Patient") redirectPath = PATIENT_PANEL_ROUTE;
         else if (userData.role === "Doctor") redirectPath = DOCTOR_PANEL_ROUTE;
 
         // Зберігаємо шлях та роль
-        localStorage.setItem("lastRoute", redirectPath);
-        localStorage.setItem("token", "user_token");  // тут має бути токен
+        localStorage.setItem("token", localStorage.getItem("token")); 
+        localStorage.setItem("role", role);
 
         navigate(redirectPath);
       } catch (e) {

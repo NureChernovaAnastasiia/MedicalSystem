@@ -2,10 +2,9 @@ import { makeAutoObservable } from "mobx";
 
 export default class User {
   constructor() {
-    this._isAuth = false;
+    this._isAuth = !!localStorage.getItem("token");
     this._user = {};
-    this._role = "";
-    this._currentPath = ""; // зберігаємо шлях
+    this._role = localStorage.getItem("role") || "";
     makeAutoObservable(this);
   }
 
@@ -21,10 +20,6 @@ export default class User {
     this._role = role;
   }
 
-  setCurrentPath(path) {
-    this._currentPath = path;
-  }
-
   get isAuth() {
     return this._isAuth;
   }
@@ -37,7 +32,4 @@ export default class User {
     return this._role;
   }
 
-  get currentPath() {
-    return this._currentPath;
-  }
 }
