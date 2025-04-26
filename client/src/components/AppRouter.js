@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Context } from '../index';
@@ -9,19 +9,17 @@ import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, MAIN_ROUTE, PATIENT_PANEL_ROUTE 
 const AppRouter = observer(() => {
   const { user } = useContext(Context);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (user.isAuth && user.role) {
-      // Перевірка на першочергове завантаження після авторизації
-      if (!localStorage.getItem("hasNavigated")) {
-        localStorage.setItem("hasNavigated", "true");
-  
-        if (user.role === "Admin") navigate(ADMIN_PANEL_ROUTE);
-        else if (user.role === "Doctor") navigate(DOCTOR_PANEL_ROUTE);
-        else if (user.role === "Patient") navigate(PATIENT_PANEL_ROUTE);
+      if (location.pathname === "/") { 
+        if (user.role === "Admin") navigate(ADMIN_PANEL_ROUTE, { replace: true });
+        else if (user.role === "Doctor") navigate(DOCTOR_PANEL_ROUTE, { replace: true });
+        else if (user.role === "Patient") navigate(PATIENT_PANEL_ROUTE, { replace: true });
       }
     }
-  }, [user.isAuth, user.role, navigate]);
+  }, [user.isAuth, user.role, navigate, location.pathname]);
 
   const renderPrivateRoutes = () => {
     switch (user.role) {
