@@ -4,7 +4,7 @@ import AboutUs from "./pages/default/AboutUs";
 import Services from "./pages/default/Services";
 import LogIn from "./pages/default/LogIn";
 import AdminPanel from "./pages/adminpanel/AdminPanel";
-import PatientPanel from "./pages/patientpanel/PatientPanel";
+import PatientDashboard from "./pages/patientpanel/PatientDashboard";
 import PatientMedCard from "./pages/patientpanel/PatientMedCard";
 import DoctorPanel from "./pages/doctorpanel/DoctorPanel";
 
@@ -20,7 +20,7 @@ export const adminRoutes = [
   ];
   
   export const patientRoutes = [
-    { path: PATIENT_PANEL_ROUTE, Component: PatientPanel },
+    { path: PATIENT_PANEL_ROUTE, Component: PatientDashboard },
     { path: PATIENT_MEDCARD_ROUTE, Component: PatientMedCard },
   ];
   
