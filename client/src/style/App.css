@@ -1,0 +1,13 @@
+.main-content {
+    transition: margin-left 0.3s ease-in-out;
+  }
+
+  /* Розмір сайдбару, коли він відкритий */
+  .sidebar-open {
+    margin-left: 250px; 
+  }
+
+  /* Повноекранний режим, коли сайдбар закритий */
+  .sidebar-closed {
+    margin-left: 0; 
+  }

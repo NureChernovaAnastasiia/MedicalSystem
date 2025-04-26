@@ -2,7 +2,7 @@ import React from "react";
 
 function App() {
   return (
-    <div style={{ marginLeft: "335px", flexGrow: 1, padding: "20px" }}>
+    <div>
       <h1>Hello, World!</h1>
     </div>
   );

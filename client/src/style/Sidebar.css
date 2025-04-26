@@ -111,18 +111,31 @@
   .sidebar_toggle {
     position: absolute;
     top: 20px;
-    right: -35px; 
-    width: 35px;
-    height: 35px;
-    background-color: #00C3A1;
+    right: -45px; 
+    width: 45px;
+    height: 45px;
+    background-color: #00c3a3e1;
     border-radius: 0 50% 50% 0; 
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: white;
-    font-size: 20px;
-    z-index: 100; 
+    font-size: 25px;
+    z-index: 100;
+    overflow: visible; 
+  }
+  
+  .sidebar_toggle::after {
+    content: "";
+    position: absolute;
+    right: -10px; 
+    width: 55px;
+    height: 60px;
+    background: rgba(0, 195, 161, 0.25); 
+    border-radius: 0 50% 50% 0;
+    filter: blur(1px);
+    z-index: -1; 
   }
   
   .close-icon {

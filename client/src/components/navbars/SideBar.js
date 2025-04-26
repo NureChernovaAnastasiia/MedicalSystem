@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from 'react-router-dom';
 import { useContext } from "react";
 import { Context } from "../../index";
@@ -11,9 +11,8 @@ import logoutIcon from '../../img/icons/exit.png';
 import { PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE } from "../../utils/consts";
 
 const Sidebar = ({ userRole, fullName }) => {
-  const { user } = useContext(Context);
+  const { user, ui } = useContext(Context);
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
 
   const handleLogoClick = () => {
     switch (userRole) {
@@ -52,8 +51,12 @@ const Sidebar = ({ userRole, fullName }) => {
     user.setRole("");
   };
 
+  const handleSidebarToggle = () => {
+    ui.setIsSidebarOpen(!ui.isSidebarOpen); 
+  };
+
   return (
-    <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+    <aside className={`sidebar ${ui.isSidebarOpen ? "open" : "closed"}`}>
       <div className="sidebar_logo" onClick={handleLogoClick}>
         <img src={logo} alt="Logo" />
       </div>
@@ -79,8 +82,8 @@ const Sidebar = ({ userRole, fullName }) => {
         <span>Вийти з профілю</span>
       </div>
 
-      <div className="sidebar_toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-        {isSidebarOpen ? (
+      <div className="sidebar_toggle" onClick={handleSidebarToggle}>
+        {ui.isSidebarOpen ? (
           <span className="close-icon">↩︎</span> 
         ) : (
           <span className="open-icon">↪︎</span> 
