@@ -8,35 +8,21 @@ const generateJwt = (id, email, role) => {
     throw new Error("SECRET_KEY is not defined in environment variables");
   }
   return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
-    expiresIn: "24h",
+    expiresIn: "7d",
   });
 };
 
 class UserController {
   async registration(req, res, next) {
-    const { email, password, role, username, hospital_id } = req.body;
-
-    if (!email || !password || !role) {
-      return next(ApiError.badRequest("Некоректний email, пароль або роль"));
-    }
-
     try {
-      const existingUser = await User.findOne({ where: { email } });
-      if (existingUser) {
-        return next(ApiError.badRequest("Користувач з таким email вже існує"));
+      const { email, password, role, username, hospital_id, doctor_id } = req.body;
+
+      if (!email || !password || !role) {
+        return next(ApiError.badRequest("Некоректний email, пароль або роль"));
       }
 
-      const userCount = await User.count();
-
-      if (userCount === 0 && role !== "Admin") {
-        return next(
-          ApiError.forbidden("Першим може бути тільки адміністратор")
-        );
-      }
-
-      if (userCount > 0 && !req.user) {
-        return next(ApiError.forbidden("Потрібна авторизація"));
-      }
+      await this._checkExistingUser(email, next);
+      await this._checkRegistrationPermissions(role, req, next);
 
       const hashPassword = await bcrypt.hash(password, 5);
       const user = await User.create({
@@ -46,80 +32,91 @@ class UserController {
         role,
       });
 
-      // Doctor auto-create in both Doctor + HospitalStaff
       if (role === "Doctor") {
-        if (!hospital_id) {
-          return next(
-            ApiError.badRequest("Для лікаря потрібно вказати hospital_id")
-          );
-        }
-
-        const doctor = await Doctor.create({
-          user_id: user.id,
-          hospital_id,
-          first_name: username || email,
-          last_name: "",
-          middle_name: "",
-          email,
-        });
-
-        // 🧑‍⚕️ Also create in HospitalStaff
-        await HospitalStaff.create({
-          user_id: user.id,
-          hospital_id,
-          first_name: doctor.first_name,
-          last_name: doctor.last_name,
-          middle_name: doctor.middle_name,
-          position: "Doctor",
-          email,
-        });
+        await this._createDoctor(user, username, email, hospital_id, next);
       }
 
       if (role === "Patient") {
-        if (
-          !req.user ||
-          (req.user.role !== "Doctor" && req.user.role !== "Admin")
-        ) {
-          return next(
-            ApiError.forbidden(
-              "Тільки лікар або адміністратор може створити пацієнта"
-            )
-          );
-        }
-
-        let doctorId;
-        if (req.user.role === "Doctor") {
-          const doctor = await Doctor.findOne({
-            where: { user_id: req.user.id },
-          });
-          if (!doctor) return next(ApiError.badRequest("Лікаря не знайдено"));
-          doctorId = doctor.id;
-        } else if (req.user.role === "Admin") {
-          // Адмін має явно передати doctor_id
-          doctorId = req.body.doctor_id;
-          if (!doctorId)
-            return next(ApiError.badRequest("Потрібно вказати doctor_id"));
-        }
-
-        const doctor = await Doctor.findByPk(doctorId);
-        if (!doctor) return next(ApiError.badRequest("Лікаря не знайдено"));
-
-        await Patient.create({
-          user_id: user.id,
-          doctor_id: doctorId,
-          hospital_id: doctor.hospital_id,
-          first_name: username || email,
-          last_name: "",
-          middle_name: "",
-          email,
-        });
+        await this._createPatient(user, username, email, req, doctor_id, next);
       }
+
       const token = generateJwt(user.id, user.email, user.role);
       return res.json({ token });
+      
     } catch (e) {
       console.error("❌ registration error:", e.message);
       return next(ApiError.internal("Помилка реєстрації"));
     }
+  }
+
+  async _checkExistingUser(email, next) {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return next(ApiError.badRequest("Користувач з таким email вже існує"));
+    }
+  }
+
+  async _checkRegistrationPermissions(role, req, next) {
+    const userCount = await User.count();
+    if (userCount === 0 && role !== "Admin") {
+      return next(ApiError.forbidden("Першим може бути тільки адміністратор"));
+    }
+    if (userCount > 0 && !req.user) {
+      return next(ApiError.forbidden("Потрібна авторизація"));
+    }
+  }
+
+  async _createDoctor(user, username, email, hospital_id, next) {
+    if (!hospital_id) {
+      return next(ApiError.badRequest("Для лікаря потрібно вказати hospital_id"));
+    }
+    const doctor = await Doctor.create({
+      user_id: user.id,
+      hospital_id,
+      first_name: username || email,
+      last_name: "",
+      middle_name: "",
+      email,
+    });
+    await HospitalStaff.create({
+      user_id: user.id,
+      hospital_id,
+      first_name: doctor.first_name,
+      last_name: doctor.last_name,
+      middle_name: doctor.middle_name,
+      position: "Doctor",
+      email,
+    });
+  }
+
+  async _createPatient(user, username, email, req, doctor_id, next) {
+    if (!req.user || (req.user.role !== "Doctor" && req.user.role !== "Admin")) {
+      return next(ApiError.forbidden("Тільки лікар або адміністратор може створити пацієнта"));
+    }
+
+    let finalDoctorId = doctor_id;
+    if (req.user.role === "Doctor") {
+      const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+      if (!doctor) {
+        return next(ApiError.badRequest("Лікаря не знайдено"));
+      }
+      finalDoctorId = doctor.id;
+    }
+
+    const doctor = await Doctor.findByPk(finalDoctorId);
+    if (!doctor) {
+      return next(ApiError.badRequest("Лікаря не знайдено"));
+    }
+
+    await Patient.create({
+      user_id: user.id,
+      doctor_id: finalDoctorId,
+      hospital_id: doctor.hospital_id,
+      first_name: username || email,
+      last_name: "",
+      middle_name: "",
+      email,
+    });
   }
 
   async login(req, res, next) {
