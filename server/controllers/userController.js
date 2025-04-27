@@ -1,18 +1,26 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { User, Doctor, Patient } = require("../models/models");
+const { User, Doctor, Patient, HospitalStaff } = require("../models/models");
 const ApiError = require("../error/ApiError");
 
 const generateJwt = (id, email, role) => {
   if (!process.env.SECRET_KEY) {
     throw new Error("SECRET_KEY is not defined in environment variables");
   }
-  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, { expiresIn: "7d" });
 };
 
 class UserController {
+  constructor() {
+    // Прив'язуємо методи до контексту this
+    this.registration = this.registration.bind(this);
+    this.login = this.login.bind(this);
+    this.check = this.check.bind(this);
+    this.getUserById = this.getUserById.bind(this);
+    this.update = this.update.bind(this);
+    this.delete = this.delete.bind(this);
+  }
+
   async registration(req, res, next) {
     try {
       const { email, password, role, username, hospital_id, doctor_id } = req.body;
@@ -21,8 +29,8 @@ class UserController {
         return next(ApiError.badRequest("Некоректний email, пароль або роль"));
       }
 
-      await this._checkExistingUser(email, next);
-      await this._checkRegistrationPermissions(role, req, next);
+      await this._checkExistingUser(email);
+      await this._checkRegistrationPermissions(role, req);
 
       const hashPassword = await bcrypt.hash(password, 5);
       const user = await User.create({
@@ -33,42 +41,46 @@ class UserController {
       });
 
       if (role === "Doctor") {
-        await this._createDoctor(user, username, email, hospital_id, next);
+        await this._createDoctor(user, username, email, hospital_id);
       }
 
       if (role === "Patient") {
-        await this._createPatient(user, username, email, req, doctor_id, next);
+        await this._createPatient(user, username, email, req, doctor_id);
+      }
+
+      if (role === "Admin") {
+        await this._createAdmin(user, username, email, hospital_id);
       }
 
       const token = generateJwt(user.id, user.email, user.role);
       return res.json({ token });
-      
+
     } catch (e) {
       console.error("❌ registration error:", e.message);
       return next(ApiError.internal("Помилка реєстрації"));
     }
   }
 
-  async _checkExistingUser(email, next) {
+  async _checkExistingUser(email) {
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return next(ApiError.badRequest("Користувач з таким email вже існує"));
+      throw ApiError.badRequest("Користувач з таким email вже існує");
     }
   }
 
-  async _checkRegistrationPermissions(role, req, next) {
+  async _checkRegistrationPermissions(role, req) {
     const userCount = await User.count();
     if (userCount === 0 && role !== "Admin") {
-      return next(ApiError.forbidden("Першим може бути тільки адміністратор"));
+      throw ApiError.forbidden("Першим може бути тільки адміністратор");
     }
     if (userCount > 0 && !req.user) {
-      return next(ApiError.forbidden("Потрібна авторизація"));
+      throw ApiError.forbidden("Потрібна авторизація");
     }
   }
 
-  async _createDoctor(user, username, email, hospital_id, next) {
+  async _createDoctor(user, username, email, hospital_id) {
     if (!hospital_id) {
-      return next(ApiError.badRequest("Для лікаря потрібно вказати hospital_id"));
+      throw ApiError.badRequest("Для лікаря потрібно вказати hospital_id");
     }
     const doctor = await Doctor.create({
       user_id: user.id,
@@ -89,29 +101,33 @@ class UserController {
     });
   }
 
-  async _createPatient(user, username, email, req, doctor_id, next) {
+  async _createPatient(user, username, email, req, doctor_id) {
     if (!req.user || (req.user.role !== "Doctor" && req.user.role !== "Admin")) {
-      return next(ApiError.forbidden("Тільки лікар або адміністратор може створити пацієнта"));
+      throw ApiError.forbidden("Тільки лікар або адміністратор може створити пацієнта");
     }
-
+  
     let finalDoctorId = doctor_id;
+  
     if (req.user.role === "Doctor") {
       const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
       if (!doctor) {
-        return next(ApiError.badRequest("Лікаря не знайдено"));
+        throw ApiError.badRequest("Лікаря не знайдено");
       }
       finalDoctorId = doctor.id;
     }
-
+  
     const doctor = await Doctor.findByPk(finalDoctorId);
     if (!doctor) {
-      return next(ApiError.badRequest("Лікаря не знайдено"));
+      throw ApiError.badRequest("Лікаря не знайдено");
     }
-
+  
+    // ТУТ ми беремо hospital_id з доктора
+    const hospital_id = doctor.hospital_id;
+  
     await Patient.create({
       user_id: user.id,
       doctor_id: finalDoctorId,
-      hospital_id: doctor.hospital_id,
+      hospital_id, // автоматично витягуємо hospital_id
       first_name: username || email,
       last_name: "",
       middle_name: "",
@@ -119,9 +135,9 @@ class UserController {
     });
   }
 
-  async _createAdmin(user, username, email, hospital_id, next) {
+  async _createAdmin(user, username, email, hospital_id) {
     if (!hospital_id) {
-      return next(ApiError.badRequest("Для адміністратора потрібно вказати hospital_id"));
+      throw ApiError.badRequest("Для адміністратора потрібно вказати hospital_id");
     }
     await HospitalStaff.create({
       user_id: user.id,
@@ -132,7 +148,7 @@ class UserController {
       position: "Admin",
       email,
     });
-  }  
+  }
 
   async login(req, res, next) {
     const { email, password } = req.body;
@@ -208,9 +224,7 @@ class UserController {
     const { id } = req.params;
     try {
       if (req.user.role !== "Admin") {
-        return next(
-          ApiError.forbidden("Тільки адміністратор може видаляти користувачів")
-        );
+        return next(ApiError.forbidden("Тільки адміністратор може видаляти користувачів"));
       }
 
       const user = await User.findByPk(id);
@@ -225,4 +239,5 @@ class UserController {
   }
 }
 
+// Створюємо інстанс
 module.exports = new UserController();
