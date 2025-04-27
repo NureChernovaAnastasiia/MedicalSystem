@@ -3,10 +3,67 @@ const { DataTypes } = require("sequelize");
 
 // User
 const User = sequelize.define("User", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  username: { type: DataTypes.STRING, unique: true, allowNull: false },
-  password: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, unique: true },
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  username: { 
+    type: DataTypes.STRING, 
+    unique: true, 
+    allowNull: false 
+  },
+  password: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    validate: {
+      len: {
+        args: [6, 100],
+        msg: "Пароль має бути від 6 до 100 символів"
+      },
+      isStrongPassword(value) {
+        if (!/[A-Z]/.test(value)) {
+          throw new Error("Пароль має містити хоча б одну велику літеру");
+        }
+        if (!/[a-z]/.test(value)) {
+          throw new Error("Пароль має містити хоча б одну маленьку літеру");
+        }
+        if (!/\d/.test(value)) {
+          throw new Error("Пароль має містити хоча б одну цифру");
+        }        
+      }
+    }
+  },
+  email: { 
+  type: DataTypes.STRING, 
+  unique: true,
+  allowNull: false,
+  validate: {
+    isEmail: {
+      msg: "Некоректний формат email",
+    },
+    notEmpty: {
+      msg: "Email не може бути порожнім",
+    },
+    len: {
+      args: [5, 255],
+      msg: "Email повинен бути від 5 до 255 символів",
+    },
+    isValidEmail(value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+      if (!emailRegex.test(value)) {
+        throw new Error("Email має містити правильний домен (приклад: example@email.com)");
+      }
+      if (/\s/.test(value)) {
+        throw new Error("Email не може містити пробіли");
+      }
+    },
+  },
+  set(value) {
+    this.setDataValue('email', value.trim().toLowerCase());
+  }
+},
+
   role: {
     type: DataTypes.ENUM("Patient", "Doctor", "Admin"),
     allowNull: false,
