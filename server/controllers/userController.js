@@ -119,6 +119,21 @@ class UserController {
     });
   }
 
+  async _createAdmin(user, username, email, hospital_id, next) {
+    if (!hospital_id) {
+      return next(ApiError.badRequest("Для адміністратора потрібно вказати hospital_id"));
+    }
+    await HospitalStaff.create({
+      user_id: user.id,
+      hospital_id,
+      first_name: username || email,
+      last_name: "",
+      middle_name: "",
+      position: "Admin",
+      email,
+    });
+  }  
+
   async login(req, res, next) {
     const { email, password } = req.body;
 
