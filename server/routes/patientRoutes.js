@@ -12,6 +12,9 @@ router.get('/', checkRole('Admin', 'Doctor'), patientController.getAll);
 // Get one patient (Patient can view only self)
 router.get('/:id', patientController.getById);
 
+// Отримати пацієнта за user_id
+router.get('/by-user/:userId', checkRole('Admin', 'Doctor', 'Patient'), patientController.getByUserId);
+
 // Create patient (Doctor or Admin)
 router.post('/', checkRole('Doctor', 'Admin'), patientController.create);
 

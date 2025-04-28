@@ -30,6 +30,33 @@ class PatientController {
     }
   }
 
+async getByUserId(req, res, next) {
+  try {
+    const { userId } = req.params;
+
+    const patient = await Patient.findOne({ where: { user_id: userId } });
+    if (!patient) {
+      return next(ApiError.notFound("Пацієнта не знайдено"));
+    }
+
+    // Якщо Patient сам себе
+    if (req.user.role === "Patient" && req.user.id !== patient.user_id) {
+      return next(ApiError.forbidden("Немає доступу"));
+    }
+
+    // Якщо Doctor або Admin - дозволяємо
+    if (req.user.role === "Doctor" || req.user.role === "Admin" || req.user.id === patient.user_id) {
+      return res.json(patient);
+    }
+
+    // Якщо хтось інший
+    return next(ApiError.forbidden("Недостатньо прав для перегляду пацієнта"));
+  } catch (e) {
+    console.error("getByUserId error:", e);
+    return next(ApiError.internal("Помилка отримання пацієнта за user_id"));
+  }
+}
+
   async create(req, res, next) {
     try {
       const { user_id, first_name, last_name, middle_name, email, hospital_id } = req.body;
