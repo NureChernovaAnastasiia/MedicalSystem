@@ -5,22 +5,33 @@ class MedicalServiceScheduleController {
   async create(req, res, next) {
     try {
       const { hospital_medical_service_id, appointment_date, start_time, end_time } = req.body;
+
+      if (!hospital_medical_service_id || !appointment_date || !start_time || !end_time) {
+        return next(ApiError.badRequest("Всі поля обов'язкові"));
+      }
+
       const schedule = await MedicalServiceSchedule.create({
         hospital_medical_service_id, appointment_date, start_time, end_time
       });
-      res.json(schedule);
+      return res.json(schedule);
     } catch (e) {
-      next(ApiError.internal("Не вдалося створити розклад послуги"));
+      console.error("❌ create MedicalServiceSchedule error:", e);
+      return next(ApiError.internal("Не вдалося створити розклад послуги"));
     }
   }
 
   async getByHospitalService(req, res, next) {
     try {
       const { hospital_medical_service_id } = req.params;
-      const schedules = await MedicalServiceSchedule.findAll({ where: { hospital_medical_service_id } });
-      res.json(schedules);
+
+      const schedules = await MedicalServiceSchedule.findAll({
+        where: { hospital_medical_service_id }
+      });
+
+      return res.json(schedules);
     } catch (e) {
-      next(ApiError.internal("Помилка отримання розкладу"));
+      console.error("❌ getByHospitalService MedicalServiceSchedule error:", e);
+      return next(ApiError.internal("Помилка отримання розкладу"));
     }
   }
 }
