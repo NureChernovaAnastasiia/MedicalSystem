@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import styles from "../../style/Patient.module.css";
+import { Context } from "../../index";
+import { fetchPatientByUserId } from "../../http/patientAPI";
 
 import iconBooking from '../../img/icons/inspection.png';
 import iconAnalysis from '../../img/icons/labour.png';
@@ -30,6 +32,23 @@ const AppointmentCard = ({ date, doctor, location }) => (
 );
 
 const PatientDashboard = () => {
+  const { user } = useContext(Context);
+  const [patient, setPatient] = useState(null);
+
+  useEffect(() => {
+    const getPatient = async () => {
+      if (!user.user.id) return;
+      try {
+        const data = await fetchPatientByUserId(user.user.id);
+        setPatient(data);
+      } catch (error) {
+        console.error("Не вдалося завантажити дані пацієнта:", error);
+        setPatient(null);
+      }
+    };
+    getPatient();
+  }, [user.user.id]);
+
   const appointments = [
     {
       date: "11 квітня 2025, 10:00",
@@ -47,10 +66,11 @@ const PatientDashboard = () => {
       location: "Медичний центр 'Довіра'",
     },
   ];
+  const fullName = patient ? `${patient.first_name || ""} ${patient.last_name || ""}`.trim() : "";
 
   return (
     <div className={styles.patientDashboard}>
-      <h1 className={styles.welcomeMessage}>Вітаємо, Ім’я!</h1>
+      <h1 className={styles.welcomeMessage}>Вітаємо, {fullName}!</h1>
 
       <div className={styles.cardsContainer}>
         <InfoCard icon={iconBooking} title="Замовити послугу" />
