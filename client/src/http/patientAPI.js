@@ -9,3 +9,13 @@ export const fetchPatientData = async (id) => {
     throw error;
   }
 };
+
+export const fetchPatientByUserId = async (userId) => {
+  try {
+    const { data } = await $authHost.get(`api/patients/by-user/${userId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні пацієнта за userId", error);
+    throw error;
+  }
+};
