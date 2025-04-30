@@ -168,6 +168,7 @@ const Appointment = sequelize.define("Appointment", {
   patient_id: { type: DataTypes.INTEGER, allowNull: false },
   doctor_id: { type: DataTypes.INTEGER, allowNull: false },
   doctor_schedule_id: { type: DataTypes.INTEGER, allowNull: false },
+  appointment_date: { type: DataTypes.DATEONLY, allowNull: false },
   status: {
     type: DataTypes.ENUM("Scheduled", "Completed", "Cancelled"),
     defaultValue: "Scheduled",
@@ -407,6 +408,19 @@ HospitalLabService.belongsTo(Hospital, {
   foreignKey: "hospital_id"
 });
 
+Review.belongsTo(Doctor, {
+  foreignKey: "target_id",
+  constraints: false,
+  as: "doctorTarget"
+});
+
+Review.belongsTo(Hospital, {
+  foreignKey: "target_id",
+  constraints: false,
+  as: "hospitalTarget"
+});
+
+
 // Many-to-many: Hospital - LabTestInfo
 Hospital.belongsToMany(LabTestInfo, {
   through: HospitalLabService,
@@ -455,6 +469,8 @@ MedicalService.belongsTo(Patient, { foreignKey: "patient_id" });
 Doctor.hasMany(Patient, { foreignKey: "doctor_id" });
 Patient.belongsTo(Doctor, { foreignKey: "doctor_id" });
 
+MedicalRecord.hasMany(Prescription, { foreignKey: "medical_record_id", onDelete: "SET NULL" });
+Prescription.belongsTo(MedicalRecord, { foreignKey: "medical_record_id" })
 
 module.exports = {
   User,
