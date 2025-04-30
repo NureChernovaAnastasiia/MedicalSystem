@@ -5,6 +5,8 @@ const authMiddleware = require('../middleware/authMiddleware');
 const checkRole = require('../middleware/checkRoleMiddleware');
 
 router.use(authMiddleware);
+// Публічний доступ до розкладу лікаря на день
+router.get('/doctor/:doctorId/date/:date', controller.getByDoctorAndDate);
 
 // Усі розклади (Admin)
 router.get('/', checkRole('Admin'), controller.getAll);
@@ -23,5 +25,7 @@ router.put('/:id', checkRole('Admin'), controller.update);
 
 // Видалити (Admin)
 router.delete('/:id', checkRole('Admin'), controller.delete);
+
+
 
 module.exports = router;

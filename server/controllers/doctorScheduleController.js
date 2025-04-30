@@ -106,6 +106,30 @@ class DoctorScheduleController {
       return next(ApiError.internal('Помилка видалення розкладу'));
     }
   }
+  
+  // Розклад лікаря по конкретному дню (доступний всім)
+async getByDoctorAndDate(req, res, next) {
+  try {
+    const { doctorId, date } = req.params;
+
+    if (!doctorId || !date) {
+      return next(ApiError.badRequest("Потрібні doctorId і date"));
+    }
+
+    const schedules = await DoctorSchedule.findAll({
+      where: {
+        doctor_id: doctorId,
+        appointment_date: date,
+      },
+    });
+
+    return res.json(schedules);
+  } catch (e) {
+    console.error("getByDoctorAndDate error:", e);
+    return next(ApiError.internal("Не вдалося отримати розклад на вказану дату"));
+  }
+}
+
 }
 
 module.exports = new DoctorScheduleController();
