@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import styles from "../../style/Patient.module.css";
+import styles from "../../style/PatientDashboard.module.css";
 import { Context } from "../../index";
 import { fetchPatientByUserId } from "../../http/patientAPI";
 
