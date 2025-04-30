@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import styles from '../../style/PatientMedCard.module.css';
 
 import iconDate from '../../img/icons/calendar.png';
@@ -8,6 +9,7 @@ import iconEmail from '../../img/icons/email.png';
 import iconAddress from '../../img/icons/address.png';
 import iconHospital from '../../img/icons/hospital.png';
 import photo from '../../img/Woman1.jpg';
+import { PATIENT_EDITPERSONALINFO_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE } from '../../utils/consts';
 
 const patientInfo = [
   { icon: iconDate, label: 'Дата народження:', value: '12.08.2004' },
@@ -46,10 +48,10 @@ const PatientMedCard = () => {
         <div className={styles.card}>
           <div className={styles.leftSide}>
             <img src={photo} alt="Patient" className={styles.profileImage} />
-            <div className={styles.editWarning}>
+            <NavLink to={PATIENT_EDITPERSONALINFO_ROUTE} className={styles.editWarning}>
               <span className={styles.exclamation}>!</span>
               <span className={styles.editText}>Редагувати дані</span>
-            </div>
+            </NavLink>
           </div>
 
           <div className={styles.rightSide}>
@@ -73,12 +75,14 @@ const PatientMedCard = () => {
             <div key={index} className={styles.diagnosisItem}>
               <p className={styles.diagnosisText}>{diagnosis.text}</p>
               <p className={styles.diagnosisDate}>{diagnosis.date}</p>
-              <button className={styles.detailsButton}>Детальніше</button>
+              <NavLink to="/diagnosis-details" className={styles.detailsButton}>
+                Детальніше
+              </NavLink>
             </div>
           ))}
-          <div className={styles.viewAll}>
+          <NavLink to={PATIENT_MEDRECORDS_ROUTE} className={styles.viewAll}>
             <span className={styles.viewAllText}>Переглянути всі діагнози ›</span>
-          </div>
+          </NavLink>
         </div>
 
         <div className={styles.recipeColumn}>
@@ -88,9 +92,9 @@ const PatientMedCard = () => {
               <div key={index} className={styles.recipeItem}>{recipe}</div>
             ))}
           </div>
-          <div className={styles.viewAll}>
+          <NavLink to={PATIENT_PRESCRIPTIONS_ROUTE} className={styles.viewAll}>
             <span className={styles.viewAllText}>Всі рецепти ›</span>
-          </div>
+          </NavLink>
         </div>
       </div>
     </div>

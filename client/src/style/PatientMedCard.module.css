@@ -63,6 +63,7 @@
   align-items: center;
   margin-top: 20px;
   cursor: pointer;
+  text-decoration: none; 
 }
 
 .exclamation {
@@ -170,8 +171,8 @@ strong {
 }
 
 .detailsButton {
-  width: 160px;
-  height: 56px;
+  width: 10rem;
+  height: 3.5rem;
   background: #E2F6F2;
   font-style: italic;
   font-weight: 600;
@@ -179,6 +180,11 @@ strong {
   color: #00C3A1;
   border: none;
   cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .recipeGrid {
@@ -202,7 +208,9 @@ strong {
 
 .viewAll {
   margin-top: 24px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .viewAllText {
@@ -212,8 +220,8 @@ strong {
   font-size: 20px;
   color: #333;
   cursor: pointer;
+  text-decoration: none;
 }
-
 
 @media (max-width: 1024px) {
   .container {

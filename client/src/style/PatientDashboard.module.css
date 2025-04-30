@@ -7,6 +7,9 @@
   font-family: 'Montserrat', sans-serif;
   padding: 20px 50px;
 }
+.cardLink {
+  text-decoration: none;
+}
 
 .cardsContainer {
   display: flex;

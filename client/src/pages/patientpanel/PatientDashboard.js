@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { NavLink } from 'react-router-dom';
 import styles from "../../style/PatientDashboard.module.css";
 import { Context } from "../../index";
 import { fetchPatientByUserId } from "../../http/patientAPI";
@@ -7,14 +8,17 @@ import iconBooking from '../../img/icons/inspection.png';
 import iconAnalysis from '../../img/icons/labour.png';
 import iconPrescription from '../../img/icons/medicine.png';
 import iconDiagnosis from '../../img/icons/diagnosis.png';
+import { PATIENT_ANALYSEORDER_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE, PATIENT_SERVICEORDER_ROUTE, } from "../../utils/consts";
 
-const InfoCard = ({ icon, title }) => (
-  <div className={styles.card}>
-    <div className={styles.cardImage}>
-      <img src={icon} alt={title} className={styles.cardIcon} />
+const InfoCard = ({ icon, title, to }) => (
+  <NavLink to={to} className={styles.cardLink}>
+    <div className={styles.card}>
+      <div className={styles.cardImage}>
+        <img src={icon} alt={title} className={styles.cardIcon} />
+      </div>
+      <div className={styles.cardTitle}>{title}</div>
     </div>
-    <div className={styles.cardTitle}>{title}</div>
-  </div>
+  </NavLink>
 );
 
 const AppointmentCard = ({ date, doctor, location }) => (
@@ -73,11 +77,12 @@ const PatientDashboard = () => {
       <h1 className={styles.welcomeMessage}>Вітаємо, {fullName}!</h1>
 
       <div className={styles.cardsContainer}>
-        <InfoCard icon={iconBooking} title="Замовити послугу" />
-        <InfoCard icon={iconAnalysis} title="Замовити аналізи" />
-        <InfoCard icon={iconPrescription} title="Мої рецепти" />
-        <InfoCard icon={iconDiagnosis} title="Мої діагнози" />
+        <InfoCard icon={iconBooking} title="Замовити послугу" to={PATIENT_SERVICEORDER_ROUTE} />
+        <InfoCard icon={iconAnalysis} title="Замовити аналізи" to={PATIENT_ANALYSEORDER_ROUTE} />
+        <InfoCard icon={iconPrescription} title="Мої рецепти" to={PATIENT_PRESCRIPTIONS_ROUTE} />
+        <InfoCard icon={iconDiagnosis} title="Мої діагнози" to={PATIENT_MEDRECORDS_ROUTE} />
       </div>
+
 
       <div className={styles.appointmentsSection}>
         <h2 className={styles.appointmentsTitle}>Наступні прийоми</h2>

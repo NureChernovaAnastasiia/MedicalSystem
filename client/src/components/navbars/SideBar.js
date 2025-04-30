@@ -8,7 +8,7 @@ import logo from "../../img/Logo.png";
 import avatar from '../../img/icons/people.png';  
 import logoutIcon from '../../img/icons/exit.png';
 
-import { PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE } from "../../utils/consts";
+import { PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_SERVICE_ROUTE } from "../../utils/consts";
 
 const Sidebar = ({ userRole, fullName }) => {
   const { user, ui } = useContext(Context);
@@ -33,12 +33,12 @@ const Sidebar = ({ userRole, fullName }) => {
     Admin: [],
     Doctor: [],
     Patient: [
-      { label: 'Запис до лікаря', path: '/patient/appointments' },
-      { label: 'Мої прийоми', path: '/patient/my-visits' },
-      { label: 'Аналізи', path: '/patient/analysis' },
-      { label: 'Послуги', path: '/patient/analysis' },
+      { label: 'Запис до лікаря', path: PATIENT_DOCAPPOINTMENT_ROUTE },
+      { label: 'Мої прийоми', path: PATIENT_APPOINTMENTS_ROUTE },
+      { label: 'Аналізи', path: PATIENT_ANALYSIS_ROUTE },
+      { label: 'Послуги', path: PATIENT_SERVICE_ROUTE },
       { label: 'Медична картка', path: PATIENT_MEDCARD_ROUTE },
-      { label: 'Моя лікарня', path: '/patient/analysis' },
+      { label: 'Моя лікарня', path: PATIENT_HOSPITALDETAIL_ROUTE },
     ],
   };
 
