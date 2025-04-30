@@ -17,6 +17,10 @@ const hospitalLabServiceRoutes = require("./hospitalLabServiceRoutes");
 const financialReportRoutes = require("./financialReportRoutes");
 const analyticsRoutes = require("./analyticsRoutes");
 const reviewRoutes = require("./reviewRoutes");
+const medicalServiceInfoRoutes = require("./medicalServiceInfoRoutes");
+const hospitalMedicalServiceRoutes = require("./hospitalMedicalServiceRoutes");
+const medicalServiceScheduleRoutes = require("./medicalServiceScheduleRoutes");
+const medicalServiceRoutes = require("./medicalServiceRoutes");
 
 router.use("/users", userRoutes);
 router.use("/patients", patientRoutes);
@@ -34,5 +38,9 @@ router.use("/hospital-lab-services", hospitalLabServiceRoutes);
 router.use("/financial-reports", financialReportRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/reviews", reviewRoutes);
+router.use("/medical-service-info", medicalServiceInfoRoutes);
+router.use("/hospital-medical-services", hospitalMedicalServiceRoutes);
+router.use("/medical-service-schedules", medicalServiceScheduleRoutes);
+router.use("/medical-services", medicalServiceRoutes);
 
 module.exports = router;

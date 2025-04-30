@@ -7,7 +7,9 @@ const generateJwt = (id, email, role) => {
   if (!process.env.SECRET_KEY) {
     throw new Error("SECRET_KEY is not defined in environment variables");
   }
-  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, { expiresIn: "7d" });
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
+    expiresIn: "7d",
+  });
 };
 
 class UserController {
@@ -23,7 +25,8 @@ class UserController {
 
   async registration(req, res, next) {
     try {
-      const { email, password, role, username, hospital_id, doctor_id } = req.body;
+      const { email, password, role, username, hospital_id, doctor_id } =
+        req.body;
 
       if (!email || !password || !role) {
         return next(ApiError.badRequest("Некоректний email, пароль або роль"));
@@ -54,7 +57,6 @@ class UserController {
 
       const token = generateJwt(user.id, user.email, user.role);
       return res.json({ token });
-
     } catch (e) {
       console.error("❌ registration error:", e.message);
       return next(ApiError.internal("Помилка реєстрації"));
@@ -102,12 +104,17 @@ class UserController {
   }
 
   async _createPatient(user, username, email, req, doctor_id) {
-    if (!req.user || (req.user.role !== "Doctor" && req.user.role !== "Admin")) {
-      throw ApiError.forbidden("Тільки лікар або адміністратор може створити пацієнта");
+    if (
+      !req.user ||
+      (req.user.role !== "Doctor" && req.user.role !== "Admin")
+    ) {
+      throw ApiError.forbidden(
+        "Тільки лікар або адміністратор може створити пацієнта"
+      );
     }
-  
+
     let finalDoctorId = doctor_id;
-  
+
     if (req.user.role === "Doctor") {
       const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
       if (!doctor) {
@@ -115,15 +122,15 @@ class UserController {
       }
       finalDoctorId = doctor.id;
     }
-  
+
     const doctor = await Doctor.findByPk(finalDoctorId);
     if (!doctor) {
       throw ApiError.badRequest("Лікаря не знайдено");
     }
-  
+
     // ТУТ ми беремо hospital_id з доктора
     const hospital_id = doctor.hospital_id;
-  
+
     await Patient.create({
       user_id: user.id,
       doctor_id: finalDoctorId,
@@ -137,7 +144,9 @@ class UserController {
 
   async _createAdmin(user, username, email, hospital_id) {
     if (!hospital_id) {
-      throw ApiError.badRequest("Для адміністратора потрібно вказати hospital_id");
+      throw ApiError.badRequest(
+        "Для адміністратора потрібно вказати hospital_id"
+      );
     }
     await HospitalStaff.create({
       user_id: user.id,
@@ -149,18 +158,35 @@ class UserController {
       email,
     });
   }
-
   async login(req, res, next) {
     const { email, password } = req.body;
 
     try {
+      // Перевірка наявності email та password
+      if (!email || !password) {
+        return next(ApiError.badRequest("Email і пароль обов'язкові"));
+      }
+
       const user = await User.findOne({ where: { email } });
-      if (!user) return next(ApiError.badRequest("Користувача не знайдено"));
+
+      if (!user) {
+        return next(ApiError.badRequest("Користувача не знайдено"));
+      }
 
       const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) return next(ApiError.badRequest("Невірний пароль"));
 
+      if (!isValid) {
+        return next(ApiError.badRequest("Невірний пароль"));
+      }
+
+      // ⚠️ Перевірка ролі — для безпеки
+      if (!user.role) {
+        return next(ApiError.internal("У користувача не вказана роль"));
+      }
+
+      // 🔐 Генерація токена
       const token = generateJwt(user.id, user.email, user.role);
+
       return res.json({ token });
     } catch (e) {
       console.error("❌ login error:", e.message);
@@ -224,7 +250,9 @@ class UserController {
     const { id } = req.params;
     try {
       if (req.user.role !== "Admin") {
-        return next(ApiError.forbidden("Тільки адміністратор може видаляти користувачів"));
+        return next(
+          ApiError.forbidden("Тільки адміністратор може видаляти користувачів")
+        );
       }
 
       const user = await User.findByPk(id);
