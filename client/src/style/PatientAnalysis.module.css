@@ -1,0 +1,248 @@
+.analysisPage {
+    padding: 30px 60px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .title, .subtitle {
+    text-align: left;
+    color: #000;
+  }
+  
+  .title {
+    font-weight: 500;
+    font-size: 36px;
+  }
+  
+  .subtitle {
+    font-style: italic;
+    font-weight: 100;
+    font-size: 18px;
+    line-height: 26px;
+    margin-top: 0px;
+  }
+  
+  .orderButtonWrapper {
+    display: flex;
+  }
+  
+  .orderButton {
+    background: rgba(0, 195, 161, 0.42);
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 2rem;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 24px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .orderButton:hover {
+    background: #00C3A1;
+  }
+  
+  .searchBar {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .searchIcon {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    width: 30px;
+    height: 30px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 12px 12px 12px 60px;
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.75rem;
+    color: rgba(0, 0, 0, 0.6);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .cardsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .card {
+    background: #FFFFFF;
+    box-shadow: 0px 4px 20px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    width: calc(33.333% - 40px); 
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .innerCard{
+    margin: 0 20px;
+  }
+  .cardStatusWaiting, .cardStatusReady {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 18px;
+  }
+  
+  .cardStatusWaiting {
+    color: #FBDA03;
+  }
+  
+  .cardStatusReady {
+    color: #00C37F;
+  }
+  
+  .cardTitle {
+    text-align: center;
+    font-weight: 700;
+    font-size: 22px;
+    height: 50px;
+    color: #00C3A1;
+    margin: 55px 0 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .cardDate,
+  .cardClinic {
+    font-weight: 300;
+    font-size: 16px;
+    font-style: italic;
+    color: #333333;
+    text-align: left;
+    margin-bottom: 5px;
+  }
+
+  .cardDate strong,
+.cardClinic strong {
+  font-weight: bold;
+  font-style: normal;
+}
+  
+  .cardFooter, .cardFooterReady {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 20px 20px;
+    padding: 14px 0;
+    margin-top: 10px;
+    text-align: center;
+    cursor: not-allowed;
+  }
+  
+  .cardFooterReady {
+    background: rgba(0, 195, 161, 0.42);
+    cursor: pointer;
+  }
+  
+  .cardFooterText {
+    font-style: italic;
+    font-weight: 500;
+    font-size: 18px;
+    color: #333333;
+  }
+
+@media (max-width: 1024px) {
+    .card {
+      width: calc(50% - 20px); 
+    }
+  
+    .title {
+      font-size: 30px;
+    }
+  
+    .orderButton {
+      font-size: 20px;
+      padding: 0.8rem 1.5rem;
+    }
+  
+    .subtitle {
+      font-size: 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .headerRow {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  
+    .orderButtonWrapper {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+    }
+  
+    .cardsContainer {
+      gap: 20px;
+    }
+  
+    .card {
+      width: 100%; 
+    }
+  
+    .searchInput {
+      font-size: 16px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .title {
+      font-size: 26px;
+    }
+  
+    .subtitle {
+      font-size: 14px;
+      line-height: 22px;
+    }
+  
+    .orderButton {
+      font-size: 18px;
+      padding: 0.6rem 1.2rem;
+    }
+  
+    .cardTitle {
+      font-size: 20px;
+      margin: 40px 0 20px;
+      height: auto; 
+      text-align: center;
+    }
+  
+    .cardDate,
+    .cardClinic {
+      font-size: 14px;
+    }
+  
+    .cardFooterText {
+      font-size: 16px;
+    }
+  }
+  
+  
