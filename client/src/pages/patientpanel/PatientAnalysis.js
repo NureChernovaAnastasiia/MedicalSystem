@@ -1,9 +1,11 @@
 import React from 'react';
 import styles from '../../style/PatientAnalysis.module.css';
+import { NavLink } from 'react-router-dom';
 
 import iconSearch from '../../img/icons/search.png';
+import { PATIENT_ANALYSEDETAIL_ROUTE, PATIENT_ANALYSEORDER_ROUTE } from '../../utils/consts';
 
-const Card = ({ status, title, date, clinic, statusClass, footerClass, footerText }) => {
+const Card = ({ status, title, date, clinic, statusClass, footerClass, footerText, isReady }) => {
   return (
     <div className={styles.card}>
       <div className={styles.innerCard}>
@@ -12,9 +14,15 @@ const Card = ({ status, title, date, clinic, statusClass, footerClass, footerTex
         <p className={styles.cardDate}><strong>Дата проведення:</strong> {date}</p>
         <p className={styles.cardClinic}><strong>Клініка:</strong> {clinic}</p>
       </div>
-      <div className={footerClass}>
-        <span className={styles.cardFooterText}>{footerText}</span>
-      </div>
+      {isReady ? (
+        <NavLink to={PATIENT_ANALYSEDETAIL_ROUTE} className={footerClass}>
+          <span className={styles.cardFooterText}>{footerText}</span>
+        </NavLink>
+      ) : (
+        <div className={footerClass}>
+          <span className={styles.cardFooterText}>{footerText}</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -55,7 +63,9 @@ const PatientAnalysis = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Аналізи</h1>
         <div className={styles.orderButtonWrapper}>
+          <NavLink to={PATIENT_ANALYSEORDER_ROUTE}>
           <button className={styles.orderButton}>Замовити аналізи</button>
+          </NavLink>
         </div>
       </div>
 
@@ -83,6 +93,7 @@ const PatientAnalysis = () => {
             statusClass={card.statusClass}
             footerClass={card.footerClass}
             footerText={card.footerText}
+            isReady={card.status === 'Готово'}
           />
         ))}
       </div>

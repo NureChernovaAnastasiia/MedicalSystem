@@ -159,6 +159,7 @@
   .cardFooterReady {
     background: rgba(0, 195, 161, 0.42);
     cursor: pointer;
+    text-decoration: none; 
   }
   
   .cardFooterText {
