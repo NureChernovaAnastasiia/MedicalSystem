@@ -4,6 +4,7 @@ const doctorController = require('../controllers/doctorController');
 const authMiddleware = require('../middleware/authMiddleware');
 const checkRole = require('../middleware/checkRoleMiddleware');
 
+router.get('/by-user/:userId', checkRole('Admin', 'Doctor'), doctorController.getDoctorByUserId);
 router.get('/', authMiddleware, doctorController.getAll);
 router.get('/:id', authMiddleware, doctorController.getById);
 
