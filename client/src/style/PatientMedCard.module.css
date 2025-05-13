@@ -194,15 +194,16 @@ strong {
 }
 
 .recipeItem {
-  background: #E2F6F2;
+  background: #00C3A1;
+  opacity: 45%;
   padding: 15px 20px;
   border-radius: 8px;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
   font-style: italic;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 20px;
-  color: #333;
+  color: #ffffff;
   cursor: pointer;
 }
 
