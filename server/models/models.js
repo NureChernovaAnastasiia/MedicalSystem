@@ -173,7 +173,7 @@ const Appointment = sequelize.define("Appointment", {
     type: DataTypes.ENUM("Scheduled", "Completed", "Cancelled"),
     defaultValue: "Scheduled",
   },
-  notes: { type: DataTypes.TEXT },
+  notes: { type: DataTypes.TEXT }
 });
 
 // Medical Record
