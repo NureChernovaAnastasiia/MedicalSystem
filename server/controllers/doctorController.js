@@ -116,6 +116,34 @@ async getByHospital(req, res, next) {
       return next(ApiError.internal("Помилка отримання лікарів по лікарні"));
     }
   }  
+  async getDoctorByUserId(req, res, next) {
+    try {
+      const { userId } = req.params;
+  
+      const doctor = await Doctor.findOne({ where: { user_id: userId } });
+      if (!doctor) {
+        return next(ApiError.notFound("Лікаря не знайдено"));
+      }
+  
+      // Якщо сам лікар
+      if (req.user.role === "Doctor" && req.user.id !== doctor.user_id) {
+        return next(ApiError.forbidden("Немає доступу"));
+      }
+  
+      // Якщо Admin або сам користувач
+      if (
+        req.user.role === "Admin" ||
+        req.user.id === doctor.user_id
+      ) {
+        return res.json(doctor);
+      }
+  
+      return next(ApiError.forbidden("Недостатньо прав для перегляду лікаря"));
+    } catch (e) {
+      console.error("getDoctorByUserId error:", e);
+      return next(ApiError.internal("Помилка отримання лікаря за user_id"));
+    }
+  }  
 }
 
 module.exports = new DoctorController();
