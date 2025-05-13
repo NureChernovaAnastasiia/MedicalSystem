@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.use(authMiddleware);
 
+router.get('/:id/pdf', authMiddleware, prescriptionController.downloadPdf);
 router.get('/patient/:patientId/:id', authMiddleware, prescriptionController.getByPatientAndId);
 router.get('/patient/:patientId', prescriptionController.getByPatient);
 router.get('/', prescriptionController.getAll);
