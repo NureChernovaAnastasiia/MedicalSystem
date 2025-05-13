@@ -109,12 +109,12 @@ async getByUserId(req, res, next) {
 
       switch (req.user.role) {
         case "Patient":
-          return this.updateAsPatient(req, res, next, user, patient);
+          return PatientController.updateAsPatient(req, res, next, user, patient);
         case "Doctor":
-          return this.updateAsDoctor(req, res, next, patient);
+          return PatientController.updateAsDoctor(req, res, next, patient);
         case "Admin":
-          return this.updateAsAdmin(req, res, next, user, patient);
-        default:
+          return PatientController.updateAsAdmin(req, res, next, user, patient);
+         default:
           return next(ApiError.forbidden("Немає доступу"));
       }
     } catch (e) {
@@ -167,12 +167,12 @@ async getByUserId(req, res, next) {
     return res.json(patient);
   }
 
-  async updateAsAdmin(req, res, next, user, patient) {
+  static async updateAsAdmin(req, res, next, user, patient) {
     if (req.body.doctor_id) {
       const newDoctor = await Doctor.findByPk(req.body.doctor_id);
       if (!newDoctor) return next(ApiError.badRequest("Лікаря не знайдено"));
     }
-
+  
     if (req.body.email && req.body.email !== user.email) {
       const existing = await User.findOne({ where: { email: req.body.email } });
       if (existing && existing.id !== user.id) {
@@ -181,11 +181,11 @@ async getByUserId(req, res, next) {
       user.email = req.body.email;
       patient.email = req.body.email;
     }
-
+  
     await user.save();
     await patient.update(req.body);
     return res.json(patient);
-  }
+  } 
 
   async delete(req, res, next) {
     try {
