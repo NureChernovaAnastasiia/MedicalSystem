@@ -26,6 +26,7 @@ router.put('/:id', checkRole('Admin'), controller.update);
 // Видалити (Admin)
 router.delete('/:id', checkRole('Admin'), controller.delete);
 
-
+// 🔒 Бронювання конкретного слота по ID (пацієнт або лікар/адмін з patient_id)
+router.post('/:scheduleId/book', controller.bookSchedule);
 
 module.exports = router;
