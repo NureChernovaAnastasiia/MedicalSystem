@@ -1,0 +1,249 @@
+.container {
+  padding: 30px 60px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.title,
+.subtitle {
+  text-align: left;
+  color: #000;
+}
+
+.title {
+  font-weight: 500;
+  font-size: 36px; 
+}
+
+.subtitle {
+  font-style: italic;
+  font-weight: 100;
+  font-size: 18px; 
+  line-height: 1.6;
+  margin-top: 0;
+}
+
+.containerInfo {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  border-radius: 25px;
+  padding: 40px;
+}
+
+.topSection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.personalInfoFields {
+  flex: 2.5;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 280px;
+}
+
+.photoSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-width: 200px;
+}
+
+.profileImage {
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #00C37F;
+}
+
+.editText {
+  padding: 10px 24px;
+  font-style: italic;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #00c3a3a3;
+  background-color: #E2F6F2;
+  border: 2px solid #00c3a3a3;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 10px 0;
+}
+
+.infoIcon {
+  width: 40px;
+  height: 40px;
+}
+
+.sectionTitle {
+  font-style: italic;
+  font-weight: 600;
+  font-size: 28px;
+  color: #00C37F;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldGroup {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.label {
+  font-weight: 500;
+  font-size: 20px; 
+  color: #333333;
+  min-width: 180px;
+}
+
+.inputBox {
+  flex: 1;
+  box-sizing: border-box;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  border-radius: 10px;
+  padding: 0 20px;
+  font-family: 'Montserrat';
+  font-style: italic;
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 45px;
+  color: #333333;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 16px;
+}
+
+.saveButton {
+  background: rgba(0, 195, 161, 0.42);
+  border-radius: 10px;
+  border: none;
+  padding: 1rem 2rem;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 24px; 
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.saveButton:hover {
+  background: #00C3A1;
+}
+
+.passwordButton {
+  font-style: italic;
+  padding: 12px 24px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00C37F;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 992px) {
+  .topSection {
+    flex-direction: column;
+  }
+
+  .profileImage {
+    width: 180px;
+    height: 180px;
+  }
+
+  .inputBox {
+    font-size: 1.2rem;
+  }
+
+  .label {
+    font-size: 1.2rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding: 20px;
+  }
+
+  .containerInfo {
+    padding: 20px;
+  }
+
+  .fieldGroup {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .label {
+    min-width: unset;
+  }
+
+  .inputBox {
+    padding: 10px;
+    font-size: 1rem;
+    width: 100%;
+  }
+
+  .editText {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+
+  .saveButton,
+  .passwordButton {
+    width: 100%;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .profileImage {
+    width: 150px;
+    height: 150px;
+  }
+
+  .sectionTitle {
+    font-size: 1.25rem;
+  }
+}
