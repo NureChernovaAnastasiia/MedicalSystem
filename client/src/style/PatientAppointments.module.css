@@ -1,0 +1,241 @@
+.patientAppointments {
+    padding: 30px 60px;
+  }
+  
+  .title, .subtitle {
+    font-family: 'Montserrat', sans-serif;
+    text-align: left;
+    color: #000;
+  }
+  
+  .title {
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 44px;
+    width: 100%;
+  }
+  
+  .subtitle {
+    margin-top: 20px;
+    font-style: italic;
+    font-weight: 100;
+    font-size: 18px;
+    line-height: 26px;
+  }
+  
+  .filterGroup {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1458px;
+    margin: 0 auto 40px;
+  }
+  
+  .select, .inputField {
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 18px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .select {
+    flex: 1 1 25%;
+    min-width: 200px;
+    padding: 12px;
+    color: #000;
+  }
+  
+  .searchWrapper {
+    flex: 1 1 75%;
+    position: relative;
+  }
+  
+  .searchIcon {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    width: 30px;
+    height: 30px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .searchIcon img {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .inputField {
+    width: 100%;
+    padding: 12px 12px 12px 60px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+  
+  .inputField:hover,
+  .inputField:focus,
+  .select:hover,
+  .select:focus {
+    border-color: #00C3A1;
+    box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
+    outline: none;
+  }
+  
+  .appointmentsCards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+    padding: 0 20px;
+  }
+  
+  .appointmentCard {
+    flex: 0 1 calc(50% - 25px);
+    background: #F6F6F6;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 250px;
+    box-sizing: border-box;
+    position: relative;
+  }
+  
+  .canceled .cardStatus {
+    color: #FF0000;
+  }
+  
+  .upcoming .cardStatus {
+    color: #00C37F;
+  }
+  
+  .past .cardStatus {
+    color: rgba(0, 0, 0, 0.25);
+  }
+  
+  .cardStatus {
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 20px;
+    text-align: right;
+  }
+  
+  .cardInfo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .cardInfo p {
+    margin: 9px 0;
+  }
+  
+  .boldText {
+    font-weight: 700;
+  }
+  
+  .cardInfo p span + span {
+    font-weight: 300;
+    margin-left: 5px;
+    font-style: italic;
+  }
+  
+  .cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+  
+  .cardDetails, .cardActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  
+  .detailsText, .cancelText {
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 17px;
+    color: #333;
+  }
+  
+  .questionMark {
+    font-size: 32px;
+    font-style: italic;
+    font-weight: 700;
+    color: #FBDA03;
+  }
+  
+  .cancelCross {
+    font-size: 36px;
+    color: #FF0000;
+    line-height: 1;
+  }
+ 
+@media (max-width: 1024px) {
+    .appointmentsCards {
+      gap: 20px; 
+    }
+  
+    .appointmentCard {
+        flex: 0 1 100%; 
+        height: auto; 
+        padding: 15px; 
+    }
+  }
+
+  @media (max-width: 480px) {
+    .appointmentsCards {
+      gap: 10px; 
+    }
+  
+    .appointmentCard {
+      flex: 0 1 100%; 
+      height: auto; 
+      padding: 15px; 
+    }
+  
+    .cardInfo {
+      font-size: 16px; 
+    }
+  
+    .cardStatus {
+      font-size: 18px; 
+    }
+  
+    .questionMark {
+      font-size: 28px; 
+    }
+  
+    .cancelCross {
+      font-size: 30px; 
+    }
+  
+    .cardFooter {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .cardActions {
+      justify-content: flex-start;
+      gap: 10px;
+    }
+  
+    .cardDetails {
+      justify-content: flex-start;
+      gap: 10px;
+    }
+  }

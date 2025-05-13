@@ -1,0 +1,157 @@
+.scheduleContainer {
+  padding: 30px 60px;
+}
+
+.title,
+.subtitle {
+  font-family: 'Montserrat', sans-serif;
+  text-align: left;
+}
+
+.title {
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 44px;
+  width: 100%;
+  color: #000;
+}
+
+.subtitle {
+  margin-top: 25px;
+  font-style: italic;
+  font-weight: 100;
+  font-size: 24px;
+  line-height: 26px;
+  color: #333;
+}
+
+.calendarWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 30px;
+}
+
+.calendarContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.card {
+  width: 150px;
+  height: 100px;
+  background: #e2f6f2;
+  border: 1px solid #00c3a1;
+  border-radius: 10px;
+  position: relative;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.dayName,
+.slotsInfo {
+  position: absolute;
+  width: 100%;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  color: #000;
+}
+
+.dayName {
+  top: 15%;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.slotsInfo {
+  top: 50%;
+  font-weight: 600;
+  margin-top: 10px;
+  color: #00c3a1;
+}
+
+.selectedCard {
+  background: #0ed1b0d6;
+  color: #fff;
+}
+
+.selectedCard .dayName,
+.selectedCard .slotsInfo {
+  color: #fff;
+}
+
+.timeSlotsGrid {
+  margin-top: 20px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  justify-content: flex-start;
+}
+
+.timeSlot {
+  width: calc((100% - 200px) / 6);
+  min-width: 120px;
+  height: 60px;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: #333;
+  background: rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+.availableSlot {
+  background: rgba(0, 195, 161, 0.42);
+  border: 1px solid #00c3a1;
+  color: #fff;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.unavailableSlot {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  color: #333;
+  letter-spacing: 0.1em;
+  cursor: not-allowed;
+}
+
+.noSlotsMessage {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  color: #333;
+}
+
+@media (max-width: 1470px) {
+  .calendarContainer {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 20px;
+  }
+
+  .card {
+    flex: 0 0 140px;
+    min-width: 140px;
+    max-width: 140px;
+  }
+}
