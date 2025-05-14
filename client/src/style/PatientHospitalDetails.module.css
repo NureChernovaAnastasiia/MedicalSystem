@@ -67,7 +67,7 @@
   display: flex;    
   flex-basis: calc(50% - 25px);
   padding: 0 40px;
-  gap: 300px;
+  gap: 40%;
 }
 
 .leftSide {

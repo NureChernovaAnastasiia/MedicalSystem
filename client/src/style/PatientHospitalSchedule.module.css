@@ -1,0 +1,289 @@
+.container {
+  padding: 30px 60px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.headerContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.headerBox {
+  background: #f6f6f6;
+  border-radius: 20px;
+  padding: 26px 42px;
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hospitalNameBlock {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hospitalIcon {
+  width: 65px;
+  height: 65px;
+}
+
+.hospitalName {
+  font-weight: 500;
+  font-size: 30px;
+  color: #000;
+}
+
+.middleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0 80px;
+}
+
+.clinicType {
+  background: #00c3a1;
+  border-radius: 10px;
+  padding: 4px 18px;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 16px;
+  color: #fff;
+}
+
+.schedule {
+  font-style: italic;
+  font-weight: 400;
+  font-size: 20px;
+  color: #333;
+  text-align: left;
+}
+
+.headerInfo {
+  display: flex;    
+  flex-basis: calc(50% - 25px);
+  padding: 0 40px;
+  gap: 40%;
+}
+
+.leftSide {
+  display: flex;
+  align-items: flex-end;
+}
+
+.contactsRow {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+  align-items: center;
+  padding: 0 30px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.iconSmall {
+  width: 35px;
+  height: 35px;
+}
+
+.contactText {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  color: #333;
+}
+
+.addressBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.address {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  color: #333;
+}
+
+.scheduleContainer {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+ .subtitle {
+    margin-left: 30px;
+    font-style: italic;
+    font-weight: 100;
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+.scheduleWrapper {
+  overflow-x: auto;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.scheduleWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scheduleWrapper::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.dayHeader {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, minmax(100px, 1fr));
+  background: rgba(0, 195, 161, 0.15);
+  padding: 10px 20px;
+  border-radius: 10px;
+  gap: 5px;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.dayItem {
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #333;
+  padding: 10px 0;
+}
+
+.scheduleTable {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyCell {
+  min-width: 100px; 
+}
+
+.scheduleRow {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, minmax(100px, 1fr));
+  align-items: center;
+  background: #f6f6f6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.doctorName {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #333;
+  text-align: center;
+}
+
+.scheduleCell {
+  text-align: center;
+  font-weight: 500;
+  font-size: 18px;
+  color: #00C37F;
+}
+
+.docAppointment {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.orderButton {
+    margin-left: 25px;
+  padding: 10px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  background-color: #00c3a37a;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.orderButton:hover {
+  background-color: #009b8191;
+}
+
+  .backButton {
+    background: none;
+    border: none;
+    color: #00C3A1;
+    font-weight: 700;
+    font-size: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    margin: 30px 30px 20px;
+  }
+  
+  .backButton:hover {
+    text-decoration: none;
+  }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .headerBox {
+    padding: 20px;
+  }
+
+  .middleRow {
+    padding: 0 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .headerInfo {
+    flex-direction: column;
+    padding: 0 20px;
+    gap: 20px;
+  }
+
+  .docAppointment {
+    align-items: flex-start;
+    padding: 0 20px;
+  }
+
+  .orderButton {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .backButton {
+    margin-left: 20px;
+  }
+
+  .dayItem,
+  .doctorName,
+  .scheduleCell {
+    font-size: 14px;
+  }
+
+  .dayHeader,
+  .scheduleRow {
+    min-width: 850px; 
+  }
+}
