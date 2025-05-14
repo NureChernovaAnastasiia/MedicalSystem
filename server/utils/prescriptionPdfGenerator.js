@@ -1,16 +1,7 @@
 const PDFDocument = require("pdfkit");
 const path = require("path");
 const fs = require("fs");
-
-function formatDate(date) {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("uk-UA", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
-}
+const { formatDate } = require('./date');
 
 async function generatePrescriptionPdf(prescription, res) {
   const doc = new PDFDocument({ margin: 50 });
