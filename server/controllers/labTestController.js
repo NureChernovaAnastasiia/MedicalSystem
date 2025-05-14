@@ -1,7 +1,8 @@
-const { LabTest, Patient, Doctor, LabTestSchedule, HospitalLabService, LabTestInfo } = require('../models/models');
+const { LabTest, Patient, Doctor, LabTestSchedule, HospitalLabService, LabTestInfo, Hospital } = require('../models/models');
 const ApiError = require('../error/ApiError');
 const PDFDocument = require('pdfkit');
 const path = require('path');
+const generateLabTestPdf = require('../utils/labTestPdfGenerator');
 
 class LabTestController {
   async getAll(req, res, next) {
@@ -106,50 +107,32 @@ class LabTestController {
     }
   }
 
-  // ✅ Правильно оформлений метод класу
   async downloadPDF(req, res, next) {
-    try {
-      const { id } = req.params;
-      const labTest = await LabTest.findByPk(id, {
-        include: [Patient, Doctor],
-      });
-
-      if (!labTest) {
-        return next(ApiError.notFound('Аналіз не знайдено'));
-      }
-
-      const doc = new PDFDocument();
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename=lab-test-${id}.pdf`);
-      doc.pipe(res);
-
-      // 🔤 Підключаємо український шрифт
-      doc.registerFont('UkrainianFont', path.join(__dirname, '../assets/fonts/DejaVuSans.ttf'));
-      doc.font('UkrainianFont');
-
-      // Заголовок
-      doc.fontSize(20).text('Звіт про лабораторний аналіз', { align: 'center' });
-      doc.moveDown();
-
-      // Деталі
-      doc.fontSize(12).text(`Пацієнт: ${labTest.Patient?.last_name} ${labTest.Patient?.first_name}`);
-      doc.text(`Лікар: ${labTest.Doctor?.last_name} ${labTest.Doctor?.first_name}`);
-      doc.text(`Дата: ${new Date().toLocaleDateString('uk-UA')}`);
-      doc.moveDown();
-
-      doc.text('Результати:', { underline: true });
-      doc.text(labTest.results || 'Результати відсутні');
-      doc.moveDown();
-
-      doc.text('Примітки:', { underline: true });
-      doc.text(labTest.notes || 'Без приміток');
-
-      doc.end();
-    } catch (e) {
-      console.error('downloadPDF error:', e);
-      return next(ApiError.internal('Не вдалося згенерувати PDF'));
+  try {
+    const { id } = req.params;
+    const labTest = await LabTest.findByPk(id, {
+       include: [
+    {
+      model: Patient,
+      include: [Hospital], 
+    },
+    {
+      model: Doctor,
+      include: [Hospital], 
     }
+  ],
+    });
+
+    if (!labTest) {
+      return next(ApiError.notFound('Аналіз не знайдено'));
+    }
+
+    await generateLabTestPdf(labTest, res);
+  } catch (e) {
+    console.error('downloadPDF error:', e);
+    return next(ApiError.internal('Не вдалося згенерувати PDF'));
   }
+}
 }
 
 module.exports = new LabTestController();
