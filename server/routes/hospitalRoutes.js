@@ -4,6 +4,9 @@ const hospitalController = require('../controllers/hospitalController');
 const authMiddleware = require('../middleware/authMiddleware');
 const checkRole = require('../middleware/checkRoleMiddleware');
 
+
+router.get('/unique-names', hospitalController.getUniqueNames);
+
 // Публічні (усі можуть переглядати)
 router.get('/', hospitalController.getAll);
 router.get('/:id', hospitalController.getById);
