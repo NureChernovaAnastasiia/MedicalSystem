@@ -6,6 +6,7 @@ const checkRole = require('../middleware/checkRoleMiddleware');
 
 router.use(authMiddleware);
 
+router.put("/:id/photo", authMiddleware, checkRole("Patient"), patientController.updatePhoto);
 // Отримати пацієнта за user_id
 router.get('/by-user/:userId', checkRole('Admin', 'Doctor', 'Patient'), patientController.getByUserId);
 
@@ -22,7 +23,8 @@ router.get('/:id', patientController.getById);
 router.post('/', checkRole('Doctor', 'Admin'), patientController.create);
 
 // Update patient (Doctor, Admin, or Patient)
-router.put('/:id', checkRole('Doctor', 'Admin', 'Patient'), patientController.update);
+router.put('/:id', checkRole('Doctor', 'Admin', 'Patient'), patientController.update.bind(patientController));
+
 
 // Delete patient (Doctor, Admin)
 router.delete('/:id', checkRole('Doctor', 'Admin'), patientController.delete);
