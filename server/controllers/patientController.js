@@ -1,6 +1,8 @@
 const { Patient, User, Doctor } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const bcrypt = require("bcrypt");
+const { updateUserCredentials } = require("../utils/userUtils");
+const { updatePatientFields } = require("../utils/patientUtils");
 
 class PatientController {
   async getAll(req, res, next) {
@@ -30,36 +32,49 @@ class PatientController {
     }
   }
 
-async getByUserId(req, res, next) {
-  try {
-    const { userId } = req.params;
+  async getByUserId(req, res, next) {
+    try {
+      const { userId } = req.params;
 
-    const patient = await Patient.findOne({ where: { user_id: userId } });
-    if (!patient) {
-      return next(ApiError.notFound("Пацієнта не знайдено"));
+      const patient = await Patient.findOne({ where: { user_id: userId } });
+      if (!patient) {
+        return next(ApiError.notFound("Пацієнта не знайдено"));
+      }
+
+      // Якщо Patient сам себе
+      if (req.user.role === "Patient" && req.user.id !== patient.user_id) {
+        return next(ApiError.forbidden("Немає доступу"));
+      }
+
+      // Якщо Doctor або Admin - дозволяємо
+      if (
+        req.user.role === "Doctor" ||
+        req.user.role === "Admin" ||
+        req.user.id === patient.user_id
+      ) {
+        return res.json(patient);
+      }
+
+      // Якщо хтось інший
+      return next(
+        ApiError.forbidden("Недостатньо прав для перегляду пацієнта")
+      );
+    } catch (e) {
+      console.error("getByUserId error:", e);
+      return next(ApiError.internal("Помилка отримання пацієнта за user_id"));
     }
-
-    // Якщо Patient сам себе
-    if (req.user.role === "Patient" && req.user.id !== patient.user_id) {
-      return next(ApiError.forbidden("Немає доступу"));
-    }
-
-    // Якщо Doctor або Admin - дозволяємо
-    if (req.user.role === "Doctor" || req.user.role === "Admin" || req.user.id === patient.user_id) {
-      return res.json(patient);
-    }
-
-    // Якщо хтось інший
-    return next(ApiError.forbidden("Недостатньо прав для перегляду пацієнта"));
-  } catch (e) {
-    console.error("getByUserId error:", e);
-    return next(ApiError.internal("Помилка отримання пацієнта за user_id"));
   }
-}
 
   async create(req, res, next) {
     try {
-      const { user_id, first_name, last_name, middle_name, email, hospital_id } = req.body;
+      const {
+        user_id,
+        first_name,
+        last_name,
+        middle_name,
+        email,
+        hospital_id,
+      } = req.body;
 
       if (!user_id || !first_name || !last_name || !email) {
         return next(ApiError.badRequest("Обовʼязкові поля відсутні"));
@@ -67,19 +82,25 @@ async getByUserId(req, res, next) {
 
       const user = await User.findByPk(user_id);
       if (!user || user.role !== "Patient") {
-        return next(ApiError.badRequest("User не знайдено або роль не Patient"));
+        return next(
+          ApiError.badRequest("User не знайдено або роль не Patient")
+        );
       }
 
       let finalHospitalId = hospital_id;
 
       if (req.user.role === "Doctor") {
-        const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+        const doctor = await Doctor.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!doctor) return next(ApiError.badRequest("Лікаря не знайдено"));
         finalHospitalId = doctor.hospital_id;
       }
 
       if (req.user.role === "Admin" && !hospital_id) {
-        return next(ApiError.badRequest("Для Admin потрібно вказати hospital_id"));
+        return next(
+          ApiError.badRequest("Для Admin потрібно вказати hospital_id")
+        );
       }
 
       const newPatient = await Patient.create({
@@ -109,12 +130,12 @@ async getByUserId(req, res, next) {
 
       switch (req.user.role) {
         case "Patient":
-          return PatientController.updateAsPatient(req, res, next, user, patient);
+          return this.updateAsPatient(req, res, next, user, patient);
         case "Doctor":
-          return PatientController.updateAsDoctor(req, res, next, patient);
+          return this.updateAsDoctor(req, res, next, patient);
         case "Admin":
-          return PatientController.updateAsAdmin(req, res, next, user, patient);
-         default:
+          return this.updateAsAdmin(req, res, next, user, patient);
+        default:
           return next(ApiError.forbidden("Немає доступу"));
       }
     } catch (e) {
@@ -124,28 +145,32 @@ async getByUserId(req, res, next) {
   }
 
   async updateAsPatient(req, res, next, user, patient) {
-    const { email, phone, photo_url, password } = req.body;
-
+  try {
     if (req.user.id !== patient.user_id) {
       return next(ApiError.forbidden("Немає доступу"));
     }
-
-    if (email && email !== user.email) {
-      const existing = await User.findOne({ where: { email } });
-      if (existing && existing.id !== user.id) {
-        return next(ApiError.badRequest("Цей email вже зайнятий"));
-      }
-      user.email = email;
-      patient.email = email;
+    
+    const genderMap = {
+      female: "Female",
+      male: "Male",
+      other: "Other",
+      жіноча: "Female",
+      чоловіча: "Male"
+    };
+    if (req.body.gender && genderMap[req.body.gender.toLowerCase()]) {
+      req.body.gender = genderMap[req.body.gender.toLowerCase()];
     }
-    if (phone) patient.phone = phone;
-    if (photo_url) patient.photo_url = photo_url;
-    if (password) user.password = await bcrypt.hash(password, 5);
 
-    await user.save();
+    await updateUserCredentials(user, req.body, next);
+    updatePatientFields(patient, req.body);
     await patient.save();
+
     return res.json(patient);
+  } catch (e) {
+    console.error("updateAsPatient error:", e);
+    return next(ApiError.internal("Помилка оновлення пацієнта як пацієнта"));
   }
+}
 
   async updateAsDoctor(req, res, next, patient) {
     const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
@@ -172,7 +197,7 @@ async getByUserId(req, res, next) {
       const newDoctor = await Doctor.findByPk(req.body.doctor_id);
       if (!newDoctor) return next(ApiError.badRequest("Лікаря не знайдено"));
     }
-  
+
     if (req.body.email && req.body.email !== user.email) {
       const existing = await User.findOne({ where: { email: req.body.email } });
       if (existing && existing.id !== user.id) {
@@ -181,11 +206,40 @@ async getByUserId(req, res, next) {
       user.email = req.body.email;
       patient.email = req.body.email;
     }
-  
+
     await user.save();
     await patient.update(req.body);
     return res.json(patient);
-  } 
+  }
+
+  async updatePhoto(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { photo_url } = req.body;
+
+      if (!photo_url) {
+        return next(ApiError.badRequest("Поле photo_url обовʼязкове"));
+      }
+
+      const patient = await Patient.findByPk(id);
+      if (!patient) return next(ApiError.notFound("Пацієнта не знайдено"));
+
+      if (req.user.role !== "Patient" || req.user.id !== patient.user_id) {
+        return next(ApiError.forbidden("Немає доступу до редагування фото"));
+      }
+
+      patient.photo_url = photo_url;
+      await patient.save();
+
+      return res.json({
+        message: "Фото оновлено",
+        photo_url: patient.photo_url,
+      });
+    } catch (e) {
+      console.error("updatePhoto error:", e);
+      return next(ApiError.internal("Не вдалося оновити фото пацієнта"));
+    }
+  }
 
   async delete(req, res, next) {
     try {
@@ -198,7 +252,9 @@ async getByUserId(req, res, next) {
       if (!patient) return next(ApiError.notFound("Пацієнта не знайдено"));
 
       if (req.user.role === "Doctor") {
-        const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+        const doctor = await Doctor.findOne({
+          where: { user_id: req.user.id },
+        });
         if (doctor.hospital_id !== patient.hospital_id) {
           return next(ApiError.forbidden("Немає доступу до цього пацієнта"));
         }
@@ -217,9 +273,13 @@ async getByUserId(req, res, next) {
       const { doctorId } = req.params;
 
       if (req.user.role === "Doctor") {
-        const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+        const doctor = await Doctor.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!doctor || doctor.id !== parseInt(doctorId)) {
-          return next(ApiError.forbidden("Немає доступу до пацієнтів іншого лікаря"));
+          return next(
+            ApiError.forbidden("Немає доступу до пацієнтів іншого лікаря")
+          );
         }
       }
 
@@ -227,7 +287,9 @@ async getByUserId(req, res, next) {
         return next(ApiError.forbidden("Недостатньо прав"));
       }
 
-      const patients = await Patient.findAll({ where: { doctor_id: doctorId } });
+      const patients = await Patient.findAll({
+        where: { doctor_id: doctorId },
+      });
       return res.json(patients);
     } catch (e) {
       console.error("getByDoctor error:", e);
