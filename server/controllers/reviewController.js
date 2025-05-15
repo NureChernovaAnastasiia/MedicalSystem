@@ -3,19 +3,43 @@ const ApiError = require("../error/ApiError");
 const MailService = require("../utils/mailService");
 const generateReviewEmail = require("../templates/reviewNotificationTemplate");
 const ReviewValidator = require("../validations/reviewValidation");
+const { Op } = require('sequelize');
 
 const REVIEW_RECEIVER_EMAIL = "anastasiia.chernova@nure.ua";
 
 class ReviewController {
   async getAll(req, res, next) {
-    try {
-      const reviews = await Review.findAll();
-      return res.json(reviews);
-    } catch (e) {
-      console.error('❌ getAll Review error:', e);
-      return next(ApiError.internal('Не вдалося отримати список відгуків'));
-    }
+  try {
+    const reviews = await Review.findAll({
+      include: [
+        {
+          model: Patient,
+          attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
+        },
+      ],
+    });
+
+    // Якщо потрібно обрахувати вік:
+    const reviewsWithAge = reviews.map(r => {
+      const birthDate = new Date(r.Patient?.birth_date);
+      const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
+
+      return {
+        ...r.toJSON(),
+        reviewer: {
+          name: `${r.Patient?.first_name || ''} ${r.Patient?.last_name || ''}`.trim(),
+          age,
+          photo_url: r.Patient?.photo_url || null,
+        },
+      };
+    });
+
+    return res.json(reviewsWithAge);
+  } catch (e) {
+    console.error('getAllReviews error:', e);
+    return next(ApiError.internal('Не вдалося отримати відгуки'));
   }
+}
 
   async getById(req, res, next) {
     try {
@@ -31,7 +55,7 @@ class ReviewController {
   async create(req, res, next) {
     try {
       // Перевірка авторизації
-      if (!req.user || !req.user.id) {
+      if (!req.user?.id) {
         return next(ApiError.unauthorized("Користувач не авторизований"));
       }
   

@@ -1,5 +1,6 @@
 const { Hospital } = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { Op, fn, col } = require('sequelize');
 
 class HospitalController {
     async getAll(req, res, next) {
@@ -56,6 +57,20 @@ class HospitalController {
             return next(ApiError.internal('Помилка видалення лікарні'));
         }
     }
+     async getUniqueNames(req, res, next) {
+    try {
+      const hospitals = await Hospital.findAll({
+        attributes: [[fn('DISTINCT', col('name')), 'name']],
+        raw: true,
+      });
+
+      const names = hospitals.map(h => h.name).filter(Boolean);
+      return res.json(names);
+    } catch (e) {
+      console.error('getUniqueNames error:', e);
+      return next(ApiError.internal('Не вдалося отримати унікальні назви лікарень'));
+    }
+  }
 }
 
 module.exports = new HospitalController();

@@ -1,5 +1,6 @@
 const { Doctor, Hospital, User } = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { Op, fn, col } = require('sequelize');
 
 class DoctorController {
     async getAll(req, res, next) {
@@ -144,6 +145,25 @@ async getByHospital(req, res, next) {
       return next(ApiError.internal("Помилка отримання лікаря за user_id"));
     }
   }  
+  async getUniqueSpecializations(req, res, next) {
+  try {
+    const specializations = await Doctor.findAll({
+      attributes: [[fn('DISTINCT', col('specialization')), 'specialization']],
+      where: {
+        specialization: {
+          [Op.ne]: null,
+        },
+      },
+      raw: true,
+    });
+
+    const result = specializations.map(s => s.specialization).filter(Boolean);
+    return res.json(result);
+  } catch (e) {
+    console.error("getUniqueSpecializations error:", e);
+    return next(ApiError.internal("Не вдалося отримати спеціалізації"));
+  }
+}
 }
 
 module.exports = new DoctorController();
