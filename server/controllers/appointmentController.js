@@ -194,6 +194,37 @@ async create(req, res, next) {
       return { ...item.toJSON(), computed_status: status };
     });
   }
+  // 🔍 Майбутні записи пацієнта
+async getUpcomingByPatient(req, res, next) {
+  try {
+    const { patientId } = req.params;
+
+    // Якщо пацієнт — перевіряємо, чи це його власний ID
+    if (req.user.role === 'Patient') {
+      const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (!patient || patient.id !== parseInt(patientId)) {
+        return next(ApiError.forbidden('Немає доступу до чужих записів'));
+      }
+    }
+
+    const now = new Date();
+
+    const upcomingAppointments = await Appointment.findAll({
+      where: {
+        patient_id: patientId,
+        appointment_date: { [Op.gte]: now },
+        status: { [Op.ne]: 'Cancelled' },
+      },
+      include: [Doctor, DoctorSchedule],
+      order: [['appointment_date', 'ASC']],
+    });
+
+    return res.json(AppointmentController._mapStatus(upcomingAppointments));
+  } catch (e) {
+    console.error('getUpcomingByPatient error:', e);
+    return next(ApiError.internal('Не вдалося отримати майбутні записи пацієнта'));
+  }
+}
 }
 
 module.exports = new AppointmentController();
