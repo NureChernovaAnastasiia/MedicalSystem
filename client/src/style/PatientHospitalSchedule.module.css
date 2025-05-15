@@ -287,3 +287,27 @@
     min-width: 850px; 
   }
 }
+
+@media (max-width: 480px) {
+  .headerBox {
+    padding: 15px;
+  }
+
+  .middleRow {
+    padding: 0 10px;
+  }
+
+  .hospitalName {
+    font-size: 20px;
+  }
+
+  .clinicType,
+  .schedule {
+    font-size: 12px;
+  }
+
+  .contactText,
+  .address {
+    font-size: 14px;
+  }
+}

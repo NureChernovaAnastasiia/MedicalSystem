@@ -98,116 +98,14 @@
     text-align: center;
     box-sizing: border-box;
   }
-  
-  .doctorCard {
-    width: 100%;
-    max-width: 1276px;
-    margin: 20px auto;
-    padding: 20px 40px;
-    background: #ffffff;
-    border: 1px solid #d9d9d9;
-    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 40px;
-    box-sizing: border-box;
-    position: relative;
-  }
-  
-  .cardHeader {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-  }
-  
-  .detailsButton {
-    display: flex;
-    align-items: center;
-    background: none;
-    border: none;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 300;
-    font-size: 16px;
-    color: #333333;
-    cursor: pointer;
-  }
-  
-  .detailsButton span {
-    margin-right: 8px;
+
+  .noResults{
+    margin-top: 60px;
     font-family: 'Montserrat', sans-serif;
     font-style: italic;
-    font-weight: 700;
-    font-size: 30px;
-    line-height: 1;
-    color: #FBDA03;
-  }
-  
-  .doctorImage {
-    flex-shrink: 0;
-    width: 20%;
-    max-width: 280px;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  }
-  
-  .doctorInfo {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .doctorName {
-    margin: 10px 0;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
-    font-size: 26px;
-    color: #333333;
-  }
-  
-  .infoItem {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'Montserrat', sans-serif;
-    font-style: italic;
-    font-weight: 200;
-    font-size: 18px;
-    color: #333333;
-  }
-  
-  .infoItem p {
-    margin: 1px;
-  }
-  
-  .infoItem p strong {
-    font-weight: 550;
-    font-style: normal;
-  }
-  
-  .infoIcon,
-  .buttonIcon {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .scheduleButton {
-    height: 40px;
-    padding: 5px 20px;
-    background: rgba(0, 195, 161, 0.42);
-    border: none;
-    border-radius: 10px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    color: #333333;
-    cursor: pointer;
-    text-decoration: none; 
-    display: inline-flex; 
-    align-items: center;
-    justify-content: center;
+    font-size: 24px;
+    text-align: center;
+    font-weight: 100;
   }
   
   @media (max-width: 1024px) {
@@ -227,32 +125,6 @@
     .searchButton {
       font-size: 16px;
       min-width: 150px;
-    }
-  
-    .doctorCard {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      padding: 20px;
-    }
-  
-    .doctorImage {
-      width: 50%;
-      max-width: 200px;
-      align-self: center;
-    }
-  
-    .doctorInfo {
-      width: 100%;
-    }
-  
-    .doctorName {
-      text-align: center;
-      font-size: 24px;
-    }
-  
-    .infoItem {
-      font-size: 16px;
     }
   }
   

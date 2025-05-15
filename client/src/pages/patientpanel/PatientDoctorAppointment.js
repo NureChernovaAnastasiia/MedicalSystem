@@ -1,76 +1,51 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import styles from '../../style/PatientDoctorAppointment.module.css';
-import { PATIENT_DOCSCHEDULE_ROUTE } from '../../utils/consts';
+import { CITIES } from '../../constants/cities';
+import DoctorCard from '../../components/elements/DoctorCard';
+import { fetchAllDoctors } from '../../http/doctorAPI';
+import ModalDocInformation from '../../components/modals/ModalDocInformation';
 
 import iconSearch from '../../img/icons/search.png';
-import iconSpecialisation from '../../img/icons/specialisation.png';
-import iconHospital from '../../img/icons/hospital.png';
-import iconLocation from '../../img/icons/location.png';
-import iconSchedule from '../../img/icons/schedule.png';
-
-import photo1 from '../../img/Woman1.jpg';
-import photo2 from '../../img/Man1.jpg';
-
-const doctors = [
-  {
-    id: 1,
-    name: 'Петрова Олександра Вікторівна',
-    specialty: 'Кардіолог',
-    hospital: 'Амбулаторія сімейної медицини "Цінність"',
-    city: 'Київ вул. Єфремова Академіка, 8А',
-    image: photo1,
-  },
-  {
-    id: 2,
-    name: 'Лихненко Віктор Миколайович',
-    specialty: 'Педіатр, Терапевт',
-    hospital: 'Сімейна клініка "Надія"',
-    city: 'Київ',
-    image: photo2,
-  },
-];
-
-const DoctorCard = ({ doctor }) => (
-  <div className={styles.doctorCard}>
-    <div className={styles.cardHeader}>
-      <button className={styles.detailsButton}>
-        <span>?</span> Детальніше про лікаря
-      </button>
-    </div>
-
-    <img src={doctor.image} alt="Doctor" className={styles.doctorImage} />
-
-    <div className={styles.doctorInfo}>
-      <h2 className={styles.doctorName}>{doctor.name}</h2>
-
-      <div className={styles.infoItem}>
-        <img src={iconSpecialisation} alt="Speciality Icon" className={styles.infoIcon} />
-        <p><strong>Спеціальність:</strong> {doctor.specialty}</p>
-      </div>
-
-      <div className={styles.infoItem}>
-        <img src={iconHospital} alt="Hospital Icon" className={styles.infoIcon} />
-        <p><strong>Лікарня:</strong> {doctor.hospital}</p>
-      </div>
-
-      <div className={styles.infoItem}>
-        <img src={iconLocation} alt="Location Icon" className={styles.infoIcon} />
-        <p><strong>Місто:</strong> {doctor.city}</p>
-      </div>
-
-      <div className={styles.infoItem}>
-        <img src={iconSchedule} alt="Schedule Icon" className={styles.buttonIcon} />  
-        <NavLink to={PATIENT_DOCSCHEDULE_ROUTE} className={styles.scheduleButton}>
-          Переглянути розклад
-        </NavLink>
-      </div>
-    </div>
-  </div>
-);
-
 
 const PatientDoctorAppointment = () => {
+  const [doctors, setDoctors] = useState([]);
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [searchName, setSearchName] = useState('');
+  const [searchCity, setSearchCity] = useState('');
+
+  useEffect(() => {
+    const getDoctors = async () => {
+      try {
+        const data = await fetchAllDoctors();
+        setDoctors(data);
+        setFilteredDoctors(data);
+      } catch (error) {
+        console.error("Не вдалося завантажити лікарів", error);
+      }
+    };
+    getDoctors();
+  }, []);
+
+  const handleSearch = () => {
+    const nameQuery = searchName.toLowerCase().trim();
+    const cityQuery = searchCity.toLowerCase().trim();
+
+    const results = doctors.filter((doc) => {
+      const fullName = `${doc.first_name} ${doc.last_name} ${doc.middle_name}`.toLowerCase();
+      const doctorCity = doc.Hospital?.address?.toLowerCase() || '';
+      return (
+        fullName.includes(nameQuery) &&
+        (cityQuery === '' || doctorCity.includes(cityQuery))
+      );
+    });
+
+    setFilteredDoctors(results);
+  };
+
+  const handleOpenModal = (doctor) => setSelectedDoctor(doctor);
+  const handleCloseModal = () => setSelectedDoctor(null);
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Запис до лікаря</h1>
@@ -81,6 +56,8 @@ const PatientDoctorAppointment = () => {
           <input
             type="text"
             placeholder="Введіть ім'я лікаря"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
             className={styles.inputField}
           />
         </div>
@@ -89,19 +66,39 @@ const PatientDoctorAppointment = () => {
           <select className={styles.select}>
             <option>Категорія лікаря</option>
           </select>
+
           <select className={styles.select}>
             <option>Лікарня</option>
           </select>
-          <select className={styles.select}>
-            <option>Місто</option>
+
+          <select
+            className={styles.select}
+            value={searchCity}
+            onChange={(e) => setSearchCity(e.target.value)}
+          >
+            <option value="">Місто</option>
+            {CITIES.map((city) => (
+              <option key={city} value={city}>{city}</option>
+            ))}
           </select>
-          <button className={styles.searchButton}>Знайти</button>
+
+          <button className={styles.searchButton} onClick={handleSearch}>
+            Знайти
+          </button>
         </div>
       </div>
 
-      {doctors.map((doctor) => (
-        <DoctorCard key={doctor.id} doctor={doctor} />
-      ))}
+      {filteredDoctors.length === 0 ? (
+        <p className={styles.noResults}>За результатами пошуку нічого не знайдено.</p>
+      ) : (
+        filteredDoctors.map((doctor) => (
+          <DoctorCard key={doctor.id} doctor={doctor} onOpenModal={handleOpenModal} />
+        ))
+      )}
+
+      {selectedDoctor && (
+        <ModalDocInformation doctor={selectedDoctor} onClose={handleCloseModal} />
+      )}
     </div>
   );
 };
