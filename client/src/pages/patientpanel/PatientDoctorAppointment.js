@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from '../../style/PatientDoctorAppointment.module.css';
 import { PATIENT_DOCSCHEDULE_ROUTE } from '../../utils/consts';
+
+import ModalDocInformation from '../../components/modals/ModalDocInformation'; 
 
 import iconSearch from '../../img/icons/search.png';
 import iconSpecialisation from '../../img/icons/specialisation.png';
@@ -19,6 +21,10 @@ const doctors = [
     specialty: 'Кардіолог',
     hospital: 'Амбулаторія сімейної медицини "Цінність"',
     city: 'Київ вул. Єфремова Академіка, 8А',
+    email: 'dr.petrova@lifeline.com',
+    phone: '+380 44 123 4567',
+    bio: 'Д-р Олександра Петрова — провідний кардіолог з 12-річним досвідом. Спеціалізується на діагностиці та лікуванні серцево-судинних захворювань.',
+    experience: '12 років',
     image: photo1,
   },
   {
@@ -27,14 +33,18 @@ const doctors = [
     specialty: 'Педіатр, Терапевт',
     hospital: 'Сімейна клініка "Надія"',
     city: 'Київ',
+    email: 'dr.lykhnenko@lifeline.com',
+    phone: '+380 44 987 6543',
+    bio: 'Д-р Віктор Лихненко — досвідчений педіатр і терапевт. Відомий індивідуальним підходом до кожного пацієнта.',
+    experience: '9 років',
     image: photo2,
   },
 ];
 
-const DoctorCard = ({ doctor }) => (
+const DoctorCard = ({ doctor, onOpenModal }) => (
   <div className={styles.doctorCard}>
     <div className={styles.cardHeader}>
-      <button className={styles.detailsButton}>
+      <button className={styles.detailsButton} onClick={() => onOpenModal(doctor)}>
         <span>?</span> Детальніше про лікаря
       </button>
     </div>
@@ -60,7 +70,7 @@ const DoctorCard = ({ doctor }) => (
       </div>
 
       <div className={styles.infoItem}>
-        <img src={iconSchedule} alt="Schedule Icon" className={styles.buttonIcon} />  
+        <img src={iconSchedule} alt="Schedule Icon" className={styles.buttonIcon} />
         <NavLink to={PATIENT_DOCSCHEDULE_ROUTE} className={styles.scheduleButton}>
           Переглянути розклад
         </NavLink>
@@ -69,8 +79,17 @@ const DoctorCard = ({ doctor }) => (
   </div>
 );
 
-
 const PatientDoctorAppointment = () => {
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  const handleOpenModal = (doctor) => {
+    setSelectedDoctor(doctor);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDoctor(null);
+  };
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Запис до лікаря</h1>
@@ -100,8 +119,12 @@ const PatientDoctorAppointment = () => {
       </div>
 
       {doctors.map((doctor) => (
-        <DoctorCard key={doctor.id} doctor={doctor} />
+        <DoctorCard key={doctor.id} doctor={doctor} onOpenModal={handleOpenModal} />
       ))}
+
+      {selectedDoctor && (
+        <ModalDocInformation doctor={selectedDoctor} onClose={handleCloseModal} />
+      )}
     </div>
   );
 };
