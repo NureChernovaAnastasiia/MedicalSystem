@@ -1,0 +1,132 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.modalContainer {
+  position: relative;
+  width: 600px;
+  max-width: 700px;
+  background: #ffffff;
+  border-radius: 1.25rem;
+  box-sizing: border-box;
+}
+
+.headerBar {
+  width: 100%;
+  background: rgba(0, 195, 161, 0.42);
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  justify-content: center;
+  display: flex;
+}
+
+.headerText {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #e2f6f2;
+}
+
+.infoBlock {
+  margin-top: 10px;
+  margin-left: 40px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1.2rem;
+  line-height: 20px;
+  color: #000000;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.confirmButton {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  color: #00c37f;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-left: 20px;
+}
+
+.cancelContainer {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.cancelX {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 40px;
+  color: #ff0000;
+  margin-right: 0.5rem;
+  line-height: 1;
+}
+
+.cancelText {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 22px;
+  color: #000000;
+}
+
+@media (max-width: 768px) {
+  .modalContainer {
+    width: 90%;
+  }
+
+  .headerText {
+    font-size: 1.2rem;
+  }
+
+  .infoBlock {
+    margin-left: 20px;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .confirmButton {
+    font-size: 1rem;
+    margin-left: 10px;
+  }
+
+  .cancelContainer {
+    margin-right: 10px;
+  }
+
+  .cancelX {
+    font-size: 30px;
+  }
+
+  .cancelText {
+    font-size: 1rem;
+  }
+
+  .footer {
+    gap: 10px;
+    align-items: center;
+  }
+}

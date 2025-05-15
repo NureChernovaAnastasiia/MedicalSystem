@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {useParams} from 'react-router-dom'
 import styles from "../../style/PatientDoctorSchedule.module.css";
+import ModalConfirmAppointment from "../../components/modals/ModalConfirmAppointment";
 import { daysOfWeekShort } from '../../constants/daysOfWeek';
 import { fetchDoctorScheduleByIdAndDate } from "../../http/doctorScheduleAPI";
 import { fetchDoctorById } from "../../http/doctorAPI";
@@ -10,6 +11,7 @@ const PatientDoctorSchedule = () => {
   const [selectedDateIndex, setSelectedDateIndex] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
   const [doctorInfo, setDoctorInfo] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
   
   const { id } = useParams();
   const doctorId = Number(id);
@@ -103,8 +105,8 @@ const PatientDoctorSchedule = () => {
     selectDate(index, selectedDate);
   };
 
-  const handleSlotClick = (slotId) => {
-    console.log(`Обрано слот з id: ${slotId}`);
+  const handleSlotClick = (slot) => {
+    setSelectedSlot(slot);
   };
 
   return (
@@ -140,7 +142,7 @@ const PatientDoctorSchedule = () => {
               <div
                 key={idx}
                 className={`${styles.timeSlot} ${slot.active ? styles.availableSlot : styles.unavailableSlot}`}
-                onClick={slot.active ? () => handleSlotClick(slot.id) : undefined}
+                onClick={slot.active ? () => handleSlotClick(slot) : undefined}
               >
                 {slot.time}
               </div>
@@ -149,6 +151,15 @@ const PatientDoctorSchedule = () => {
             <div className={styles.noSlotsMessage}>Немає доступних слотів</div>
           )}
         </div>
+      )}
+
+      {selectedSlot && doctorInfo && (
+        <ModalConfirmAppointment
+          doctor={doctorInfo}
+          slot={selectedSlot}
+          date={weekDates[selectedDateIndex].formattedDate}
+          onClose={() => setSelectedSlot(null)}
+        />
       )}
     </div>
   );
