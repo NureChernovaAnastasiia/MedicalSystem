@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import styles from '../../style/PatientDoctorAppointment.module.css';
 import { CITIES } from '../../constants/cities';
 import DoctorCard from '../../components/elements/DoctorCard';
-import { fetchAllDoctors } from '../../http/doctorAPI';
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
-
 import iconSearch from '../../img/icons/search.png';
+
+import {
+  fetchAllDoctors,
+  fetchDoctorSpecializations,
+  fetchUniqueHospitalNames,
+} from '../../http/doctorAPI';
 
 const PatientDoctorAppointment = () => {
   const [doctors, setDoctors] = useState([]);
@@ -13,30 +17,47 @@ const PatientDoctorAppointment = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [searchName, setSearchName] = useState('');
   const [searchCity, setSearchCity] = useState('');
+  const [searchHospital, setSearchHospital] = useState('');
+  const [searchSpecialization, setSearchSpecialization] = useState('');
+  const [specializations, setSpecializations] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
 
   useEffect(() => {
-    const getDoctors = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchAllDoctors();
-        setDoctors(data);
-        setFilteredDoctors(data);
+        const [doctorsData, specData, hospitalData] = await Promise.all([
+          fetchAllDoctors(),
+          fetchDoctorSpecializations(),
+          fetchUniqueHospitalNames(),
+        ]);
+        setDoctors(doctorsData);
+        setFilteredDoctors(doctorsData);
+        setSpecializations(specData);
+        setHospitals(hospitalData);
       } catch (error) {
-        console.error("Не вдалося завантажити лікарів", error);
+        console.error("Помилка при завантаженні даних:", error);
       }
     };
-    getDoctors();
+    loadData();
   }, []);
 
   const handleSearch = () => {
     const nameQuery = searchName.toLowerCase().trim();
-    const cityQuery = searchCity.toLowerCase().trim();
+    const cityQuery = searchCity.toLowerCase();
+    const hospitalQuery = searchHospital.toLowerCase();
+    const specializationQuery = searchSpecialization.toLowerCase();
 
     const results = doctors.filter((doc) => {
       const fullName = `${doc.first_name} ${doc.last_name} ${doc.middle_name}`.toLowerCase();
-      const doctorCity = doc.Hospital?.address?.toLowerCase() || '';
+      const docCity = doc.Hospital?.address?.toLowerCase() || '';
+      const docHospital = doc.Hospital?.name?.toLowerCase() || '';
+      const docSpec = doc.specialization?.toLowerCase() || '';
+
       return (
         fullName.includes(nameQuery) &&
-        (cityQuery === '' || doctorCity.includes(cityQuery))
+        (cityQuery === '' || docCity.includes(cityQuery)) &&
+        (hospitalQuery === '' || docHospital.includes(hospitalQuery)) &&
+        (specializationQuery === '' || docSpec.includes(specializationQuery))
       );
     });
 
@@ -63,12 +84,26 @@ const PatientDoctorAppointment = () => {
         </div>
 
         <div className={styles.selectGroup}>
-          <select className={styles.select}>
-            <option>Категорія лікаря</option>
+          <select
+            className={styles.select}
+            value={searchSpecialization}
+            onChange={(e) => setSearchSpecialization(e.target.value)}
+          >
+            <option value="">Категорія лікаря</option>
+            {specializations.map((spec, index) => (
+              <option key={index} value={spec}>{spec}</option>
+            ))}
           </select>
 
-          <select className={styles.select}>
-            <option>Лікарня</option>
+          <select
+            className={styles.select}
+            value={searchHospital}
+            onChange={(e) => setSearchHospital(e.target.value)}
+          >
+            <option value="">Лікарня</option>
+            {hospitals.map((hospital, index) => (
+              <option key={index} value={hospital}>{hospital}</option>
+            ))}
           </select>
 
           <select
