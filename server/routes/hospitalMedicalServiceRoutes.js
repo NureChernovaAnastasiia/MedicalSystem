@@ -1,10 +1,14 @@
 const router = require("express").Router();
-const controller = require("../controllers/hospitalMedicalServiceController");
+const hospitalMedicalServiceController = require("../controllers/hospitalMedicalServiceController");
 const authMiddleware = require("../middleware/authMiddleware");
-const checkRole = require("../middleware/checkRoleMiddleware");
 
 router.use(authMiddleware);
-router.post("/", checkRole("Admin"), controller.assign);
-router.get("/", controller.getAll);
+
+router.get('/hospital-medical-services', hospitalMedicalServiceController.getAll);
+router.get('/hospital-medical-services/hospital/:hospitalId', hospitalMedicalServiceController.getByHospital);
+router.get('/hospital-medical-services/doctor/:doctorId', hospitalMedicalServiceController.getByDoctor);
+router.post('/hospital-medical-services', hospitalMedicalServiceController.create);
+router.put('/hospital-medical-services/:id', hospitalMedicalServiceController.update);
+router.delete('/hospital-medical-services/:id', hospitalMedicalServiceController.delete);
 
 module.exports = router;
