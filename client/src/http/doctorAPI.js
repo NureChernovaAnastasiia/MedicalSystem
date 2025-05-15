@@ -9,3 +9,8 @@ export const fetchAllDoctors = async () => {
     throw error;
   }
 };
+
+export const fetchDoctorById = async (id) => {
+  const { data } = await $authHost.get(`/api/doctors/${id}`);
+  return data;
+};

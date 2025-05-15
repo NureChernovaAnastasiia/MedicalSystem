@@ -37,7 +37,7 @@ const DoctorCard = ({ doctor, onOpenModal }) => (
       </div>
       <div className={styles.infoItem}>
         <img src={iconSchedule} alt="Розклад" className={styles.buttonIcon} />
-        <NavLink to={PATIENT_DOCSCHEDULE_ROUTE} className={styles.scheduleButton}>
+        <NavLink to={`${PATIENT_DOCSCHEDULE_ROUTE}/${doctor.id}`} className={styles.scheduleButton}>
           Переглянути розклад
         </NavLink>
       </div>
