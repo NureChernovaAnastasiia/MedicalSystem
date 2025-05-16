@@ -3,6 +3,8 @@ import { NavLink } from 'react-router-dom';
 import styles from "../../style/PatientDashboard.module.css";
 import { Context } from "../../index";
 import { fetchPatientByUserId } from "../../http/patientAPI";
+import { fetchUpcomingAppointments } from "../../http/appointmentAPI";
+import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
 
 import iconBooking from '../../img/icons/inspection.png';
 import iconAnalysis from '../../img/icons/labour.png';
@@ -21,14 +23,14 @@ const InfoCard = ({ icon, title, to }) => (
   </NavLink>
 );
 
-const AppointmentCard = ({ date, doctor, location }) => (
+const AppointmentCard = ({ date, doctor, location, onDetailsClick }) => (
   <div className={styles.appointmentCard}>
     <p className={styles.appointmentInfo}>
       <strong>Дата і час прийому:</strong> <span className={styles.lightText}>{date}</span> <br />
       <strong>Лікар:</strong> <span className={styles.lightText}>{doctor}</span> <br />
       <strong>Місцезнаходження:</strong> <span className={styles.lightText}>{location}</span>
     </p>
-    <div className={styles.appointmentDetails}>
+    <div className={styles.appointmentDetails} onClick={onDetailsClick}>
       <span className={styles.questionMark}>?</span>
       <span className={styles.detailsText}>Деталі прийому</span>
     </div>
@@ -38,39 +40,43 @@ const AppointmentCard = ({ date, doctor, location }) => (
 const PatientDashboard = () => {
   const { user } = useContext(Context);
   const [patient, setPatient] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
-    const getPatient = async () => {
+    const getPatientAndAppointments = async () => {
       if (!user.user.id) return;
       try {
-        const data = await fetchPatientByUserId(user.user.id);
-        setPatient(data);
+        const patientData = await fetchPatientByUserId(user.user.id);
+        setPatient(patientData);
+
+        const upcomingAppointments = await fetchUpcomingAppointments(patientData.id);
+        const formattedAppointments = upcomingAppointments.map((a) => {
+          const date = new Date(`${a.appointment_date}T${a.DoctorSchedule.start_time}`);
+          const formattedDate = date.toLocaleString("uk-UA", {
+            day: "numeric", month: "long", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          });
+
+          const doctor = `${a.Doctor.first_name} ${a.Doctor.last_name}`;
+          const location = a.Doctor.Hospital?.name || "Невідома лікарня";
+
+          return { date: formattedDate, doctor, location };
+        });
+
+        setAppointments(formattedAppointments);
       } catch (error) {
-        console.error("Не вдалося завантажити дані пацієнта:", error);
-        setPatient(null);
+        console.error("Помилка при завантаженні даних:", error);
       }
     };
-    getPatient();
+
+    getPatientAndAppointments();
   }, [user.user.id]);
 
-  const appointments = [
-    {
-      date: "11 квітня 2025, 10:00",
-      doctor: "Олександра Петрова",
-      location: "Амбулаторія сімейної медицини 'Цінність'",
-    },
-    {
-      date: "15 квітня 2025, 12:00",
-      doctor: "Іван Іванов",
-      location: "Клініка здоров'я",
-    },
-    {
-      date: "20 квітня 2025, 09:00",
-      doctor: "Марія Коваленко",
-      location: "Медичний центр 'Довіра'",
-    },
-  ];
   const fullName = patient ? `${patient.first_name || ""} ${patient.last_name || ""}`.trim() : "";
+  const handleOpenAppointmentModal = (appointment) => setSelectedAppointment(appointment);
+  const handleCloseAppointmentModal = () => setSelectedAppointment(null);
+
 
   return (
     <div className={styles.patientDashboard}>
@@ -93,9 +99,19 @@ const PatientDashboard = () => {
               date={appointment.date}
               doctor={appointment.doctor}
               location={appointment.location}
+              onDetailsClick={() => handleOpenAppointmentModal(appointment)}
             />
           ))}
         </div>
+        {selectedAppointment && (
+          <ModalAppointmentDetails
+            appointment={selectedAppointment}
+            onClose={handleCloseAppointmentModal}
+            onGoToCard={() => {
+              setSelectedAppointment(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

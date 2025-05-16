@@ -1,0 +1,107 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 34px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 16px 40px;
+}
+
+.note {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 1.5rem;
+}
+
+.detailsBox {
+  background: #E2F6F2;
+  box-shadow: inset 0px 4px 10px rgba(0, 0, 0, 0.02);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.detailsText {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 200;
+  line-height: 1.75;
+  color: #333;
+  margin: 0;
+}
+
+.detailsText strong {
+  font-weight: 700;
+  font-style: normal;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.backButton,
+.goToCardButton  {
+  background: none;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  font-style: italic;
+  color: #00C3A1;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    width: 70%;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .note{
+    font-size: 1rem;
+  }
+
+  .detailsText {
+  font-size: 1rem;
+  font-weight: 200;
+  }
+
+  .backButton,
+  .goToCardButton  {
+    font-size: 12px;
+  }
+}

@@ -141,6 +141,20 @@
 .detailsText:hover {
   text-decoration: underline; 
 }
+
+.noAppointments {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-size: 24px;
+  text-align: center;
+  font-weight: 100;
+}
+
 @media (max-width: 1200px) {
   .appointmentsList {
     grid-template-columns: repeat(2, 1fr); 
