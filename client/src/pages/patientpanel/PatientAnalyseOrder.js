@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from '../../style/PatientAnalyseOrder.module.css';
 
 import iconSearch from '../../img/icons/search.png';
+import { getHospitalLabServices } from '../../http/analysisAPI';
 
 const AnalyseItem = ({ name, lab, address, price }) => (
   <div className={styles.analyseItem}>
@@ -14,26 +15,25 @@ const AnalyseItem = ({ name, lab, address, price }) => (
 );
 
 const PatientAnalyseOrder = () => {
-  const analyses = [
-    {
-      name: 'Алергокомпонент кота rFel d4 ліпокалін (e228), sIgE',
-      lab: 'Лабораторія “Ескулаб”',
-      address: 'Львів, вулиця Пекарська, 33',
-      price: 820,
-    },
-    {
-      name: 'Визначення антигену коронавірусу COVID-19',
-      lab: 'Лабораторія “Ескулаб”',
-      address: 'Львів, вулиця Городоцька, 35',
-      price: 295,
-    },
-    {
-      name: 'Антитромбін (активність)',
-      lab: 'Лабораторія “Синево”',
-      address: 'Київ, вулиця Василя Липківського, 16 Б',
-      price: 470,
-    },
-  ];
+  const [analyses, setAnalyses] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getHospitalLabServices();
+        const mapped = data.map(item => ({
+          name: item.LabTestInfo.name,
+          lab: item.Hospital.name,
+          address: item.Hospital.address,
+          price: Math.round(item.LabTestInfo.price), 
+        }));
+        setAnalyses(mapped);
+      } catch (error) {
+        console.error('Помилка при завантаженні аналізів:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -88,3 +88,4 @@ const PatientAnalyseOrder = () => {
 };
 
 export default PatientAnalyseOrder;
+
