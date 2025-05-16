@@ -1,44 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../../style/PatientDoctorAppointment.module.css';
-import { CITIES } from '../../constants/cities';
 import DoctorCard from '../../components/elements/DoctorCard';
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
-import iconSearch from '../../img/icons/search.png';
 
-import {
-  fetchAllDoctors,
-  fetchDoctorSpecializations,
-  fetchUniqueHospitalNames,
-} from '../../http/doctorAPI';
+import SearchByDocName from '../../components/elements/SearchByDocName';
+import SearchByHospital from '../../components/elements/SearchByHospital';
+import SearchBySpecialization from '../../components/elements/SearchBySpecialization';
+import SearchByCity from '../../components/elements/SearchByCity';
+
+import { fetchAllDoctors } from '../../http/doctorAPI';
 
 const PatientDoctorAppointment = () => {
   const [doctors, setDoctors] = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+
   const [searchName, setSearchName] = useState('');
   const [searchCity, setSearchCity] = useState('');
   const [searchHospital, setSearchHospital] = useState('');
   const [searchSpecialization, setSearchSpecialization] = useState('');
-  const [specializations, setSpecializations] = useState([]);
-  const [hospitals, setHospitals] = useState([]);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadDoctors = async () => {
       try {
-        const [doctorsData, specData, hospitalData] = await Promise.all([
-          fetchAllDoctors(),
-          fetchDoctorSpecializations(),
-          fetchUniqueHospitalNames(),
-        ]);
+        const doctorsData = await fetchAllDoctors();
         setDoctors(doctorsData);
         setFilteredDoctors(doctorsData);
-        setSpecializations(specData);
-        setHospitals(hospitalData);
       } catch (error) {
-        console.error("Помилка при завантаженні даних:", error);
+        console.error("Помилка при завантаженні лікарів:", error);
       }
     };
-    loadData();
+    loadDoctors();
   }, []);
 
   const handleSearch = () => {
@@ -72,54 +64,13 @@ const PatientDoctorAppointment = () => {
       <h1 className={styles.title}>Запис до лікаря</h1>
 
       <div className={styles.searchBlock}>
-        <div className={styles.searchFieldWrapper}>
-          <img src={iconSearch} alt="Search Icon" className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Введіть ім'я лікаря"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
-            className={styles.inputField}
-          />
-        </div>
+        <SearchByDocName value={searchName} onChange={setSearchName} />
 
         <div className={styles.selectGroup}>
-          <select
-            className={styles.select}
-            value={searchSpecialization}
-            onChange={(e) => setSearchSpecialization(e.target.value)}
-          >
-            <option value="">Категорія лікаря</option>
-            {specializations.map((spec, index) => (
-              <option key={index} value={spec}>{spec}</option>
-            ))}
-          </select>
-
-          <select
-            className={styles.select}
-            value={searchHospital}
-            onChange={(e) => setSearchHospital(e.target.value)}
-          >
-            <option value="">Лікарня</option>
-            {hospitals.map((hospital, index) => (
-              <option key={index} value={hospital}>{hospital}</option>
-            ))}
-          </select>
-
-          <select
-            className={styles.select}
-            value={searchCity}
-            onChange={(e) => setSearchCity(e.target.value)}
-          >
-            <option value="">Місто</option>
-            {CITIES.map((city) => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-
-          <button className={styles.searchButton} onClick={handleSearch}>
-            Знайти
-          </button>
+          <SearchBySpecialization value={searchSpecialization} onChange={setSearchSpecialization} />
+          <SearchByHospital value={searchHospital} onChange={setSearchHospital} />
+          <SearchByCity value={searchCity} onChange={setSearchCity} />
+          <button className={styles.searchButton} onClick={handleSearch}>Знайти</button>
         </div>
       </div>
 
@@ -139,3 +90,4 @@ const PatientDoctorAppointment = () => {
 };
 
 export default PatientDoctorAppointment;
+

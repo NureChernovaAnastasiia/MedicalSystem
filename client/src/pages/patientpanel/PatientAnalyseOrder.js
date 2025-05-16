@@ -1,39 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../../style/PatientAnalyseOrder.module.css';
 
-import iconSearch from '../../img/icons/search.png';
 import { getHospitalLabServices } from '../../http/analysisAPI';
 
-const AnalyseItem = ({ name, lab, address, price }) => (
-  <div className={styles.analyseItem}>
-    <span className={styles.analyseName}>{name}</span>
-    <span className={styles.labName}>{lab}</span>
-    <span className={styles.labAddress}>{address}</span>
-    <span className={styles.price}>{price} грн</span>
-    <button className={styles.orderButton}>Замовити</button>
-  </div>
-);
+import SearchByHospital from '../../components/elements/SearchByHospital';
+import SearchByCity from '../../components/elements/SearchByCity';
+import SearchByAnalyseName from '../../components/elements/SearchByAnalyseName';
+import SortByPrice from '../../components/elements/SortByPrice';
+import AnalyseItem from '../../components/elements/AnalyseItem'; 
 
 const PatientAnalyseOrder = () => {
   const [analyses, setAnalyses] = useState([]);
+  const [filteredAnalyses, setFilteredAnalyses] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedHospital, setSelectedHospital] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [sortOrder, setSortOrder] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getHospitalLabServices();
-        const mapped = data.map(item => ({
-          name: item.LabTestInfo.name,
-          lab: item.Hospital.name,
-          address: item.Hospital.address,
-          price: Math.round(item.LabTestInfo.price), 
-        }));
-        setAnalyses(mapped);
+        setAnalyses(data);
+        setFilteredAnalyses(data);
       } catch (error) {
         console.error('Помилка при завантаженні аналізів:', error);
       }
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    let filtered = analyses;
+
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(a =>
+        a.LabTestInfo?.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (selectedHospital) {
+      filtered = filtered.filter(a => a.Hospital?.name === selectedHospital);
+    }
+    if (selectedCity) {
+      filtered = filtered.filter(a =>
+        a.Hospital?.address?.toLowerCase().includes(selectedCity.toLowerCase())
+      );
+    }
+
+    if (sortOrder === 'asc') {
+      filtered = [...filtered].sort((a, b) => a.LabTestInfo.price - b.LabTestInfo.price);
+    } else if (sortOrder === 'desc') {
+      filtered = [...filtered].sort((a, b) => b.LabTestInfo.price - a.LabTestInfo.price);
+    }
+
+    setFilteredAnalyses(filtered);
+  }, [searchTerm, selectedHospital, selectedCity, sortOrder, analyses]);
 
   return (
     <div className={styles.container}>
@@ -44,24 +66,13 @@ const PatientAnalyseOrder = () => {
 
       <div className={styles.searchGroup}>
         <div className={styles.inputWrapper}>
-          <img src={iconSearch} alt="Search Icon" className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Введіть назву аналізу"
-          />
+          <SearchByAnalyseName value={searchTerm} onChange={setSearchTerm} />
         </div>
 
         <div className={styles.selectGroup}>
-          <select className={styles.select}>
-            <option>Місто</option>
-          </select>
-          <select className={styles.select}>
-            <option>Лікарня</option>
-          </select>
-          <select className={styles.select}>
-            <option>Сортувати за</option>
-          </select>
+          <SearchByCity value={selectedCity} onChange={setSelectedCity} />
+          <SearchByHospital value={selectedHospital} onChange={setSelectedHospital} />
+          <SortByPrice value={sortOrder} onChange={setSortOrder} />
         </div>
       </div>
 
@@ -73,14 +84,8 @@ const PatientAnalyseOrder = () => {
       </div>
 
       <div className={styles.analyseList}>
-        {analyses.map((analyse, index) => (
-          <AnalyseItem
-            key={index}
-            name={analyse.name}
-            lab={analyse.lab}
-            address={analyse.address}
-            price={analyse.price}
-          />
+        {filteredAnalyses.map((analyse, index) => (
+          <AnalyseItem key={index} analyse={analyse} />
         ))}
       </div>
     </div>

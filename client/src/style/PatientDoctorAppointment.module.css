@@ -1,131 +1,89 @@
 .container {
-    padding: 30px 60px;
-  }
-  
-  .title {
-    width: 100%;
-    text-align: left;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
-    font-size: 36px;
-    line-height: 44px;
-    color: #000;
-  }
-  
-  .searchBlock {
-    width: 100%;
-    max-width: 1458px;
-    margin: 0 auto 30px;
-    padding: 0;
-    background: #ffffff;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    box-sizing: border-box;
-  }
-  
-  .searchFieldWrapper {
-    position: relative;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .searchIcon {
-    position: absolute;
-    top: 50%;
-    left: 20px;
-    width: 30px;
-    height: 30px;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  
-  .inputField,
-  .select {
-    width: 100%;
-    padding: 12px 12px 12px 60px;
-    font-family: 'Montserrat', sans-serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 18px;
-    line-height: 1.75rem;
-    color: rgba(0, 0, 0, 0.6);
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 10px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .select {
-    padding: 12px;
-    min-width: 200px;
-    flex: 1 1 20%;
-    text-align: left;
-    color: #000;
-  }
-  
-  .inputField:hover,
-  .inputField:focus,
-  .select:hover,
-  .select:focus {
-    border-color: #00C3A1;
-    box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
-    outline: none;
-  }
-  
-  .selectGroup {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    box-sizing: border-box;
-  }
-  
-  .searchButton {
-    flex: 1 1 20%;
-    min-width: 180px;
-    padding: 12px;
-    background: rgba(0, 195, 161, 0.42);
-    border: none;
-    border-radius: 10px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 400;
-    font-size: 18px;
-    color: #333333;
-    cursor: pointer;
-    text-align: center;
-    box-sizing: border-box;
+  padding: 30px 60px;
+}
+
+.title {
+  width: 100%;
+  text-align: left;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 44px;
+  color: #000;
+}
+
+.searchBlock {
+  width: 100%;
+  max-width: 1458px;
+  margin: 0 auto 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.searchFieldWrapper {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.selectGroup {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  flex-wrap: nowrap;
+  box-sizing: border-box;
+}
+
+.searchButton {
+  flex: 1 1 20%;
+  min-width: 180px;
+  padding: 12px;
+  background: rgba(0, 195, 161, 0.42);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  color: #333333;
+  cursor: pointer;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.noResults {
+  margin-top: 60px;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-size: 24px;
+  text-align: center;
+  font-weight: 100;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 20px 30px;
   }
 
-  .noResults{
-    margin-top: 60px;
-    font-family: 'Montserrat', sans-serif;
-    font-style: italic;
-    font-size: 24px;
-    text-align: center;
-    font-weight: 100;
+  .title {
+    font-size: 30px;
+    line-height: 38px;
   }
-  
-  @media (max-width: 1024px) {
-    .container {
-      padding: 20px 30px;
-    }
-  
-    .title {
-      font-size: 30px;
-      line-height: 38px;
-    }
-  
-    .searchBlock {
-      padding: 20px;
-    }
-  
-    .searchButton {
-      font-size: 16px;
-      min-width: 150px;
-    }
+
+  .searchBlock {
+    padding: 20px;
   }
-  
- 
+
+  .selectGroup {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .searchButton {
+    font-size: 16px;
+    min-width: 150px;
+  }
+}

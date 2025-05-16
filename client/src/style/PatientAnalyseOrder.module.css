@@ -40,64 +40,11 @@
     box-sizing: border-box;
   }
   
-  .searchIcon {
-    position: absolute;
-    top: 50%;
-    left: 20px;
-    width: 30px;
-    height: 30px;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  
-  .searchInput {
-    width: 100%;
-    padding: 12px 12px 12px 60px;
-    font-family: 'Montserrat', sans-serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 18px;
-    line-height: 1.75rem;
-    color: rgba(0, 0, 0, 0.6);
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 10px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
   .selectGroup {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
     gap: 20px;
-    flex-wrap: wrap;
-  }
-  
-  .select {
-    width: 25%;
-    min-width: 200px;
-    padding: 12px;
-    font-family: 'Montserrat', sans-serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 18px;
-    line-height: 1.75rem;
-    color: rgba(0, 0, 0, 0.6);
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 10px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    color: #000;
-  }
-  
-  .searchInput:hover,
-  .searchInput:focus,
-  .select:hover,
-  .select:focus {
-    border-color: #00C3A1;
-    box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
-    outline: none;
+    width: 100%;
   }
   
   .tableHeader {
@@ -115,60 +62,6 @@
     flex-direction: column;
   }
   
-  .analyseItem {
-    display: grid;
-    grid-template-columns: 2fr 2fr 2fr 0.5fr 1fr; 
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: #fff;
-    border-bottom: 1px solid rgba(0, 195, 161, 0.42);
-  }
-  
-  .analyseName {
-    font-weight: 600;
-    color: #00C3A1;
-    font-size: 1.2rem;
-    word-break: break-word; 
-  }
-  
-  .labName, .labAddress {
-    font-weight: 300;
-    font-style: italic;
-    color: #000;
-    font-size: 1rem;
-    word-break: break-word;
-  }
-  
-  .price {
-    font-weight: 300;
-    font-style: italic;
-    font-size: 1.2rem;
-    color: #000;
-    text-align: center;
-  }
-  
-  .orderButton {
-    padding: 0.5rem 1rem;
-    background: rgba(0, 195, 161, 0.42);
-    color: #fff;
-    font-weight: 600;
-    font-style: italic;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-    width: 100%;
-    max-width: 150px;
-    height: 50px;
-    justify-self: center; 
-  }
-  
-  .orderButton:hover {
-    background: #00c3a1;
-  }
-  
   @media (max-width: 900px) {
     .title {
       font-size: 24px;
@@ -181,6 +74,12 @@
   
     .searchInput, .select {
       font-size: 14px;
+    }
+
+    .selectGroup {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
     }
   
     .tableHeader {
