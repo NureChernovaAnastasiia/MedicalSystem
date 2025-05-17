@@ -34,18 +34,18 @@ async getById(req, res, next) {
 
   // 🔍 Отримати всі послуги для конкретної лікарні
   async getByHospital(req, res, next) {
-    try {
-      const { hospitalId } = req.params;
-      const items = await HospitalMedicalService.findAll({
-        where: { hospital_id: hospitalId },
-        include: [MedicalServiceInfo, Doctor],
-      });
-      return res.json(items);
-    } catch (e) {
-      console.error('getByHospital error:', e);
-      return next(ApiError.internal('Не вдалося отримати послуги для лікарні'));
-    }
+  try {
+    const { hospitalId } = req.params;
+    const items = await HospitalMedicalService.findAll({
+      where: { hospital_id: hospitalId },
+      include: [Hospital, MedicalServiceInfo, Doctor], // Додано Hospital
+    });
+    return res.json(items);
+  } catch (e) {
+    console.error('getByHospital error:', e);
+    return next(ApiError.internal('Не вдалося отримати послуги для лікарні'));
   }
+}
 
   // 🔍 Отримати всі послуги для лікаря
   async getByDoctor(req, res, next) {
