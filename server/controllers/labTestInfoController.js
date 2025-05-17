@@ -3,37 +3,41 @@ const ApiError = require('../error/ApiError');
 const { Op } = require('sequelize');
 
 class LabTestInfoController {
-  // 🔓 Отримати всі тести
+  // 🔓 Get all lab tests (optionally filter by name and is_ready)
   async getAll(req, res, next) {
     try {
-      const { name } = req.query;
+      const { name, is_ready } = req.query;
       const whereClause = {};
 
       if (name) {
         whereClause.name = { [Op.iLike]: `%${name}%` };
       }
 
+      if (typeof is_ready !== 'undefined') {
+        whereClause.is_ready = is_ready === 'true';
+      }
+
       const tests = await LabTestInfo.findAll({ where: whereClause });
       return res.json(tests);
     } catch (e) {
       console.error('getAll error:', e);
-      return next(ApiError.internal('Не вдалося отримати список тестів'));
+      return next(ApiError.internal('Failed to fetch lab tests'));
     }
   }
 
-  // 🔓 Отримати тест по ID
+  // 🔓 Get single lab test by ID
   async getById(req, res, next) {
     try {
       const test = await LabTestInfo.findByPk(req.params.id);
-      if (!test) return next(ApiError.notFound('Тест не знайдено'));
+      if (!test) return next(ApiError.notFound('Lab test not found'));
       return res.json(test);
     } catch (e) {
       console.error('getById error:', e);
-      return next(ApiError.internal('Помилка отримання тесту'));
+      return next(ApiError.internal('Error fetching lab test'));
     }
   }
 
-  // 🔓 Отримати всі тести доступні в лікарні
+  // 🔓 Get all lab tests available in a specific hospital
   async getByHospital(req, res, next) {
     try {
       const { hospitalId } = req.params;
@@ -43,62 +47,62 @@ class LabTestInfoController {
         include: [LabTestInfo],
       });
 
-      const tests = services.map(s => s.LabTestInfo);
-      return res.json(tests);
+      const result = services.map(s => s.LabTestInfo);
+      return res.json(result);
     } catch (e) {
       console.error('getByHospital error:', e);
-      return next(ApiError.internal('Не вдалося отримати тести для лікарні'));
+      return next(ApiError.internal('Failed to fetch lab tests for hospital'));
     }
   }
 
-  // 🔐 Створити (Admin only)
+  // 🔐 Create lab test (Admin only)
   async create(req, res, next) {
     try {
       if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Доступ заборонено'));
+        return next(ApiError.forbidden('Access denied'));
       }
 
       const created = await LabTestInfo.create(req.body);
-      return res.json(created);
+      return res.status(201).json(created);
     } catch (e) {
       console.error('create error:', e);
-      return next(ApiError.badRequest('Не вдалося створити тест'));
+      return next(ApiError.badRequest('Failed to create lab test'));
     }
   }
 
-  // 🔐 Оновити (Admin only)
+  // 🔐 Update lab test (Admin only)
   async update(req, res, next) {
     try {
       if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Доступ заборонено'));
+        return next(ApiError.forbidden('Access denied'));
       }
 
       const test = await LabTestInfo.findByPk(req.params.id);
-      if (!test) return next(ApiError.notFound('Тест не знайдено'));
+      if (!test) return next(ApiError.notFound('Lab test not found'));
 
       await test.update(req.body);
       return res.json(test);
     } catch (e) {
       console.error('update error:', e);
-      return next(ApiError.internal('Помилка оновлення тесту'));
+      return next(ApiError.internal('Failed to update lab test'));
     }
   }
 
-  // 🔐 Видалити (Admin only)
+  // 🔐 Delete lab test (Admin only)
   async delete(req, res, next) {
     try {
       if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Доступ заборонено'));
+        return next(ApiError.forbidden('Access denied'));
       }
 
       const test = await LabTestInfo.findByPk(req.params.id);
-      if (!test) return next(ApiError.notFound('Тест не знайдено'));
+      if (!test) return next(ApiError.notFound('Lab test not found'));
 
       await test.destroy();
-      return res.json({ message: 'Тест видалено' });
+      return res.json({ message: 'Lab test deleted' });
     } catch (e) {
       console.error('delete error:', e);
-      return next(ApiError.internal('Помилка видалення тесту'));
+      return next(ApiError.internal('Failed to delete lab test'));
     }
   }
 }
