@@ -14,13 +14,13 @@ import { PATIENT_EDITPERSONALINFO_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PRESC
 
 import { Context } from '../../index'; 
 import { fetchPatientByUserId } from '../../http/patientAPI';
-import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
+//import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
 
 const PatientMedCard = () => {
   const { user } = useContext(Context);
   const [patient, setPatient] = useState(null);
-  const [diagnoses, setDiagnoses] = useState([]);
+  const [diagnoses, /*setDiagnoses*/] = useState([]);
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
