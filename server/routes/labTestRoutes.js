@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const labTestController = require('../controllers/labTestController');
+const authMiddleware = require('../middleware/authMiddleware');
+
+router.use(authMiddleware);
 
 router.get('/', labTestController.getAll);
 router.get('/:id', labTestController.getById);
