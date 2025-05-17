@@ -161,7 +161,13 @@ strong {
 }
 
 .diagnosisText {
+  font-size: 22px;
+  color: #333333;
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80%; 
 }
 
 .diagnosisDate {

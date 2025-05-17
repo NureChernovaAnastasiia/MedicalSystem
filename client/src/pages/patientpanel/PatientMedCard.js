@@ -10,17 +10,22 @@ import iconAddress from '../../img/icons/address.png';
 import iconHospital from '../../img/icons/hospital.png';
 import photo from '../../img/Woman1.jpg';
 
-import { PATIENT_EDITPERSONALINFO_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE } from '../../utils/consts';
+import {
+  PATIENT_EDITPERSONALINFO_ROUTE,
+  PATIENT_MEDDETAIL_ROUTE,
+  PATIENT_MEDRECORDS_ROUTE,
+  PATIENT_PRESCRIPTIONS_ROUTE
+} from '../../utils/consts';
 
 import { Context } from '../../index'; 
 import { fetchPatientByUserId } from '../../http/patientAPI';
-//import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
+import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
 
 const PatientMedCard = () => {
   const { user } = useContext(Context);
   const [patient, setPatient] = useState(null);
-  const [diagnoses, /*setDiagnoses*/] = useState([]);
+  const [diagnoses, setDiagnoses] = useState([]);
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
@@ -30,12 +35,11 @@ const PatientMedCard = () => {
         const data = await fetchPatientByUserId(user.user.id);
         setPatient(data);
 
-        /*const medicalRecords = await fetchMedicalRecordsByPatientId(data.id);
-        setDiagnoses(medicalRecords);*/
+        const medicalRecords = await fetchMedicalRecordsByPatientId(data.id);
+        setDiagnoses(medicalRecords);
 
         const prescriptions = await fetchPrescriptionsByPatientId(data.id);
         setRecipes(prescriptions);
-
       } catch (error) {
         console.error("Помилка при отриманні даних:", error);
       }
@@ -48,13 +52,21 @@ const PatientMedCard = () => {
     return <div>Завантаження даних пацієнта...</div>;
   }
 
+  const sortedDiagnoses = Array.isArray(diagnoses)
+    ? [...diagnoses].sort((a, b) => new Date(b.record_date) - new Date(a.record_date))
+    : [];
+
+  const sortedRecipes = Array.isArray(recipes)
+    ? [...recipes].sort((a, b) => new Date(b.prescription_date) - new Date(a.prescription_date))
+    : [];
+
   const patientInfo = [
     { icon: iconDate, label: 'Дата народження:', value: patient.date_of_birth || 'Немає даних' },
     { icon: iconGender, label: 'Стать:', value: patient.gender || 'Немає даних' },
     { icon: iconTelephone, label: 'Телефон:', value: patient.phone || 'Немає даних' },
     { icon: iconEmail, label: 'Email:', value: patient.email || 'Немає даних' },
     { icon: iconAddress, label: 'Адреса:', value: patient.address || 'Немає даних' },
-    { icon: iconHospital, label: 'Облік у лікарні:', value: patient.hospital_name || 'Немає даних' },
+    { icon: iconHospital, label: 'Облік у лікарні:', value: patient.Hospital?.name || 'Немає даних' },
   ];
 
   return (
@@ -75,7 +87,9 @@ const PatientMedCard = () => {
           </div>
 
           <div className={styles.rightSide}>
-            <h2 className={styles.name}>{`${patient.first_name} ${patient.last_name} ${patient.middle_name || ''}`.trim()}</h2>
+            <h2 className={styles.name}>
+              {`${patient.first_name} ${patient.last_name} ${patient.middle_name || ''}`.trim()}
+            </h2>
             {patientInfo.map((info, index) => (
               <div key={index} className={styles.infoGroup}>
                 <img src={info.icon} alt="icon" className={styles.icon} />
@@ -91,12 +105,14 @@ const PatientMedCard = () => {
       <div className={styles.contentRow}>
         <div className={styles.diagnosisColumn}>
           <h2 className={styles.sectionTitle}>Діагнози</h2>
-          {diagnoses.length === 0 && <p>Діагнози відсутні</p>}
-          {diagnoses.map((diagnosis, index) => (
+          {sortedDiagnoses.length === 0 && <p>Діагнози відсутні</p>}
+          {sortedDiagnoses.slice(0, 4).map((diagnosis, index) => (
             <div key={index} className={styles.diagnosisItem}>
               <p className={styles.diagnosisText}>{diagnosis.diagnosis}</p>
-              <p className={styles.diagnosisDate}>{new Date(diagnosis.record_date).toLocaleDateString('uk-UA')}</p>
-              <NavLink to="/diagnosis-details" className={styles.detailsButton}>
+              <p className={styles.diagnosisDate}>
+                {new Date(diagnosis.record_date).toLocaleDateString('uk-UA')}
+              </p>
+              <NavLink to={PATIENT_MEDDETAIL_ROUTE} className={styles.detailsButton}>
                 Детальніше
               </NavLink>
             </div>
@@ -108,9 +124,9 @@ const PatientMedCard = () => {
 
         <div className={styles.recipeColumn}>
           <h2 className={styles.sectionTitle}>Рецепти</h2>
-          {recipes.length === 0 && <p>Рецепти відсутні</p>}
+          {sortedRecipes.length === 0 && <p>Рецепти відсутні</p>}
           <div className={styles.recipeGrid}>
-            {recipes.slice(0, 6).map((recipe, index) => (
+            {sortedRecipes.slice(0, Math.max(1, diagnoses.length+2)).map((recipe, index) => (
               <div key={index} className={styles.recipeItem}>{recipe.medication}</div>
             ))}
           </div>
