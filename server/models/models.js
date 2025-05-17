@@ -111,7 +111,7 @@ const Patient = sequelize.define("Patient", {
   hospital_id: { type: DataTypes.INTEGER, allowNull: false },
   doctor_id: {
   type: DataTypes.INTEGER,
-  allowNull: true, // ← Тимчасово дозволити NULL
+  allowNull: true, 
   references: {
     model: 'Doctors',
     key: 'id'
@@ -167,13 +167,15 @@ const Appointment = sequelize.define("Appointment", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   patient_id: { type: DataTypes.INTEGER, allowNull: false },
   doctor_id: { type: DataTypes.INTEGER, allowNull: false },
-  doctor_schedule_id: { type: DataTypes.INTEGER, allowNull: false },
+  doctor_schedule_id: { type: DataTypes.INTEGER, allowNull: true },
   appointment_date: { type: DataTypes.DATEONLY, allowNull: false },
   status: {
     type: DataTypes.ENUM("Scheduled", "Completed", "Cancelled"),
     defaultValue: "Scheduled",
   },
-  notes: { type: DataTypes.TEXT }
+  notes: { type: DataTypes.TEXT },
+  lab_test_schedule_id: { type: DataTypes.INTEGER, allowNull: true },
+  medical_service_schedule_id: { type: DataTypes.INTEGER, allowNull: true }
 });
 
 // Medical Record
@@ -473,6 +475,29 @@ Patient.belongsTo(Doctor, { foreignKey: "doctor_id" });
 
 MedicalRecord.hasMany(Prescription, { foreignKey: "medical_record_id", onDelete: "SET NULL" });
 Prescription.belongsTo(MedicalRecord, { foreignKey: "medical_record_id" })
+
+// Hospital ↔ HospitalMedicalService
+Hospital.hasMany(HospitalMedicalService, { foreignKey: 'hospital_id' });
+HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
+
+// Doctor ↔ HospitalMedicalService
+Doctor.hasMany(HospitalMedicalService, { foreignKey: 'doctor_id' });
+HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
+
+// MedicalServiceInfo ↔ HospitalMedicalService
+MedicalServiceInfo.hasMany(HospitalMedicalService, { foreignKey: 'medical_service_info_id' });
+HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id' });
+
+HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
+HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
+
+Appointment.belongsTo(LabTestSchedule, { foreignKey: 'lab_test_schedule_id' });
+LabTestSchedule.hasMany(Appointment, { foreignKey: 'lab_test_schedule_id' });
+
+Appointment.belongsTo(MedicalServiceSchedule, { foreignKey: 'medical_service_schedule_id' });
+MedicalServiceSchedule.hasMany(Appointment, { foreignKey: 'medical_service_schedule_id' });
+
+
 
 module.exports = {
   User,
