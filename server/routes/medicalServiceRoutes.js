@@ -1,10 +1,19 @@
-const router = require("express").Router();
-const controller = require("../controllers/medicalServiceController");
+const express = require("express");
+const router = express.Router();
+
+const medicalServiceController = require("../controllers/medicalServiceController"); // ✅ Ім'я відповідає файлу
+
 const authMiddleware = require("../middleware/authMiddleware");
-const checkRole = require("../middleware/checkRoleMiddleware");
+const roleMiddleware = require("../middleware/checkRoleMiddleware");
 
 router.use(authMiddleware);
-router.post("/", checkRole("Patient", "Admin", "Doctor"), controller.book);
-router.get("/", checkRole("Doctor", "Admin"), controller.getAll);
+
+router.get('/:id/pdf', roleMiddleware('Admin', 'Doctor', 'Patient'), medicalServiceController.downloadPDF);
+router.get('/patient/:patientId', medicalServiceController.getByPatient);
+router.get('/:id', medicalServiceController.getById);
+router.get('/', roleMiddleware('Admin', 'Doctor'), medicalServiceController.getAll);
+router.post('/', roleMiddleware('Admin', 'Doctor'), medicalServiceController.create);
+router.put('/:id', roleMiddleware('Admin', 'Doctor'), medicalServiceController.update);
+router.delete('/:id', roleMiddleware('Admin'), medicalServiceController.delete);
 
 module.exports = router;
