@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from '../../style/PatientMedCard.module.css';
 
@@ -9,34 +9,54 @@ import iconEmail from '../../img/icons/email.png';
 import iconAddress from '../../img/icons/address.png';
 import iconHospital from '../../img/icons/hospital.png';
 import photo from '../../img/Woman1.jpg';
+
 import { PATIENT_EDITPERSONALINFO_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE } from '../../utils/consts';
 
-const patientInfo = [
-  { icon: iconDate, label: 'Дата народження:', value: '12.08.2004' },
-  { icon: iconGender, label: 'Стать:', value: 'Жіноча' },
-  { icon: iconTelephone, label: 'Телефон:', value: '+380671234567' },
-  { icon: iconEmail, label: 'Email:', value: 'anastasiya.koval@gmail.com' },
-  { icon: iconAddress, label: 'Адреса:', value: 'м. Київ, Україна, вул. Лесі Українки, 25' },
-  { icon: iconHospital, label: 'Облік у лікарні:', value: 'Амбулаторія сімейної медицини "Цінність"' },
-];
-
-const diagnoses = [
-  { text: 'Хронічний бронхіт', date: '20.02.2025' },
-  { text: 'Гастрит', date: '17.10.2023' },
-  { text: 'Гіпертонія', date: '03.03.2023' },
-  { text: 'Остеохондроз ший...', date: '28.05.2024' },
-];
-
-const recipes = [
-  'Парацетамол',
-  'Амоксицилін',
-  'Ібупрофен',
-  'Но-шпа',
-  'Лоратадин',
-  'Ренні',
-];
+import { Context } from '../../index'; 
+import { fetchPatientByUserId } from '../../http/patientAPI';
+import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
+import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
 
 const PatientMedCard = () => {
+  const { user } = useContext(Context);
+  const [patient, setPatient] = useState(null);
+  const [diagnoses, setDiagnoses] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() => {
+    const getPatientData = async () => {
+      if (!user?.user?.id) return;
+      try {
+        const data = await fetchPatientByUserId(user.user.id);
+        setPatient(data);
+
+        /*const medicalRecords = await fetchMedicalRecordsByPatientId(data.id);
+        setDiagnoses(medicalRecords);*/
+
+        const prescriptions = await fetchPrescriptionsByPatientId(data.id);
+        setRecipes(prescriptions);
+
+      } catch (error) {
+        console.error("Помилка при отриманні даних:", error);
+      }
+    };
+
+    getPatientData();
+  }, [user]);
+
+  if (!patient) {
+    return <div>Завантаження даних пацієнта...</div>;
+  }
+
+  const patientInfo = [
+    { icon: iconDate, label: 'Дата народження:', value: patient.date_of_birth || 'Немає даних' },
+    { icon: iconGender, label: 'Стать:', value: patient.gender || 'Немає даних' },
+    { icon: iconTelephone, label: 'Телефон:', value: patient.phone || 'Немає даних' },
+    { icon: iconEmail, label: 'Email:', value: patient.email || 'Немає даних' },
+    { icon: iconAddress, label: 'Адреса:', value: patient.address || 'Немає даних' },
+    { icon: iconHospital, label: 'Облік у лікарні:', value: patient.hospital_name || 'Немає даних' },
+  ];
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Моя медична картка</h1>
@@ -55,7 +75,7 @@ const PatientMedCard = () => {
           </div>
 
           <div className={styles.rightSide}>
-            <h2 className={styles.name}>Коваль Анастасія Володимирівна</h2>
+            <h2 className={styles.name}>{`${patient.first_name} ${patient.last_name} ${patient.middle_name || ''}`.trim()}</h2>
             {patientInfo.map((info, index) => (
               <div key={index} className={styles.infoGroup}>
                 <img src={info.icon} alt="icon" className={styles.icon} />
@@ -71,10 +91,11 @@ const PatientMedCard = () => {
       <div className={styles.contentRow}>
         <div className={styles.diagnosisColumn}>
           <h2 className={styles.sectionTitle}>Діагнози</h2>
+          {diagnoses.length === 0 && <p>Діагнози відсутні</p>}
           {diagnoses.map((diagnosis, index) => (
             <div key={index} className={styles.diagnosisItem}>
-              <p className={styles.diagnosisText}>{diagnosis.text}</p>
-              <p className={styles.diagnosisDate}>{diagnosis.date}</p>
+              <p className={styles.diagnosisText}>{diagnosis.diagnosis}</p>
+              <p className={styles.diagnosisDate}>{new Date(diagnosis.record_date).toLocaleDateString('uk-UA')}</p>
               <NavLink to="/diagnosis-details" className={styles.detailsButton}>
                 Детальніше
               </NavLink>
@@ -87,9 +108,10 @@ const PatientMedCard = () => {
 
         <div className={styles.recipeColumn}>
           <h2 className={styles.sectionTitle}>Рецепти</h2>
+          {recipes.length === 0 && <p>Рецепти відсутні</p>}
           <div className={styles.recipeGrid}>
-            {recipes.map((recipe, index) => (
-              <div key={index} className={styles.recipeItem}>{recipe}</div>
+            {recipes.slice(0, 6).map((recipe, index) => (
+              <div key={index} className={styles.recipeItem}>{recipe.medication}</div>
             ))}
           </div>
           <NavLink to={PATIENT_PRESCRIPTIONS_ROUTE} className={styles.viewAll}>
