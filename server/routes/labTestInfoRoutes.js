@@ -2,13 +2,16 @@ const Router = require('express');
 const router = new Router();
 const labTestInfoController = require('../controllers/labTestInfoController');
 const authMiddleware = require('../middleware/authMiddleware');
+const checkRoleMiddleware = require('../middleware/checkRoleMiddleware');
 
-router.get('/', labTestInfoController.getAll); // 🔓 Public
-router.get('/:id', labTestInfoController.getById); // 🔓 Public
-router.get('/hospital/:hospitalId', labTestInfoController.getByHospital); // 🔓 Public
+// 🔓 Public routes
+router.get('/', labTestInfoController.getAll);
+router.get('/:id', labTestInfoController.getById);
+router.get('/hospital/:hospitalId', labTestInfoController.getByHospital);
 
-router.post('/', authMiddleware, labTestInfoController.create); // 🔐 Admin
-router.put('/:id', authMiddleware, labTestInfoController.update); // 🔐 Admin
-router.delete('/:id', authMiddleware, labTestInfoController.delete); // 🔐 Admin
+// 🔐 Admin routes
+router.post('/', authMiddleware, checkRoleMiddleware('Admin'), labTestInfoController.create);
+router.put('/:id', authMiddleware, checkRoleMiddleware('Admin'), labTestInfoController.update);
+router.delete('/:id', authMiddleware, checkRoleMiddleware('Admin'), labTestInfoController.delete);
 
 module.exports = router;
