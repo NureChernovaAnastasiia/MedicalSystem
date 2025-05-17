@@ -8,7 +8,6 @@ import iconTelephone from '../../img/icons/telephone.png';
 import iconEmail from '../../img/icons/email.png';
 import iconAddress from '../../img/icons/address.png';
 import iconHospital from '../../img/icons/hospital.png';
-import photo from '../../img/Woman1.jpg';
 
 import {
   PATIENT_EDITPERSONALINFO_ROUTE,
@@ -79,7 +78,11 @@ const PatientMedCard = () => {
       <div className={styles.cardShadow}>
         <div className={styles.card}>
           <div className={styles.leftSide}>
-            <img src={photo} alt="Patient" className={styles.profileImage} />
+            {patient.photo ? (
+              <img src={patient.photo} alt="Patient" className={styles.profileImage} />
+            ) : (
+              <div className={styles.noPhoto}>Немає фото</div>
+            )}
             <NavLink to={PATIENT_EDITPERSONALINFO_ROUTE} className={styles.editWarning}>
               <span className={styles.exclamation}>!</span>
               <span className={styles.editText}>Редагувати дані</span>

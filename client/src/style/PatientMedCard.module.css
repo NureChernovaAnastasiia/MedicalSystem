@@ -58,6 +58,21 @@
   margin-top: 20px;
 }
 
+.noPhoto {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  color: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  text-align: center;
+  border: 1px dashed #ccc;
+}
+
 .editWarning {
   display: flex;
   align-items: center;
@@ -262,7 +277,8 @@ strong {
     align-items: center;
   }
 
-  .profileImage {
+  .profileImage,
+  .noPhoto {
     width: 150px;
     height: 150px;
     margin-top: 10px;
