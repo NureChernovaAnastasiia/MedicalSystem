@@ -14,6 +14,23 @@ class HospitalMedicalServiceController {
       return next(ApiError.internal('Не вдалося отримати список призначених послуг'));
     }
   }
+// 🔍 Отримати конкретний запис за ID
+async getById(req, res, next) {
+  try {
+    const item = await HospitalMedicalService.findByPk(req.params.id, {
+      include: [Hospital, MedicalServiceInfo, Doctor],
+    });
+
+    if (!item) {
+      return next(ApiError.notFound('Запис не знайдено'));
+    }
+
+    return res.json(item);
+  } catch (e) {
+    console.error('getById error:', e);
+    return next(ApiError.internal('Помилка отримання запису'));
+  }
+}
 
   // 🔍 Отримати всі послуги для конкретної лікарні
   async getByHospital(req, res, next) {
