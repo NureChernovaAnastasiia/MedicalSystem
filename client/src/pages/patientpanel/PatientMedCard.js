@@ -93,8 +93,8 @@ const PatientMedCard = () => {
       <div className={styles.cardShadow}>
         <div className={styles.card}>
           <div className={styles.leftSide}>
-            {patient.photo ? (
-              <img src={patient.photo} alt="Patient" className={styles.profileImage} />
+            {patient.photo_url ? (
+              <img src={patient.photo_url} alt="Patient" className={styles.profileImage} />
             ) : (
               <div className={styles.noPhoto}>Немає фото</div>
             )}

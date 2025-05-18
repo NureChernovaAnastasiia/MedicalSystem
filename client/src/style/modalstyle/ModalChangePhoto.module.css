@@ -26,8 +26,8 @@
 .title {
   font-family: 'Montserrat', sans-serif;
   font-style: italic;
-  font-weight: 600;
-  font-size: 2rem;
+  font-weight: 500;
+  font-size: 30px;
   color: #00C3A1;
   margin: 1px 0 30px;
   text-align: center;
@@ -79,7 +79,7 @@
 .leftControls {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 40px;
   flex: 1;
   max-width: 300px;
 }

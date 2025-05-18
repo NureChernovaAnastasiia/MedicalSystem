@@ -29,3 +29,12 @@ export const updatePatientData = async (id, updatedData) => {
     throw error;
   }
 };
+
+export const updatePatientPhoto = async (id, photoUrl) => {
+  try {
+    const { data } = await $authHost.put(`api/patients/${id}/photo`, { photo_url: photoUrl });
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};

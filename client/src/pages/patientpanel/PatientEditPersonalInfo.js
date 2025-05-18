@@ -24,7 +24,7 @@ const PatientEditPersonalInfo = () => {
     email: patient.email || '',
     phone: patient.phone || '',
     address: patient.address || '',
-    photoUrl: patient.photo_url || '',
+    photo_url: patient.photo_url || '',
     bloodType: patient.blood_type || '',
     chronicConditions: patient.chronic_conditions || '',
     allergies: patient.allergies || '',
@@ -34,8 +34,8 @@ const PatientEditPersonalInfo = () => {
   const [error, setError] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [photoUrlInput, setPhotoUrlInput] = useState(formData.photoUrl);
-  const [photoPreview, setPhotoPreview] = useState(formData.photoUrl);
+  const [photoUrlInput, setPhotoUrlInput] = useState(formData.photo_url);
+  const [photoPreview, setPhotoPreview] = useState(formData.photo_url);
 
   const handleChange = ({ target: { name, value } }) => setFormData(f => ({ ...f, [name]: value }));
 
@@ -57,8 +57,8 @@ const PatientEditPersonalInfo = () => {
   };
 
   const openModal = () => {
-    setPhotoUrlInput(formData.photoUrl);
-    setPhotoPreview(formData.photoUrl);
+    setPhotoUrlInput(formData.photo_url);
+    setPhotoPreview(formData.photo_url);
     setIsModalOpen(true);
   };
 
@@ -70,8 +70,12 @@ const PatientEditPersonalInfo = () => {
   };
 
   const handleUpload = () => {
-    setFormData(f => ({ ...f, photoUrl: photoUrlInput }));
+    setFormData(f => ({ ...f, photo_url: photoUrlInput }));
     setIsModalOpen(false);
+  };
+
+  const handlePhotoUpdated = (newPhotoUrl) => {
+    setFormData(f => ({ ...f, photo_url: newPhotoUrl }));
   };
 
   const personalFields = [
@@ -131,8 +135,8 @@ const PatientEditPersonalInfo = () => {
             </div>
 
             <div className={styles.photoSection}>
-              {formData.photoUrl ? (
-                <img src={formData.photoUrl} alt="Patient" className={styles.profileImage} />
+              {formData.photo_url ? (
+                <img src={formData.photo_url} alt="Patient" className={styles.profileImage} />
               ) : (
                 <div className={styles.noPhoto}>Немає фото</div>
               )}
@@ -211,11 +215,13 @@ const PatientEditPersonalInfo = () => {
 
       {isModalOpen && (
         <ModalChangePhoto
+          patientId={patient.id} 
           photoPreview={photoPreview}
-          photoUrl={photoUrlInput}
+          initialPhotoUrl={photoUrlInput}
           onClose={closeModal}
           onChangePhotoUrl={handleChangePhotoUrl}
           onUpload={handleUpload}
+          onPhotoUpdated={handlePhotoUpdated}
         />
       )}
     </>
@@ -223,4 +229,3 @@ const PatientEditPersonalInfo = () => {
 };
 
 export default PatientEditPersonalInfo;
-
