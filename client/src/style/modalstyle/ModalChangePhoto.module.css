@@ -52,8 +52,14 @@
   border: 1px solid rgba(0,0,0,0.24);
   border-radius: 0.625rem;
   box-sizing: border-box;
-  outline-offset: 2px;
-  outline-color: #00c3a1;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:hover,
+.input:focus {
+  border-color: #00C3A1;
+  box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
+  outline: none;
 }
 
 .previewSection {

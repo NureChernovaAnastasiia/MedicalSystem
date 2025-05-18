@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../../style/PatientEditPersonalInfo.module.css';
 
-import iconContacts from '../../img/icons/contacts.png';
-import iconHealth from '../../img/icons/medical.png';
-import iconUnlock from '../../img/icons/unlock.png';
+import { genderMap } from '../../constants/gender';
+import { BLOOD_GROUPS } from '../../constants/bloodType';
+import { iconContacts,  iconHealth,  iconUnlock } from '../../utils/icons';
 
 import { updatePatientData } from '../../http/patientAPI';
 
@@ -128,8 +128,11 @@ const PatientEditPersonalInfo = () => {
                   className={styles.inputBox}
                 >
                   <option value="">Не визначено</option>
-                  <option value="Male">Чоловіча</option>
-                  <option value="Female">Жіноча</option>
+                  {Object.entries(genderMap).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -179,10 +182,7 @@ const PatientEditPersonalInfo = () => {
                   className={styles.inputBox}
                 >
                   <option value="">Не визначено</option>
-                  {[
-                    "A(II) Rh+","A(II) Rh-","B(III) Rh+","B(III) Rh-",
-                    "AB(IV) Rh+","AB(IV) Rh-","0(I) Rh+","0(I) Rh-"
-                  ].map(bt => (
+                  {BLOOD_GROUPS.map(bt => (
                     <option key={bt} value={bt}>{bt}</option>
                   ))}
                 </select>

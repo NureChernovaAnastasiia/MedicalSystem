@@ -1,46 +1,19 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { NavLink } from 'react-router-dom';
 import styles from '../../style/PatientMedCard.module.css';
-
-import iconDate from '../../img/icons/calendar.png';
-import iconGender from '../../img/icons/gender.png';
-import iconTelephone from '../../img/icons/telephone.png';
-import iconEmail from '../../img/icons/email.png';
-import iconAddress from '../../img/icons/address.png';
-import iconHospital from '../../img/icons/hospital.png';
-
-import {
-  PATIENT_EDITPERSONALINFO_ROUTE,
-  PATIENT_MEDDETAIL_ROUTE,
-  PATIENT_MEDRECORDS_ROUTE,
-  PATIENT_PRESCRIPTIONS_ROUTE
-} from '../../utils/consts';
-
-import { Context } from '../../index'; 
+import { Context } from '../../index';
 import { fetchPatientByUserId } from '../../http/patientAPI';
 import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
+
+import PatientCard from '../../components/elements/PatientCard';
+import DiagnosisPreview from '../../components/elements/DiagnosisPreview';
+import PrescriptionPreview from '../../components/elements/PrescriptionPreview';
 
 const PatientMedCard = () => {
   const { user } = useContext(Context);
   const [patient, setPatient] = useState(null);
   const [diagnoses, setDiagnoses] = useState([]);
   const [recipes, setRecipes] = useState([]);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'Немає даних';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('uk-UA', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
-
-  const genderMap = {
-    male: 'Чоловіча',
-    female: 'Жіноча',
-  };
 
   useEffect(() => {
     const getPatientData = async () => {
@@ -66,23 +39,6 @@ const PatientMedCard = () => {
     return <div>Завантаження даних пацієнта...</div>;
   }
 
-  const sortedDiagnoses = Array.isArray(diagnoses)
-    ? [...diagnoses].sort((a, b) => new Date(b.record_date) - new Date(a.record_date))
-    : [];
-
-  const sortedRecipes = Array.isArray(recipes)
-    ? [...recipes].sort((a, b) => new Date(b.prescription_date) - new Date(a.prescription_date))
-    : [];
-
-  const patientInfo = [
-    { icon: iconDate, label: 'Дата народження:', value: formatDate(patient.birth_date) },
-    { icon: iconGender, label: 'Стать:', value: genderMap[patient.gender?.toLowerCase()] || 'Немає даних' },
-    { icon: iconTelephone, label: 'Телефон:', value: patient.phone || 'Немає даних' },
-    { icon: iconEmail, label: 'Email:', value: patient.email || 'Немає даних' },
-    { icon: iconAddress, label: 'Адреса:', value: patient.address || 'Немає даних' },
-    { icon: iconHospital, label: 'Облік у лікарні:', value: patient.Hospital?.name || 'Немає даних' },
-  ];
-
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Моя медична картка</h1>
@@ -90,76 +46,14 @@ const PatientMedCard = () => {
         Переглядайте свою історію лікування, призначення лікарів та результати аналізів у зручному форматі.
       </p>
 
-      <div className={styles.cardShadow}>
-        <div className={styles.card}>
-          <div className={styles.leftSide}>
-            {patient.photo_url ? (
-              <img src={patient.photo_url} alt="Patient" className={styles.profileImage} />
-            ) : (
-              <div className={styles.noPhoto}>Немає фото</div>
-            )}
-            <NavLink
-              to={PATIENT_EDITPERSONALINFO_ROUTE}
-              state={{ patient }}
-              className={styles.editWarning}
-            >
-              <span className={styles.exclamation}>!</span>
-              <span className={styles.editText}>Редагувати дані</span>
-            </NavLink>
-          </div>
-
-          <div className={styles.rightSide}>
-            <h2 className={styles.name}>
-              {`${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`.trim()}
-            </h2>
-            {patientInfo.map((info, index) => (
-              <div key={index} className={styles.infoGroup}>
-                <img src={info.icon} alt="icon" className={styles.icon} />
-                <span className={styles.info}>
-                  <strong>{info.label}</strong> <span className={styles.lightText}>{info.value}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <PatientCard patient={patient} />
 
       <div className={styles.contentRow}>
-        <div className={styles.diagnosisColumn}>
-          <h2 className={styles.sectionTitle}>Діагнози</h2>
-          {sortedDiagnoses.length === 0 && <p>Діагнози відсутні</p>}
-          {sortedDiagnoses.slice(0, 4).map((diagnosis, index) => (
-            <div key={index} className={styles.diagnosisItem}>
-              <p className={styles.diagnosisText}>{diagnosis.diagnosis}</p>
-              <p className={styles.diagnosisDate}>
-                {new Date(diagnosis.record_date).toLocaleDateString('uk-UA')}
-              </p>
-              <NavLink to={PATIENT_MEDDETAIL_ROUTE} className={styles.detailsButton}>
-                Детальніше
-              </NavLink>
-            </div>
-          ))}
-          <NavLink to={PATIENT_MEDRECORDS_ROUTE} className={styles.viewAll}>
-            <span className={styles.viewAllText}>Переглянути всі діагнози ›</span>
-          </NavLink>
-        </div>
-
-        <div className={styles.recipeColumn}>
-          <h2 className={styles.sectionTitle}>Рецепти</h2>
-          {sortedRecipes.length === 0 && <p>Рецепти відсутні</p>}
-          <div className={styles.recipeGrid}>
-            {sortedRecipes.slice(0, Math.max(1, diagnoses.length)).map((recipe, index) => (
-              <div key={index} className={styles.recipeItem}>{recipe.medication}</div>
-            ))}
-          </div>
-          <NavLink to={PATIENT_PRESCRIPTIONS_ROUTE} className={styles.viewAll}>
-            <span className={styles.viewAllText}>Всі рецепти ›</span>
-          </NavLink>
-        </div>
+        <DiagnosisPreview diagnoses={diagnoses} />
+        <PrescriptionPreview prescriptions={recipes} referenceCount={diagnoses.length} />
       </div>
     </div>
   );
 };
 
 export default PatientMedCard;
-
