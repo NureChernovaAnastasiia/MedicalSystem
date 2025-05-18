@@ -1,0 +1,215 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 1.25rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 600px; 
+  padding: 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y: auto;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 2rem;
+  color: #00C3A1;
+  margin: 1px 0 30px;
+  text-align: center;
+}
+
+.label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 200;
+  font-style: italic;
+  font-size: 1.125rem;
+  color: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0,0,0,0.24);
+  border-radius: 0.625rem;
+  box-sizing: border-box;
+  outline-offset: 2px;
+  outline-color: #00c3a1;
+}
+
+.previewSection {
+  margin-bottom: 60px;
+}
+
+.previewLabel {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: #333;
+  margin: 1px;
+}
+
+.bottomSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 2rem;
+}
+
+.leftControls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+  max-width: 300px;
+}
+
+.changePhotoButton,
+.cancelButton {
+  background: transparent;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.changePhotoButton {
+  color: #333333;
+  font-weight: 300;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.changePhotoButton:hover {
+  color: #00805a;
+}
+
+.cancelButton {
+  color: #333333;
+  font-weight: 300;
+  font-size: 20px;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto; 
+}
+.cancelButton:hover {
+  color: #666;
+}
+
+.saveIcon {
+  color: #00C37F;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.closeIcon {
+  color: #FF0000;
+  font-size: 45px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.photoCircle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #00c37f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fafafa;
+  flex-shrink: 0;
+}
+
+.photoCircleImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noPhotoCircle {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 300;
+  color: rgba(0,0,0,0.3);
+}
+
+@media (max-width: 767px) {
+  .modal {
+    width: 90vw;
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .input {
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .previewSection {
+    margin-bottom: 40px;
+  }
+
+  .previewLabel {
+    font-size: 1.25rem;
+  }
+
+  .bottomSection {
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .leftControls {
+    max-width: 100%;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .changePhotoButton,
+  .cancelButton {
+    font-size: 18px;
+  }
+
+  .saveIcon {
+    font-size: 28px;
+  }
+
+  .closeIcon {
+    font-size: 36px;
+  }
+
+  .photoCircle {
+    width: 150px;
+    height: 150px;
+  }
+}

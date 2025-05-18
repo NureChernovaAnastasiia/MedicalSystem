@@ -8,6 +8,8 @@ import iconUnlock from '../../img/icons/unlock.png';
 
 import { updatePatientData } from '../../http/patientAPI';
 
+import ModalChangePhoto from '../../components/modals/ModalChangePhoto'; 
+
 const PatientEditPersonalInfo = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -31,6 +33,10 @@ const PatientEditPersonalInfo = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [photoUrlInput, setPhotoUrlInput] = useState(formData.photoUrl);
+  const [photoPreview, setPhotoPreview] = useState(formData.photoUrl);
+
   const handleChange = ({ target: { name, value } }) => setFormData(f => ({ ...f, [name]: value }));
 
   const handleSubmit = async e => {
@@ -48,6 +54,24 @@ const PatientEditPersonalInfo = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openModal = () => {
+    setPhotoUrlInput(formData.photoUrl);
+    setPhotoPreview(formData.photoUrl);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
+
+  const handleChangePhotoUrl = (url) => {
+    setPhotoUrlInput(url);
+    setPhotoPreview(url);
+  };
+
+  const handleUpload = () => {
+    setFormData(f => ({ ...f, photoUrl: photoUrlInput }));
+    setIsModalOpen(false);
   };
 
   const personalFields = [
@@ -69,120 +93,132 @@ const PatientEditPersonalInfo = () => {
   ];
 
   return (
-    <form className={styles.container} onSubmit={handleSubmit}>
-      <h1 className={styles.title}>Редагування профілю</h1>
-      <p className={styles.subtitle}>Оновіть вашу персональну інформацію, щоб ми могли краще піклуватися про вас.</p>
+    <>
+      <form className={styles.container} onSubmit={handleSubmit}>
+        <h1 className={styles.title}>Редагування профілю</h1>
+        <p className={styles.subtitle}>Оновіть вашу персональну інформацію, щоб ми могли краще піклуватися про вас.</p>
 
-      {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
+        {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
 
-      <div className={styles.containerInfo}>
-        <div className={styles.topSection}>
-          <div className={styles.personalInfoFields}>
-            {personalFields.map(({ label, name, type = 'text' }) => (
-              <div key={name} className={styles.fieldGroup}>
-                <label className={styles.label}>{label}:</label>
-                <input
-                  type={type}
-                  name={name}
-                  value={formData[name]}
+        <div className={styles.containerInfo}>
+          <div className={styles.topSection}>
+            <div className={styles.personalInfoFields}>
+              {personalFields.map(({ label, name, type = 'text' }) => (
+                <div key={name} className={styles.fieldGroup}>
+                  <label className={styles.label}>{label}:</label>
+                  <input
+                    type={type}
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    className={styles.inputBox}
+                  />
+                </div>
+              ))}
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Стать:</label>
+                <select
+                  name="gender"
+                  value={formData.gender}
                   onChange={handleChange}
                   className={styles.inputBox}
-                />
+                >
+                  <option value="">Не визначено</option>
+                  <option value="Male">Чоловіча</option>
+                  <option value="Female">Жіноча</option>
+                </select>
               </div>
-            ))}
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Стать:</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className={styles.inputBox}
-              >
-                <option value="">Не визначено</option>
-                <option value="Male">Чоловіча</option>
-                <option value="Female">Жіноча</option>
-              </select>
+            </div>
+
+            <div className={styles.photoSection}>
+              {formData.photoUrl ? (
+                <img src={formData.photoUrl} alt="Patient" className={styles.profileImage} />
+              ) : (
+                <div className={styles.noPhoto}>Немає фото</div>
+              )}
+              <button type="button" className={styles.editText} onClick={openModal}>Змінити фото</button>
             </div>
           </div>
 
-          <div className={styles.photoSection}>
-            {formData.photoUrl ? (
-              <img src={formData.photoUrl} alt="Patient" className={styles.profileImage} />
-            ) : (
-              <div className={styles.noPhoto}>Немає фото</div>
-            )}
-            <button type="button" className={styles.editText}>Змінити фото</button>
-          </div>
-        </div>
-
-        <div className={styles.infoBlock}>
-          <div className={styles.infoItem}>
-            <img src={iconContacts} alt="Contacts Icon" className={styles.infoIcon} />
-            <h2 className={styles.sectionTitle}>Контактна інформація</h2>
-          </div>
-          <div className={styles.section}>
-            {contactFields.map(({ label, name }) => (
-              <div key={name} className={styles.fieldGroup}>
-                <label className={styles.label}>{label}:</label>
-                <input
-                  name={name}
-                  value={formData[name]}
-                  onChange={handleChange}
-                  className={styles.inputBox}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={styles.infoBlock}>
-          <div className={styles.infoItem}>
-            <img src={iconHealth} alt="Health Icon" className={styles.infoIcon} />
-            <h2 className={styles.sectionTitle}>Інформація про здоров’я</h2>
-          </div>
-          <div className={styles.section}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.label}>Група крові:</label>
-              <select
-                name="bloodType"
-                value={formData.bloodType}
-                onChange={handleChange}
-                className={styles.inputBox}
-              >
-                <option value="">Не визначено</option>
-                {[
-                  "A(II) Rh+","A(II) Rh-","B(III) Rh+","B(III) Rh-",
-                  "AB(IV) Rh+","AB(IV) Rh-","0(I) Rh+","0(I) Rh-"
-                ].map(bt => (
-                  <option key={bt} value={bt}>{bt}</option>
-                ))}
-              </select>
+          <div className={styles.infoBlock}>
+            <div className={styles.infoItem}>
+              <img src={iconContacts} alt="Contacts Icon" className={styles.infoIcon} />
+              <h2 className={styles.sectionTitle}>Контактна інформація</h2>
             </div>
-            {healthFields.map(({ label, name }) => (
-              <div key={name} className={styles.fieldGroup}>
-                <label className={styles.label}>{label}:</label>
-                <input
-                  name={name}
-                  value={formData[name]}
+            <div className={styles.section}>
+              {contactFields.map(({ label, name }) => (
+                <div key={name} className={styles.fieldGroup}>
+                  <label className={styles.label}>{label}:</label>
+                  <input
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    className={styles.inputBox}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.infoBlock}>
+            <div className={styles.infoItem}>
+              <img src={iconHealth} alt="Health Icon" className={styles.infoIcon} />
+              <h2 className={styles.sectionTitle}>Інформація про здоров’я</h2>
+            </div>
+            <div className={styles.section}>
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Група крові:</label>
+                <select
+                  name="bloodType"
+                  value={formData.bloodType}
                   onChange={handleChange}
                   className={styles.inputBox}
-                />
+                >
+                  <option value="">Не визначено</option>
+                  {[
+                    "A(II) Rh+","A(II) Rh-","B(III) Rh+","B(III) Rh-",
+                    "AB(IV) Rh+","AB(IV) Rh-","0(I) Rh+","0(I) Rh-"
+                  ].map(bt => (
+                    <option key={bt} value={bt}>{bt}</option>
+                  ))}
+                </select>
               </div>
-            ))}
+              {healthFields.map(({ label, name }) => (
+                <div key={name} className={styles.fieldGroup}>
+                  <label className={styles.label}>{label}:</label>
+                  <input
+                    name={name}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    className={styles.inputBox}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.buttonGroup}>
-        <div className={styles.passwordButton}>
-          <img src={iconUnlock} alt="Unlock Icon" className={styles.infoIcon} />
-          Змінити пароль
+        <div className={styles.buttonGroup}>
+          <div className={styles.passwordButton}>
+            <img src={iconUnlock} alt="Unlock Icon" className={styles.infoIcon} />
+            Змінити пароль
+          </div>
+          <button type="submit" className={styles.saveButton} disabled={loading}>
+            {loading ? 'Збереження...' : 'Зберегти зміни'}
+          </button>
         </div>
-        <button type="submit" className={styles.saveButton} disabled={loading}>
-          {loading ? 'Збереження...' : 'Зберегти зміни'}
-        </button>
-      </div>
-    </form>
+      </form>
+
+      {isModalOpen && (
+        <ModalChangePhoto
+          photoPreview={photoPreview}
+          photoUrl={photoUrlInput}
+          onClose={closeModal}
+          onChangePhotoUrl={handleChangePhotoUrl}
+          onUpload={handleUpload}
+        />
+      )}
+    </>
   );
 };
 
