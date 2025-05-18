@@ -48,7 +48,7 @@ export const adminRoutes = [
     { path: PATIENT_DOCSCHEDULE_ROUTE + '/:id', Component: PatientDoctorSchedule },
     { path: PATIENT_HOSPITALDETAIL_ROUTE, Component: PatientHospitalDetails },
     { path: PATIENT_HOSPITALSCHEDULE_ROUTE, Component: PatientHospitalSchedule },
-    { path: PATIENT_MEDDETAIL_ROUTE, Component: PatientMedicalDetail },
+    { path: PATIENT_MEDDETAIL_ROUTE + '/:id', Component: PatientMedicalDetail },
     { path: PATIENT_SERVICEORDER_ROUTE, Component: PatientServiceOrder },
     { path: PATIENT_SERVICE_ROUTE, Component: PatientServices },
     { path: PATIENT_SERVICEDETAILS_ROUTE, Component: PatientServiceDetails },

@@ -12,14 +12,14 @@ const formatDate = (isoDate) => {
     .padStart(2, '0')}.${date.getFullYear()}`;
 };
 
-const DiagnosisCard = ({ diagnosis, record_date }) => (
+const DiagnosisCard = ({ id, diagnosis, record_date }) => (
   <div className={styles.card}>
     <div className={styles.cardHeader}>
       <img src={iconDiagnosis} alt="icon" className={styles.iconDiagnosis} />
       <p className={styles.date}>Дата встановлення: {formatDate(record_date)}</p>
     </div>
     <h3 className={styles.cardTitle}>{diagnosis}</h3>
-    <NavLink to={PATIENT_MEDDETAIL_ROUTE} className={styles.detailsButton}>
+    <NavLink to={`${PATIENT_MEDDETAIL_ROUTE}/${id}`} className={styles.detailsButton}>
       <span className={styles.cardFooterText}>Деталі хвороби</span>
     </NavLink>
   </div>

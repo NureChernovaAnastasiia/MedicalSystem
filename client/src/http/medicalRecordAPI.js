@@ -9,3 +9,13 @@ export const fetchMedicalRecordsByPatientId = async (patientId) => {
     throw error;
   }
 };
+
+export const fetchMedicalRecordById = async (id) => {
+  try {
+    const { data } = await $authHost.get(`api/medical-records/${id}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні медичного запису за ID:', error);
+    throw error;
+  }
+};

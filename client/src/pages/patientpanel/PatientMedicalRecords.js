@@ -125,7 +125,7 @@ const PatientMedicalRecords = () => {
       <div className={styles.cardsGrid}>
         {sortedDiagnoses.length ? (
           sortedDiagnoses.map(({ id, diagnosis, record_date }) => (
-            <DiagnosisCard key={id} diagnosis={diagnosis} record_date={record_date} />
+            <DiagnosisCard key={id} id={id} diagnosis={diagnosis} record_date={record_date} />
           ))
         ) : (
           <p className={styles.noResults}>Діагнози не знайдені</p>
