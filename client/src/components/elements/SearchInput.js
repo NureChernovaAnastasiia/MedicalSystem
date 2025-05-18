@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import iconSearch from "../../img/icons/search.png";
+import defaultIcon from "../../img/icons/search.png";
 
 const baseInputStyle = {
   width: "100%",
@@ -42,7 +42,12 @@ const styles = {
   },
 };
 
-const SearchByName = ({ value, onChange }) => {
+const SearchInput = ({
+  value,
+  onChange,
+  placeholder = "Пошук...",
+  icon = defaultIcon,
+}) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -53,10 +58,10 @@ const SearchByName = ({ value, onChange }) => {
 
   return (
     <div style={styles.wrapper}>
-      <img src={iconSearch} alt="Search Icon" style={styles.icon} />
+      <img src={icon} alt="Search Icon" style={styles.icon} />
       <input
         type="text"
-        placeholder="Введіть ім'я лікаря"
+        placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         style={combinedInputStyle}
@@ -69,4 +74,4 @@ const SearchByName = ({ value, onChange }) => {
   );
 };
 
-export default SearchByName;
+export default SearchInput;

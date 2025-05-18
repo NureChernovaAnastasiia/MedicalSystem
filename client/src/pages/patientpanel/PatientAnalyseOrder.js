@@ -5,7 +5,7 @@ import { getHospitalLabServices } from '../../http/analysisAPI';
 
 import SearchByHospital from '../../components/elements/SearchByHospital';
 import SearchByCity from '../../components/elements/SearchByCity';
-import SearchByAnalyseName from '../../components/elements/SearchByAnalyseName';
+import SearchInput from '../../components/elements/SearchInput';
 import SortByPrice from '../../components/elements/SortByPrice';
 import AnalyseItem from '../../components/elements/AnalyseItem'; 
 
@@ -66,7 +66,7 @@ const PatientAnalyseOrder = () => {
 
       <div className={styles.searchGroup}>
         <div className={styles.inputWrapper}>
-          <SearchByAnalyseName value={searchTerm} onChange={setSearchTerm} />
+          <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Введіть назву аналізу" />
         </div>
 
         <div className={styles.selectGroup}>

@@ -1,37 +1,17 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Context } from '../../index';
-import { DateRange } from 'react-date-range';
 import { format } from 'date-fns';
-import { uk } from 'date-fns/locale';
+
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
+import SearchInput from '../../components/elements/SearchInput';
+import DateRangeFilter from '../../components/elements/DateRangeFilter';
+import DiagnosisCard from '../../components/elements/DiagnosisCard';
 import styles from '../../style/PatientMedicalRecords.module.css';
-import iconSearch from '../../img/icons/search.png';
-import iconDiagnosis from '../../img/icons/diagnosis.png';
-import { PATIENT_MEDDETAIL_ROUTE } from '../../utils/consts';
 
 import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 import { fetchPatientByUserId } from '../../http/patientAPI';
-
-const formatDate = (isoDate) => {
-  const date = new Date(isoDate);
-  return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth()+1).toString().padStart(2, '0')}.${date.getFullYear()}`;
-};
-
-const DiagnosisCard = ({ diagnosis, record_date }) => (
-  <div className={styles.card}>
-    <div className={styles.cardHeader}>
-      <img src={iconDiagnosis} alt="icon" className={styles.iconDiagnosis} />
-      <p className={styles.date}>Дата встановлення: {formatDate(record_date)}</p>
-    </div>
-    <h3 className={styles.cardTitle}>{diagnosis}</h3>
-    <NavLink to={PATIENT_MEDDETAIL_ROUTE} className={styles.detailsButton}>
-      <span className={styles.cardFooterText}>Деталі хвороби</span>
-    </NavLink>
-  </div>
-);
 
 const PatientMedicalRecords = () => {
   const { user } = useContext(Context);
@@ -43,56 +23,59 @@ const PatientMedicalRecords = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const getPatientData = async () => {
-      if (!user?.user?.id) return;
-      try {
-        setLoading(true);
-        const data = await fetchPatientByUserId(user.user.id);
-        setPatient(data);
-      } catch (err) {
-        setError('Не вдалося завантажити дані пацієнта');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getPatientData();
+  const loadPatient = useCallback(async () => {
+    if (!user?.user?.id) return;
+    try {
+      setLoading(true);
+      const data = await fetchPatientByUserId(user.user.id);
+      setPatient(data);
+      setError(null);
+    } catch {
+      setError('Не вдалося завантажити дані пацієнта');
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
-  useEffect(() => {
+  const loadMedicalRecords = useCallback(async () => {
     if (!patient?.id) return;
-
-    const loadMedicalRecords = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchMedicalRecordsByPatientId(patient.id);
-        setDiagnoses(data);
-        setError(null);
-      } catch (err) {
-        setError('Не вдалося завантажити медичні записи');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMedicalRecords();
+    try {
+      setLoading(true);
+      const data = await fetchMedicalRecordsByPatientId(patient.id);
+      setDiagnoses(data);
+      setError(null);
+    } catch {
+      setError('Не вдалося завантажити медичні записи');
+    } finally {
+      setLoading(false);
+    }
   }, [patient]);
+
+  useEffect(() => {
+    loadPatient();
+  }, [loadPatient]);
+
+  useEffect(() => {
+    loadMedicalRecords();
+  }, [loadMedicalRecords]);
 
   const { startDate, endDate } = dateRange[0];
 
   const filteredDiagnoses = diagnoses.filter(({ diagnosis, record_date }) => {
-    const matchDiagnosis = diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
-    const diagDate = new Date(record_date);
-    const inRange =
-      (!startDate || diagDate >= startDate) &&
-      (!endDate || diagDate <= endDate);
-    return matchDiagnosis && inRange;
+    const diagnosisLower = diagnosis.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    const matchByDiagnosis = diagnosisLower.includes(searchLower);
+
+    const recordDate = new Date(record_date);
+    const isInDateRange =
+      (!startDate || recordDate >= startDate) && (!endDate || recordDate <= endDate);
+
+    return matchByDiagnosis && isInDateRange;
   });
 
   const sortedDiagnoses = filteredDiagnoses.slice().sort((a, b) => new Date(b.record_date) - new Date(a.record_date));
 
-  const getLabel = () => {
+  const getDateRangeLabel = () => {
     if (!startDate && !endDate) return 'Виберіть діапазон';
     if (startDate && !endDate) return `Від ${format(startDate, 'dd.MM.yyyy')}`;
     if (!startDate && endDate) return `До ${format(endDate, 'dd.MM.yyyy')}`;
@@ -116,18 +99,16 @@ const PatientMedicalRecords = () => {
 
       <div className={styles.filterRow}>
         <div className={styles.datePickerWrapper}>
-          <button onClick={() => setShowCalendar(!showCalendar)} className={styles.dateButton}>
-            {getLabel()}
+          <button onClick={() => setShowCalendar((prev) => !prev)} className={styles.dateButton}>
+            {getDateRangeLabel()}
           </button>
           {showCalendar && (
             <div className={styles.dateRangeWrapper}>
-              <DateRange
-                editableDateInputs={true}
-                onChange={(item) => setDateRange([item.selection])}
-                moveRangeOnFirstSelection={false}
-                ranges={dateRange}
-                maxDate={new Date()}
-                locale={uk}
+              <DateRangeFilter
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                showCalendar={showCalendar}
+                setShowCalendar={setShowCalendar}
               />
               <button onClick={resetDateFilter} className={styles.clearDateButton}>
                 Скинути фільтр
@@ -137,25 +118,14 @@ const PatientMedicalRecords = () => {
         </div>
 
         <div className={styles.searchBox}>
-          <img src={iconSearch} alt="icon" className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Введіть назву діагнозу"
-            className={styles.searchInput}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Введіть назву діагнозу" />
         </div>
       </div>
 
       <div className={styles.cardsGrid}>
-        {sortedDiagnoses.length > 0 ? (
-          sortedDiagnoses.map((diag) => (
-            <DiagnosisCard
-              key={diag.id}
-              diagnosis={diag.diagnosis}
-              record_date={diag.record_date}
-            />
+        {sortedDiagnoses.length ? (
+          sortedDiagnoses.map(({ id, diagnosis, record_date }) => (
+            <DiagnosisCard key={id} diagnosis={diagnosis} record_date={record_date} />
           ))
         ) : (
           <p className={styles.noResults}>Діагнози не знайдені</p>
