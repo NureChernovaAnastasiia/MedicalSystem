@@ -19,3 +19,13 @@ export const fetchPatientByUserId = async (userId) => {
     throw error;
   }
 };
+
+export const updatePatientData = async (id, updatedData) => {
+  try {
+    const { data } = await $authHost.put(`api/patients/${id}`, updatedData);
+    return data;
+  } catch (error) {
+    console.error("Помилка при оновленні даних пацієнта", error);
+    throw error;
+  }
+};

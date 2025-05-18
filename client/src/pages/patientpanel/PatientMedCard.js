@@ -27,6 +27,21 @@ const PatientMedCard = () => {
   const [diagnoses, setDiagnoses] = useState([]);
   const [recipes, setRecipes] = useState([]);
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Немає даних';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('uk-UA', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  const genderMap = {
+    male: 'Чоловіча',
+    female: 'Жіноча',
+  };
+
   useEffect(() => {
     const getPatientData = async () => {
       if (!user?.user?.id) return;
@@ -60,8 +75,8 @@ const PatientMedCard = () => {
     : [];
 
   const patientInfo = [
-    { icon: iconDate, label: 'Дата народження:', value: patient.date_of_birth || 'Немає даних' },
-    { icon: iconGender, label: 'Стать:', value: patient.gender || 'Немає даних' },
+    { icon: iconDate, label: 'Дата народження:', value: formatDate(patient.birth_date) },
+    { icon: iconGender, label: 'Стать:', value: genderMap[patient.gender?.toLowerCase()] || 'Немає даних' },
     { icon: iconTelephone, label: 'Телефон:', value: patient.phone || 'Немає даних' },
     { icon: iconEmail, label: 'Email:', value: patient.email || 'Немає даних' },
     { icon: iconAddress, label: 'Адреса:', value: patient.address || 'Немає даних' },
@@ -83,7 +98,11 @@ const PatientMedCard = () => {
             ) : (
               <div className={styles.noPhoto}>Немає фото</div>
             )}
-            <NavLink to={PATIENT_EDITPERSONALINFO_ROUTE} className={styles.editWarning}>
+            <NavLink
+              to={PATIENT_EDITPERSONALINFO_ROUTE}
+              state={{ patient }}
+              className={styles.editWarning}
+            >
               <span className={styles.exclamation}>!</span>
               <span className={styles.editText}>Редагувати дані</span>
             </NavLink>
@@ -91,7 +110,7 @@ const PatientMedCard = () => {
 
           <div className={styles.rightSide}>
             <h2 className={styles.name}>
-              {`${patient.first_name} ${patient.last_name} ${patient.middle_name || ''}`.trim()}
+              {`${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`.trim()}
             </h2>
             {patientInfo.map((info, index) => (
               <div key={index} className={styles.infoGroup}>
@@ -129,7 +148,7 @@ const PatientMedCard = () => {
           <h2 className={styles.sectionTitle}>Рецепти</h2>
           {sortedRecipes.length === 0 && <p>Рецепти відсутні</p>}
           <div className={styles.recipeGrid}>
-            {sortedRecipes.slice(0, Math.max(1, diagnoses.length+2)).map((recipe, index) => (
+            {sortedRecipes.slice(0, Math.max(1, diagnoses.length)).map((recipe, index) => (
               <div key={index} className={styles.recipeItem}>{recipe.medication}</div>
             ))}
           </div>
@@ -143,3 +162,4 @@ const PatientMedCard = () => {
 };
 
 export default PatientMedCard;
+
