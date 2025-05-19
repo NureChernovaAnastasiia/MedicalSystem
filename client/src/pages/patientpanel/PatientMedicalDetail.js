@@ -6,14 +6,17 @@ import iconDoctor from '../../img/icons/doctor.png';
 import iconHospital from '../../img/icons/hospital.png';
 
 import { fetchMedicalRecordById } from '../../http/medicalRecordAPI';
-import { fetchDoctorById } from '../../http/doctorAPI'; 
+import { fetchDoctorById } from '../../http/doctorAPI';
+
+import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo';
 
 const PatientMedicalDetail = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [record, setRecord] = useState(null);
-  const [doctorInfo, setDoctorInfo] = useState(null); 
+  const [doctorInfo, setDoctorInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedPrescription, setSelectedPrescription] = useState(null); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,7 +39,8 @@ const PatientMedicalDetail = () => {
   }, [id]);
 
   const goBack = () => navigate(-1);
-
+  const openModal = (prescription) => setSelectedPrescription(prescription);
+  const closeModal = () => setSelectedPrescription(null);
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString('uk-UA');
 
@@ -60,16 +64,25 @@ const PatientMedicalDetail = () => {
           <div className={styles.detailItem}>
             <img src={iconDoctor} alt="Doctor Icon" className={styles.icon} />
             <p className={styles.detailText}>
-              <strong>Лікар:</strong> {`${doctorInfo.last_name} ${doctorInfo.first_name} ${doctorInfo.middle_name}` || 'Невідомо'}
+              <strong>Лікар:</strong>{' '}
+              {doctorInfo
+                ? `${doctorInfo.last_name} ${doctorInfo.first_name} ${doctorInfo.middle_name}`
+                : 'Невідомо'}
             </p>
           </div>
           <div className={styles.detailItem}>
-            <img src={iconHospital} alt="Hospital Icon" className={styles.icon} />
+            <img
+              src={iconHospital}
+              alt="Hospital Icon"
+              className={styles.icon}
+            />
             <p className={styles.detailText}>
-              <strong>Заклад:</strong> {doctorInfo.Hospital?.name || 'Невідомо'}
+              <strong>Заклад:</strong>{' '}
+              {doctorInfo.Hospital?.name || 'Невідомо'}
             </p>
           </div>
         </div>
+
         <div className={styles.rightColumn}>
           <h3 className={styles.notesTitle}>Записи лікаря</h3>
           <div className={styles.recommendationsBox}>
@@ -94,7 +107,11 @@ const PatientMedicalDetail = () => {
         <div className={styles.prescriptionsList}>
           {record.Prescriptions?.length > 0 ? (
             record.Prescriptions.map((prescription) => (
-              <div className={styles.medicineCard} key={prescription.id}>
+              <div
+                className={styles.medicineCard}
+                key={prescription.id}
+                onClick={() => openModal(prescription)}
+              >
                 <strong>{prescription.medication}</strong>
               </div>
             ))
@@ -107,6 +124,14 @@ const PatientMedicalDetail = () => {
       <button onClick={goBack} className={styles.backButton}>
         ‹ Повернутися назад до списку аналізів
       </button>
+
+      {/* Модалка з інформацією про препарат */}
+      {selectedPrescription && (
+        <ModalPrescriptionInfo
+          prescription={selectedPrescription}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 };

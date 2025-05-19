@@ -7,6 +7,12 @@ import iconHospital from '../img/icons/hospital.png';
 import iconContacts from '../img/icons/contacts.png';
 import iconHealth from '../img/icons/medical.png';
 import iconUnlock from '../img/icons/unlock.png';
+import iconDuration from '../img/icons/duration.png';
+import iconFrequency from '../img/icons/frequency.png';
+import iconInstructions from '../img/icons/instructions.png';
+import iconPills from '../img/icons/pills.png';
+import iconDosage from '../img/icons/dosage.png';
+
 
 export {
   iconDate,
@@ -17,5 +23,10 @@ export {
   iconHospital,
   iconContacts,
   iconHealth,
-  iconUnlock
+  iconUnlock,
+  iconDuration,
+  iconFrequency,
+  iconInstructions,
+  iconPills,
+  iconDosage
 };

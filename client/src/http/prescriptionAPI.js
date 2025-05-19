@@ -9,3 +9,18 @@ export const fetchPrescriptionsByPatientId = async (patientId) => {
     throw error;
   }
 };
+
+export const fetchPrescriptionPdf = async (prescriptionId) => {
+  try {
+    const response = await $authHost.get(`api/prescriptions/${prescriptionId}/pdf`, {
+      responseType: 'blob', 
+    });
+
+    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    window.open(pdfUrl, '_blank');
+  } catch (error) {
+    console.error('Помилка при отриманні PDF рецепта:', error);
+    alert('Не вдалося відкрити PDF документ');
+  }
+};
