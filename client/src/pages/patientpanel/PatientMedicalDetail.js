@@ -122,10 +122,9 @@ const PatientMedicalDetail = () => {
       </div>
 
       <button onClick={goBack} className={styles.backButton}>
-        ‹ Повернутися назад до списку аналізів
+        ‹ Повернутися назад
       </button>
 
-      {/* Модалка з інформацією про препарат */}
       {selectedPrescription && (
         <ModalPrescriptionInfo
           prescription={selectedPrescription}

@@ -18,7 +18,7 @@ const DiagnosisPreview = ({ diagnoses = [] }) => {
           <p className={styles.diagnosisDate}>
             {new Date(diagnosis.record_date).toLocaleDateString('uk-UA')}
           </p>
-          <NavLink to={PATIENT_MEDDETAIL_ROUTE} className={styles.detailsButton}>
+          <NavLink to={`${PATIENT_MEDDETAIL_ROUTE}/${diagnosis.id}`} className={styles.detailsButton}>
             Детальніше
           </NavLink>
         </div>
