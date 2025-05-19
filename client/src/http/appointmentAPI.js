@@ -4,3 +4,8 @@ export const fetchUpcomingAppointments = async (patientId) => {
   const { data } = await $authHost.get(`/api/appointments/upcoming/patient/${patientId}`);
   return data;
 };
+
+export const fetchAllPatientsAppointments = async (patientId) => {
+  const { data } = await $authHost.get(`/api/appointments/patient/${patientId}`);
+  return data;
+};

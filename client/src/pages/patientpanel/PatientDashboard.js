@@ -23,19 +23,24 @@ const InfoCard = ({ icon, title, to }) => (
   </NavLink>
 );
 
-const AppointmentCard = ({ date, doctor, location, onDetailsClick }) => (
-  <div className={styles.appointmentCard}>
-    <p className={styles.appointmentInfo}>
-      <strong>Дата і час прийому:</strong> <span className={styles.lightText}>{date}</span> <br />
-      <strong>Лікар:</strong> <span className={styles.lightText}>{doctor}</span> <br />
-      <strong>Місцезнаходження:</strong> <span className={styles.lightText}>{location}</span>
-    </p>
-    <div className={styles.appointmentDetails} onClick={onDetailsClick}>
-      <span className={styles.questionMark}>?</span>
-      <span className={styles.detailsText}>Деталі прийому</span>
+const AppointmentCard = ({ appointment, onDetailsClick }) => {
+  const doctor = `${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`;
+  const location = appointment.Doctor?.Hospital?.name || "Невідома лікарня";
+
+  return (
+    <div className={styles.appointmentCard}>
+      <p className={styles.appointmentInfo}>
+        <strong>Дата і час прийому:</strong> <span className={styles.lightText}>{appointment.formattedDate}</span> <br />
+        <strong>Лікар:</strong> <span className={styles.lightText}>{doctor}</span> <br />
+        <strong>Місцезнаходження:</strong> <span className={styles.lightText}>{location}</span>
+      </p>
+      <div className={styles.appointmentDetails} onClick={() => onDetailsClick(appointment)}>
+        <span className={styles.questionMark}>?</span>
+        <span className={styles.detailsText}>Деталі прийому</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PatientDashboard = () => {
   const { user } = useContext(Context);
@@ -52,16 +57,13 @@ const PatientDashboard = () => {
 
         const upcomingAppointments = await fetchUpcomingAppointments(patientData.id);
         const formattedAppointments = upcomingAppointments.map((a) => {
-          const date = new Date(`${a.appointment_date}T${a.DoctorSchedule.start_time}`);
-          const formattedDate = date.toLocaleString("uk-UA", {
+          const dateObj = new Date(`${a.appointment_date}T${a.DoctorSchedule.start_time}`);
+          const formattedDate = dateObj.toLocaleString("uk-UA", {
             day: "numeric", month: "long", year: "numeric",
             hour: "2-digit", minute: "2-digit"
           });
 
-          const doctor = `${a.Doctor.first_name} ${a.Doctor.last_name}`;
-          const location = a.Doctor.Hospital?.name || "Невідома лікарня";
-
-          return { date: formattedDate, doctor, location };
+          return { ...a, formattedDate }; 
         });
 
         setAppointments(formattedAppointments);
@@ -96,10 +98,8 @@ const PatientDashboard = () => {
           {appointments.map((appointment, index) => (
             <AppointmentCard
               key={index}
-              date={appointment.date}
-              doctor={appointment.doctor}
-              location={appointment.location}
-              onDetailsClick={() => handleOpenAppointmentModal(appointment)}
+              appointment={appointment}
+              onDetailsClick={handleOpenAppointmentModal}
             />
           ))}
         </div>
