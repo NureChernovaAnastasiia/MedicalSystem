@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import styles from '../../style/PatientAppointments.module.css';
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
+import ModalCancelAppointment from "../../components/modals/ModalCancelAppointment";
 
 import iconSearch from '../../img/icons/search.png';
 import { Context } from '../../index';
 import { fetchPatientByUserId } from '../../http/patientAPI';
 import { fetchAllPatientsAppointments } from '../../http/appointmentAPI';
 
-const AppointmentCard = ({ appointment, onDetailsClick }) => {
+const AppointmentCard = ({ appointment, onDetailsClick, onCancelClick  }) => {
   const doctor = `${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`;
   const specialization = appointment.Doctor?.specialization || 'Невідома спеціалізація';
   const location = `${appointment.Doctor?.Hospital?.name || "Невідома лікарня"},  ${appointment.Doctor?.Hospital?.address}`;
@@ -34,7 +35,7 @@ const AppointmentCard = ({ appointment, onDetailsClick }) => {
         </div>
 
         {canCancel && (
-          <div className={styles.cardActions}>
+          <div className={styles.cardActions} onClick={() => onCancelClick(appointment)}>
             <span className={styles.cancelCross}>×</span>
             <span className={styles.cancelText}>Скасувати</span>
           </div>
@@ -48,6 +49,7 @@ const PatientAppointments = () => {
   const { user } = useContext(Context);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -109,6 +111,28 @@ const PatientAppointments = () => {
   const handleOpenAppointmentModal = (appointment) => setSelectedAppointment(appointment);
   const handleCloseAppointmentModal = () => setSelectedAppointment(null);
 
+  const handleCancelClick = (appointment) => setAppointmentToCancel(appointment);
+  const handleCloseCancelModal = () => setAppointmentToCancel(null);
+  const handleConfirmCancel = () => {
+    console.log("Скасування:", appointmentToCancel.id);
+    setAppointmentToCancel(null);
+  };
+
+  const handleAppointmentCancelled = (cancelledId) => {
+    setAppointments(prev =>
+      prev.map(app =>
+        app.id === cancelledId
+          ? {
+              ...app,
+              status: 'Cancelled',
+              statusLabel: '● Скасований',
+              type: 'canceled',
+            }
+          : app
+      )
+    );
+  };
+
   const filteredAppointments = appointments.filter((a) => {
     const matchesStatus = statusFilter === 'all' || a.type === statusFilter;
     const doctorFullName = `${a.Doctor?.last_name} ${a.Doctor?.first_name} ${a.Doctor?.middle_name}`.toLowerCase();
@@ -118,7 +142,8 @@ const PatientAppointments = () => {
     const matchesSearch = doctorFullName.includes(query) || specialization.includes(query);
 
     return matchesStatus && matchesSearch;
-  });
+  })
+  .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
 
   return (
     <div className={styles.patientAppointments}>
@@ -158,6 +183,7 @@ const PatientAppointments = () => {
               key={index}
               appointment={appointment}
               onDetailsClick={handleOpenAppointmentModal}
+              onCancelClick={handleCancelClick}
             />
           ))
         ) : (
@@ -169,6 +195,15 @@ const PatientAppointments = () => {
         <ModalAppointmentDetails
           appointment={selectedAppointment}
           onClose={handleCloseAppointmentModal}
+        />
+      )}
+
+      {appointmentToCancel && (
+        <ModalCancelAppointment
+          appointment={appointmentToCancel}
+          onClose={handleCloseCancelModal}
+          onCancel={handleConfirmCancel}
+          onAppointmentCancelled={handleAppointmentCancelled}
         />
       )}
     </div>
