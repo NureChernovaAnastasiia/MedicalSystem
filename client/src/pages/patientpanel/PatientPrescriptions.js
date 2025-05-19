@@ -1,33 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import styles from '../../style/PatientPrescriptions.module.css';
-
 import iconSearch from '../../img/icons/search.png';
 import iconDrugs from '../../img/icons/drugs.png';
 
-const prescriptions = [
-  { name: 'Будесонід', assigned: '10.03.2025', validUntil: '10.06.2025' },
-  { name: 'Сальбутамол', assigned: '10.03.2025', validUntil: '20.03.2025' },
-  { name: 'Нурофен', assigned: '03.05.2024', validUntil: '10.05.2024' },
-  { name: 'Алмагель', assigned: '03.05.2024', validUntil: '17.05.2024' },
-  { name: 'Сорцеф', assigned: '21.01.2024', validUntil: '27.01.2024' },
-  { name: 'Біфрен', assigned: '14.07.2023', validUntil: '14.10.2023' },
-];
+import { Context } from '../../index';
+import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
+import { fetchPatientByUserId } from '../../http/patientAPI';
+import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo'; 
 
 const isActive = (validUntil) => {
+  if (!validUntil) return false;
   const today = new Date();
-  const expiry = new Date(validUntil.split('.').reverse().join('-'));
+  const expiry = new Date(validUntil);
   return expiry >= today;
 };
 
+const formatDate = (isoString) => {
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 const PatientPrescriptions = () => {
+  const { user } = useContext(Context);
+  const [patient, setPatient] = useState(null);
+  const [prescriptions, setPrescriptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const filteredPrescriptions = prescriptions.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesActive = showActiveOnly ? isActive(item.validUntil) : true;
-    return matchesSearch && matchesActive;
-  });
+  const [selectedPrescription, setSelectedPrescription] = useState(null); // ⬅️ Додай стан для модалки
+
+  const loadPatient = useCallback(async () => {
+    if (!user?.user?.id) return;
+    try {
+      setLoading(true);
+      const data = await fetchPatientByUserId(user.user.id);
+      setPatient(data);
+      setError(null);
+    } catch {
+      setError('Не вдалося завантажити дані пацієнта');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const loadPrescriptions = useCallback(async () => {
+    if (!patient?.id) return;
+    try {
+      setLoading(true);
+      const data = await fetchPrescriptionsByPatientId(patient.id);
+      setPrescriptions(data);
+      setError(null);
+    } catch {
+      setError('Не вдалося завантажити рецепти');
+    } finally {
+      setLoading(false);
+    }
+  }, [patient]);
+
+  useEffect(() => {
+    loadPatient();
+  }, [loadPatient]);
+
+  useEffect(() => {
+    loadPrescriptions();
+  }, [loadPrescriptions]);
+
+  const filteredPrescriptions = prescriptions
+    .filter((item) => {
+      const matchesSearch = item.medication.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesActive = showActiveOnly ? isActive(item.prescription_expiration) : true;
+      return matchesSearch && matchesActive;
+    })
+    .sort((a, b) => new Date(b.prescription_expiration) - new Date(a.prescription_expiration));
 
   return (
     <div className={styles.container}>
@@ -38,7 +87,6 @@ const PatientPrescriptions = () => {
         <label className={styles.radioLabel}>
           <input
             type="checkbox"
-            id="active-only"
             checked={showActiveOnly}
             onChange={() => setShowActiveOnly(!showActiveOnly)}
           />
@@ -49,29 +97,48 @@ const PatientPrescriptions = () => {
           <div className={styles.searchIcon}>
             <img src={iconSearch} alt="Search Icon" />
           </div>
-              <input
-                type="text"
-                className={styles.inputField}
-                placeholder="Введіть назву препарату"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <input
+            type="text"
+            className={styles.inputField}
+            placeholder="Введіть назву препарату"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
-      <div className={styles.tableBody}>
-        {filteredPrescriptions.map((item, index) => (
-          <div key={index} className={styles.tableRow}>
-            <img src={iconDrugs} alt="icon" className={styles.prescriptionIcon} />
-            <div className={styles.drugName}>{item.name}</div>
-            <div className={styles.dateAssigned}>Призначено: {item.assigned}</div>
-            <div className={styles.dateValid}>Діє до: {item.validUntil}</div>
-            <div className={styles.details}>Детальніше</div>
-          </div>
-        ))}
-      </div>
+      {loading ? (
+        <p>Завантаження...</p>
+      ) : error ? (
+        <p className={styles.error}>{error}</p>
+      ) : (
+        <div className={styles.tableBody}>
+          {filteredPrescriptions.map((item, index) => (
+            <div key={index} className={styles.tableRow}>
+              <img src={iconDrugs} alt="icon" className={styles.prescriptionIcon} />
+              <div className={styles.drugName}>{item.medication}</div>
+              <div className={styles.dateAssigned}>Призначено: {formatDate(item.prescribed_date)}</div>
+              <div className={styles.dateValid}>Діє до: {formatDate(item.prescription_expiration)}</div>
+              <div
+                className={styles.details}
+                onClick={() => setSelectedPrescription(item)} 
+              >
+                Детальніше
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {selectedPrescription && (
+        <ModalPrescriptionInfo
+          prescription={selectedPrescription}
+          onClose={() => setSelectedPrescription(null)}
+        />
+      )}
     </div>
   );
 };
 
 export default PatientPrescriptions;
+
