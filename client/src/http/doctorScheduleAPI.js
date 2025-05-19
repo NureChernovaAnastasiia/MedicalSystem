@@ -9,3 +9,13 @@ export const fetchDoctorScheduleByIdAndDate = async (doctorId, date) => {
       throw error;
     }
   };
+
+export const bookDoctorScheduleById = async (scheduleId) => {
+  try {
+    const { data } = await $authHost.post(`api/doctor-schedules/${scheduleId}/book`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при бронюванні розкладу лікаря:", error);
+    throw error;
+  }
+};
