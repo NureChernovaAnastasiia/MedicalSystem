@@ -12,6 +12,9 @@ import iconFrequency from '../img/icons/frequency.png';
 import iconInstructions from '../img/icons/instructions.png';
 import iconPills from '../img/icons/pills.png';
 import iconDosage from '../img/icons/dosage.png';
+import iconPreparation from '../img/icons/preparation.png';
+import iconDescription from '../img/icons/description.png';
+import iconTestimony from '../img/icons/testimony.png';
 
 
 export {
@@ -28,5 +31,8 @@ export {
   iconFrequency,
   iconInstructions,
   iconPills,
-  iconDosage
+  iconDosage,
+  iconPreparation,
+  iconDescription,
+  iconTestimony
 };
