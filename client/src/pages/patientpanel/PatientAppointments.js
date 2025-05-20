@@ -62,7 +62,13 @@ const PatientAppointments = () => {
         const data = await fetchAllPatientsAppointments(patient.id);
 
         const formattedAppointments = data.map((a) => {
-          const dateObj = new Date(`${a.appointment_date}T${a.DoctorSchedule.start_time}`);
+          const schedule = a.DoctorSchedule || a.LabTestSchedule || a.MedicalServiceSchedule;
+
+          const appointmentDate = a.appointment_date || (schedule && schedule.appointment_date) || '';
+          const startTime = schedule?.start_time || '00:00:00';
+          const endTime = schedule?.end_time || '00:00:00';
+
+          const dateObj = new Date(`${appointmentDate}T${startTime}`);
 
           const formattedDate = dateObj.toLocaleDateString("uk-UA", {
             day: "2-digit", month: "2-digit", year: "numeric"
@@ -73,7 +79,7 @@ const PatientAppointments = () => {
             return `${hours}:${minutes}`;
           };
 
-          const formattedTime = `${formatTime(a.DoctorSchedule.start_time)} - ${formatTime(a.DoctorSchedule.end_time)}`;
+          const formattedTime = `${formatTime(startTime)} - ${formatTime(endTime)}`;
 
           let statusLabel = '';
           let type = '';
