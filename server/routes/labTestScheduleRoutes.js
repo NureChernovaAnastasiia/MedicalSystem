@@ -14,6 +14,7 @@ router.get(
   roleMiddleware('Admin', 'Doctor', 'Patient'),
   labTestScheduleController.getByLabAndDate
 );
+router.get('/working-hours/lab/:hospital_lab_service_id/:date', labTestScheduleController.getWorkingHoursByDate);
 
 router.get('/', roleMiddleware('Admin', 'Doctor', 'Patient'), labTestScheduleController.getAll);
 router.get('/:id', roleMiddleware('Admin', 'Doctor', 'Patient'), labTestScheduleController.getById);
