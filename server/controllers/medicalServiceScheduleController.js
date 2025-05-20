@@ -6,8 +6,10 @@ const {
   Hospital,
   MedicalServiceInfo,
   Doctor,
+  MedicalService,
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
+const moment = require("moment");
 
 class MedicalServiceScheduleController {
   // 🔍 Отримати всі розклади процедур (всі авторизовані)
@@ -113,11 +115,15 @@ class MedicalServiceScheduleController {
         patientId = bodyPatientId;
       }
 
-      const doctor_id = (
-        await HospitalMedicalService.findByPk(
-          schedule.hospital_medical_service_id
-        )
-      )?.doctor_id;
+      const hospitalService = await HospitalMedicalService.findByPk(
+        schedule.hospital_medical_service_id
+      );
+      if (!hospitalService)
+        return next(
+          ApiError.badRequest("Послугу медичних процедур не знайдено")
+        );
+
+      const doctor_id = hospitalService.doctor_id;
 
       const appointment = await Appointment.create({
         patient_id: patientId,
@@ -129,6 +135,15 @@ class MedicalServiceScheduleController {
 
       await schedule.update({ is_booked: true });
 
+      // 🔄 Автоматично створюємо запис про процедуру (MedicalService)
+      await MedicalService.create({
+        patient_id: patientId,
+        doctor_id,
+        medical_service_schedule_id,
+        result: null,
+        notes: null,
+      });
+
       return res.json(appointment);
     } catch (e) {
       console.error("bookMedicalService error:", e);
@@ -139,20 +154,83 @@ class MedicalServiceScheduleController {
   // ➕ Створити (лише Admin або Doctor)
   async create(req, res, next) {
     try {
-      if (!["Admin", "Doctor"].includes(req.user.role)) {
+      if (req.user.role !== "Admin") {
         return next(
-          ApiError.forbidden("Недостатньо прав для створення розкладу")
+          ApiError.forbidden("Тільки адміністратор може створювати розклад")
         );
       }
 
-      const created = await MedicalServiceSchedule.create(req.body);
-      return res.status(201).json(created);
+      const {
+        hospital_medical_service_id,
+        start_date,
+        end_date,
+        time_template,
+      } = req.body;
+
+      if (
+        !hospital_medical_service_id ||
+        !start_date ||
+        !end_date ||
+        !time_template
+      ) {
+        return next(
+          ApiError.badRequest(
+            "Необхідно вказати hospital_medical_service_id, start_date, end_date та time_template"
+          )
+        );
+      }
+
+      const schedulesToCreate = [];
+      let current = moment(start_date);
+      const end = moment(end_date);
+
+      while (current.isSameOrBefore(end, "day")) {
+        const dayOfWeek = current.format("dddd"); // e.g. 'Monday'
+        const template = time_template[dayOfWeek];
+
+        if (template) {
+          const { start_time, end_time } = template;
+          const slotStart = moment(
+            `${current.format("YYYY-MM-DD")} ${start_time}`,
+            "YYYY-MM-DD HH:mm"
+          );
+          const slotEndLimit = moment(
+            `${current.format("YYYY-MM-DD")} ${end_time}`,
+            "YYYY-MM-DD HH:mm"
+          );
+
+          let slotCurrent = slotStart.clone();
+          while (slotCurrent.isBefore(slotEndLimit)) {
+            const slotEnd = slotCurrent.clone().add(30, "minutes");
+            if (slotEnd.isAfter(slotEndLimit)) break;
+
+            schedulesToCreate.push({
+              hospital_medical_service_id,
+              appointment_date: current.format("YYYY-MM-DD"),
+              start_time: slotCurrent.toDate(),
+              end_time: slotEnd.toDate(),
+              is_booked: false,
+            });
+
+            slotCurrent.add(30, "minutes");
+          }
+        }
+
+        current.add(1, "day");
+      }
+
+      const created = await MedicalServiceSchedule.bulkCreate(
+        schedulesToCreate
+      );
+      return res.status(201).json({
+        message: `Успішно створено ${created.length} розкладів`,
+        created,
+      });
     } catch (e) {
-      console.error("create error:", e);
-      return next(ApiError.badRequest("Не вдалося створити розклад процедури"));
+      console.error("create (medicalServiceSchedule) error:", e);
+      return next(ApiError.internal("Не вдалося створити розклад процедур"));
     }
   }
-
   // ✏️ Оновити (лише Admin або Doctor)
   async update(req, res, next) {
     try {
@@ -213,6 +291,45 @@ class MedicalServiceScheduleController {
     } catch (e) {
       console.error("getByServiceAndDate error:", e);
       return next(ApiError.internal("Не вдалося отримати розклад процедур"));
+    }
+  }
+  async getWorkingHoursByDate(req, res, next) {
+    try {
+      const { hospital_medical_service_id, date } = req.params;
+
+      if (!hospital_medical_service_id || !date) {
+        return next(
+          ApiError.badRequest("Потрібні hospital_medical_service_id і date")
+        );
+      }
+
+      const slots = await MedicalServiceSchedule.findAll({
+        where: {
+          hospital_medical_service_id,
+          appointment_date: date,
+        },
+        order: [["start_time", "ASC"]],
+      });
+
+      if (slots.length === 0) {
+        return res.json({
+          hospital_medical_service_id,
+          date,
+          message: "На цей день немає процедур",
+        });
+      }
+
+      return res.json({
+        hospital_medical_service_id,
+        date,
+        start_time: moment(slots[0].start_time, "HH:mm").format("HH:mm:ss"),
+        end_time: moment(slots[slots.length - 1].end_time, "HH:mm").format(
+          "HH:mm:ss"
+        ),
+      });
+    } catch (e) {
+      console.error("getWorkingHoursByDate (Medical) error:", e);
+      return next(ApiError.internal("Не вдалося отримати час для процедур"));
     }
   }
 }

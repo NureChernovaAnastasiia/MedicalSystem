@@ -13,6 +13,7 @@ router.get(
   roleMiddleware('Admin', 'Doctor', 'Patient'),
   medicalServiceScheduleController.getByServiceAndDate
 );
+router.get('/working-hours/medical/:hospital_medical_service_id/:date', medicalServiceScheduleController.getWorkingHoursByDate);
 
 router.get('/', roleMiddleware('Admin', 'Doctor', 'Patient'), medicalServiceScheduleController.getAll);
 router.get('/:id', roleMiddleware('Admin', 'Doctor', 'Patient'), medicalServiceScheduleController.getById);

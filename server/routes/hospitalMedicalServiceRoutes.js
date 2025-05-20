@@ -13,9 +13,9 @@ router.get('/doctor/:doctorId', hospitalMedicalServiceController.getByDoctor);
 router.get('/:id', hospitalMedicalServiceController.getById);
 
 // Адмін-доступ
-router.get('/', roleMiddleware('Admin'), hospitalMedicalServiceController.getAll);
-router.post('/', roleMiddleware('Admin'), hospitalMedicalServiceController.create);
-router.put('/:id', roleMiddleware('Admin'), hospitalMedicalServiceController.update);
-router.delete('/:id', roleMiddleware('Admin'), hospitalMedicalServiceController.delete);
+router.get('/', roleMiddleware('Admin', 'Doctor', 'Patient'), hospitalMedicalServiceController.getAll);
+router.post('/', roleMiddleware('Admin', 'Doctor'), hospitalMedicalServiceController.create);
+router.put('/:id', roleMiddleware('Admin', 'Doctor'), hospitalMedicalServiceController.update);
+router.delete('/:id', roleMiddleware('Admin', 'Doctor'), hospitalMedicalServiceController.delete);
 
 module.exports = router;
