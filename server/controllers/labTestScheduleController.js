@@ -6,6 +6,7 @@ const {
   LabTestInfo,
   Doctor,
   LabTestSchedule,
+  LabTest,
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const moment = require("moment");
@@ -174,14 +175,15 @@ class LabTestScheduleController {
     try {
       const { lab_test_schedule_id, patient_id: bodyPatientId } = req.body;
 
+      // 1. Знайти запис розкладу
       const schedule = await LabTestSchedule.findByPk(lab_test_schedule_id);
       if (!schedule)
         return next(ApiError.notFound("Розклад аналізу не знайдено"));
       if (schedule.is_booked)
         return next(ApiError.badRequest("Час вже зайнято"));
 
+      // 2. Визначити ID пацієнта
       let patientId;
-
       if (req.user.role === "Patient") {
         const patient = await Patient.findOne({
           where: { user_id: req.user.id },
@@ -194,10 +196,16 @@ class LabTestScheduleController {
         patientId = bodyPatientId;
       }
 
-      const doctor_id = (
-        await HospitalLabService.findByPk(schedule.hospital_lab_service_id)
-      )?.doctor_id;
+      // 3. Отримати doctor_id з HospitalLabService
+      const hospitalLabService = await HospitalLabService.findByPk(
+        schedule.hospital_lab_service_id
+      );
+      if (!hospitalLabService)
+        return next(ApiError.badRequest("Послугу лабораторії не знайдено"));
 
+      const doctor_id = hospitalLabService.doctor_id;
+
+      // 4. Створити запис про прийом (Appointment)
       const appointment = await Appointment.create({
         patient_id: patientId,
         doctor_id,
@@ -206,8 +214,19 @@ class LabTestScheduleController {
         status: "Scheduled",
       });
 
+      // 5. Позначити час як зайнятий
       await schedule.update({ is_booked: true });
 
+      // 6. 🔄 Автоматично створити пустий аналіз (LabTest)
+      await LabTest.create({
+        patient_id: patientId,
+        doctor_id,
+        lab_test_schedule_id,
+        result: null,
+        notes: null,
+      });
+
+      // 7. Відповідь
       return res.json(appointment);
     } catch (e) {
       console.error("bookLabTest error:", e);
