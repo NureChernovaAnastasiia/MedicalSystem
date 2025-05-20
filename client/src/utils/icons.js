@@ -15,7 +15,8 @@ import iconDosage from '../img/icons/dosage.png';
 import iconPreparation from '../img/icons/preparation.png';
 import iconDescription from '../img/icons/description.png';
 import iconTestimony from '../img/icons/testimony.png';
-
+import iconSyringe from '../img/icons/syringe.png';
+import iconMoney from '../img/icons/money.png';
 
 export {
   iconDate,
@@ -34,5 +35,7 @@ export {
   iconDosage,
   iconPreparation,
   iconDescription,
-  iconTestimony
+  iconTestimony,
+  iconSyringe,
+  iconMoney
 };

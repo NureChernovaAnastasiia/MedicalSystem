@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo';
+import ModalServicesOrdering from '../../components/modals/ModalServicesOrdering';
 
 const baseStyles = {
   analyseItem: {
@@ -94,6 +95,7 @@ const smallScreenStyles = {
 const AnalyseItem = ({ analyse }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -138,32 +140,30 @@ const AnalyseItem = ({ analyse }) => {
     },
   };
 
-  return (
+    return (
     <>
-      <div style={combinedStyles.analyseItem}>
-        <span
-          style={combinedStyles.analyseName}
-          onClick={() => setIsModalOpen(true)}
-        >
-          {name}
-        </span>
-        <span style={combinedStyles.labName}>{hospitalName}</span>
-        <span style={combinedStyles.labAddress}>{hospitalAddress}</span>
-        <span style={combinedStyles.price}>
-          {price} грн
-        </span>
-        <button
-          style={combinedStyles.orderButton}
-          onMouseEnter={e => (e.currentTarget.style.background = '#00c3a1')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0, 195, 161, 0.42)')}
-        >
-          Замовити
-        </button>
-      </div>
+        <div style={combinedStyles.analyseItem}>
+            <span style={combinedStyles.analyseName} onClick={()=> setIsModalOpen(true)}
+                >
+                {name}
+            </span>
+            <span style={combinedStyles.labName}>{hospitalName}</span>
+            <span style={combinedStyles.labAddress}>{hospitalAddress}</span>
+            <span style={combinedStyles.price}>
+                {price} грн
+            </span>
+            <button style={combinedStyles.orderButton} onClick={()=> setIsOrderModalOpen(true)}
+                onMouseEnter={e => (e.currentTarget.style.background = '#00c3a1')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0, 195, 161, 0.42)')}
+                >
+                Замовити
+            </button>
+        </div>
 
-      {isModalOpen && <ModalAnalysInfo onClose={() => setIsModalOpen(false)} analyse={analyse} />}
+        {isModalOpen && <ModalAnalysInfo onClose={()=> setIsModalOpen(false)} analyse={analyse} />}
+        {isOrderModalOpen && <ModalServicesOrdering onClose={()=> setIsOrderModalOpen(false)} analyse={analyse} />}
     </>
-  );
-};
+    );
+    };
 
-export default AnalyseItem;
+    export default AnalyseItem;
