@@ -5,6 +5,9 @@ const authMiddleware = require('../middleware/authMiddleware');
 const checkRole = require('../middleware/checkRoleMiddleware');
 
 router.use(authMiddleware);
+
+router.get('/working-hours/:doctorId/:date', controller.getWorkingHoursByDate);
+
 // Публічний доступ до розкладу лікаря на день
 router.get('/doctor/:doctorId/date/:date', controller.getByDoctorAndDate);
 
