@@ -14,7 +14,6 @@ const generateJwt = (id, email, role) => {
 
 class UserController {
   constructor() {
-    // Прив'язуємо методи до контексту this
     this.registration = this.registration.bind(this);
     this.login = this.login.bind(this);
     this.check = this.check.bind(this);
@@ -265,7 +264,36 @@ class UserController {
       return next(ApiError.internal("Помилка видалення"));
     }
   }
+  async changePassword(req, res, next) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+
+      if (!oldPassword || !newPassword) {
+        return next(
+          ApiError.badRequest("Необхідно вказати старий і новий паролі")
+        );
+      }
+
+      const user = await User.findByPk(req.user.id);
+      if (!user) {
+        return next(ApiError.badRequest("Користувача не знайдено"));
+      }
+
+      const isValid = await bcrypt.compare(oldPassword, user.password);
+      if (!isValid) {
+        return next(ApiError.badRequest("Старий пароль невірний"));
+      }
+
+      const hashedNewPassword = await bcrypt.hash(newPassword, 5);
+      user.password = hashedNewPassword;
+      await user.save();
+
+      return res.json({ message: "Пароль успішно змінено" });
+    } catch (e) {
+      console.error("❌ changePassword error:", e.message);
+      return next(ApiError.internal("Помилка зміни пароля"));
+    }
+  }
 }
 
-// Створюємо інстанс
 module.exports = new UserController();

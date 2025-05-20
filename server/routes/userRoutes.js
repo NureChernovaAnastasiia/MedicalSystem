@@ -16,6 +16,8 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
+router.post("/change-password", authMiddleware, userController.changePassword);
+
 // login
 router.post('/login', userController.login);
 
