@@ -19,19 +19,34 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
 
   const schedule = appointment.DoctorSchedule || appointment.LabTestSchedule || appointment.MedicalServiceSchedule;
 
-  const appointmentDate = appointment.appointment_date || (schedule && schedule.appointment_date) || '';
+  let formattedDateTime = "Дата і час не вказані";
 
-  const startTime = schedule?.start_time || '00:00:00';
+  if (appointment.DoctorSchedule) {
+    const appointmentDate = appointment.appointment_date || schedule.appointment_date;
+    const startTime = schedule.start_time;
 
-  const dateTimeString = appointmentDate && startTime 
-    ? new Date(`${appointmentDate}T${startTime}`).toLocaleString("uk-UA", {
+    if (appointmentDate && startTime) {
+      const dateObj = new Date(`${appointmentDate}T${startTime}`);
+      formattedDateTime = dateObj.toLocaleString("uk-UA", {
         day: "numeric",
         month: "long",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit"
-      })
-    : "Дата і час не вказані";
+      });
+    }
+  } else if (appointment.LabTestSchedule || appointment.MedicalServiceSchedule) {
+    const startDate = new Date(schedule?.start_time);
+    if (!isNaN(startDate)) {
+      formattedDateTime = startDate.toLocaleString("uk-UA", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+  }
 
   return (
     <div className={styles.modalOverlay}>
@@ -52,7 +67,7 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
             <strong>Клініка: </strong>{" "}
             {appointment.Doctor?.Hospital?.name || "Невідома лікарня"}, {appointment.Doctor?.Hospital?.address}
             <br />
-            <strong>Дата та час: </strong> {dateTimeString}
+            <strong>Дата та час: </strong> {formattedDateTime}
             <br />
             <strong>Статус: </strong> {formatStatus(appointment.status)}
             <br />
@@ -76,4 +91,3 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
 };
 
 export default ModalAppointmentDetails;
-
