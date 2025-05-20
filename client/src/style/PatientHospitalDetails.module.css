@@ -123,12 +123,15 @@
 
 .servicesContainer {
   display: flex;
-  justify-content: center;
-  gap: 40px;
-  flex-wrap: wrap;
+  gap: 20px; 
+  justify-content: center; 
+  flex-wrap: nowrap;
+  max-width: 1200px; 
+  margin: 0 auto; 
 }
 
 .scrollableList {
+  flex: 1; 
   height: 250px;
   background: #fff;
   border: 1px solid #D9D9D9;

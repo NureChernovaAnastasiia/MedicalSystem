@@ -5,3 +5,7 @@ export const getHospitalLabServices = async () => {
   return data;
 };
 
+export const getHospitalLabServicesByHospitalId = async (hospitalId) => {
+  const { data } = await $authHost.get(`api/hospital-lab-services/hospital/${hospitalId}`);
+  return data;
+};

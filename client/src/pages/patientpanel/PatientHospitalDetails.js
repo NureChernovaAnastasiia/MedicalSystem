@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from '../../style/PatientHospitalDetails.module.css';
+
+import { Context } from '../../index';
+import { fetchPatientByUserId } from '../../http/patientAPI';
+import { fetchHospitalById } from '../../http/hospitalAPI';
+import { getHospitalLabServicesByHospitalId } from '../../http/analysisAPI';
+import { getHospitalMedicalServicesByHospitalId } from '../../http/servicesAPI';
+import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
 
 import iconHospital from '../../img/icons/hospital.png';
 import iconAddress from '../../img/icons/address.png';
@@ -9,35 +16,31 @@ import iconEmail from '../../img/icons/email.png';
 import iconSpecialisation from '../../img/icons/specialisation.png';
 import iconDoctor from '../../img/icons/doctor.png';
 import iconSchedule from '../../img/icons/schedule.png';
-
-import photo1 from '../../img/Woman1.jpg';
-import photo2 from '../../img/Man1.jpg';
 import { PATIENT_HOSPITALSCHEDULE_ROUTE } from '../../utils/consts';
 
-const doctors = [
-  { id: 1, name: 'Петрова Олександра Вікторівна', specialty: 'Кардіолог', experience: '12 років', image: photo1 },
-  { id: 2, name: 'Лихненко Віктор Миколайович', specialty: 'Педіатр, Терапевт', experience: '7 років', image: photo2 },
-];
 
-const DoctorCard = ({ doctor }) => (
+const DoctorCard = ({ doctor }) => {
+  const experienceYears = doctor.experience_start_date
+    ? new Date().getFullYear() - new Date(doctor.experience_start_date).getFullYear()
+    : '—';
+
+  return (
   <div className={styles.doctorCard}>
     <div className={styles.cardHeader}>
-      <button className={styles.detailsButton}>
-        <span>?</span>
-      </button>
+      <button className={styles.detailsButton}><span>?</span></button>
     </div>
-    <img src={doctor.image} alt="Doctor" className={styles.doctorImage} />
+    <img src={doctor.photo_url} alt="Doctor" className={styles.doctorImage} />
     <div className={styles.doctorInfo}>
-      <h2 className={styles.doctorName}>{doctor.name}</h2>
-      <InfoItem icon={iconSpecialisation} label={`Спеціальність: ${doctor.specialty}`} />
-      <InfoItem icon={iconDoctor} label={`Стаж: ${doctor.experience}`} />
+      <h2 className={styles.doctorName}>{doctor.last_name} {doctor.first_name} {doctor.middle_name}</h2>
+      <InfoItem icon={iconSpecialisation} label={`Спеціальність: ${doctor.specialization}`} />
+      <InfoItem icon={iconDoctor} label={`Стаж: ${experienceYears} років`} />
       <div className={styles.infoItem}>
         <img src={iconSchedule} alt="Schedule Icon" className={styles.buttonIcon} />
         <button className={styles.scheduleButton}>Записатися</button>
       </div>
     </div>
   </div>
-);
+)};
 
 const InfoItem = ({ icon, label }) => (
   <div className={styles.infoItem}>
@@ -53,53 +56,99 @@ const ContactInfo = ({ icon, text }) => (
   </div>
 );
 
-const ServiceList = ({ items }) => (
-  <div className={styles.scrollableList}>
-    <div className={styles.scrollContent}>
-      {items.map((item, index) => (
-        <div key={index} className={styles.itemCard}>
-          <div>{item.title}</div>
-          <div>{item.price}</div>
-          <button>Замовити</button>
-        </div>
-      ))}
+const ServiceList = ({ items }) => {
+  if (!items || items.length === 0) return <p>Немає даних для відображення</p>;
+
+  return (
+    <div className={styles.scrollableList}>
+      <div className={styles.scrollContent}>
+        {items.map((item) => {
+          const isMedical = !!item.MedicalServiceInfo;
+          const serviceInfo = isMedical ? item.MedicalServiceInfo : item.LabTestInfo;
+
+          const title = serviceInfo?.name || 'Без назви';
+          const priceValue = serviceInfo?.price;
+          const price = priceValue != null ? `${Math.round(priceValue)} грн` : 'Ціна відсутня';
+
+          return (
+            <div key={item.id} className={styles.itemCard}>
+              <div>{title}</div>
+              <div>{price}</div>
+              <button className={styles.orderButton}>Замовити</button>
+            </div>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PatientHospitalDetails = () => {
-  const analyses = Array(20).fill({ title: 'Аналіз крові', price: '350 грн' });
-  const services = Array(20).fill({ title: 'Консультація', price: '500 грн' });
+  const { user } = useContext(Context);
+  const [hospital, setHospital] = useState(null);
+  const [analyses, setAnalyses] = useState([]);
+  const [services, setServices] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    const fetchHospital = async () => {
+      if (!user?.user?.id) return;
+      try {
+        const patientData = await fetchPatientByUserId(user.user.id);
+
+        if (patientData?.hospital_id) {
+          const hospitalData = await fetchHospitalById(patientData.hospital_id);
+          setHospital(hospitalData);
+
+          const [labData, medicalData, doctorData] = await Promise.all([
+            getHospitalLabServicesByHospitalId(patientData.hospital_id),
+            getHospitalMedicalServicesByHospitalId(patientData.hospital_id),
+            fetchDoctorsByHospitalId(patientData.hospital_id)
+          ]);
+
+          setAnalyses(labData);
+          setServices(medicalData);
+          setDoctors(doctorData);
+        }
+      } catch (error) {
+        console.error('Помилка при завантаженні даних:', error);
+      }
+    };
+
+    fetchHospital();
+  }, [user]);
 
   return (
     <div className={styles.container}>
-      <div className={styles.headerContainer}>
-        <div className={styles.headerBox}>
-          <div className={styles.hospitalNameBlock}>
-            <img src={iconHospital} alt="Hospital Icon" className={styles.hospitalIcon} />
-            <span className={styles.hospitalName}>Амбулаторія сімейної медицини "Цінність"</span>
-          </div>
-
-          <div className={styles.middleRow}>
-            <div className={styles.clinicType}>Приватна клініка</div>
-            <div className={styles.schedule}>Пн-Сб-08:00-20:00, Нд-вихідний</div>
-          </div>
-
-          <div className={styles.headerInfo}>
-            <div className={styles.leftSide}>
-              <div className={styles.addressBox}>
-                <img src={iconAddress} alt="Address Icon" className={styles.iconSmall} />
-                <span className={styles.address}>Київ, вул. Єфремова Академіка, 8А</span>
-              </div>
+      {hospital && (
+        <div className={styles.headerContainer}>
+          <div className={styles.headerBox}>
+            <div className={styles.hospitalNameBlock}>
+              <img src={iconHospital} alt="Hospital Icon" className={styles.hospitalIcon} />
+              <span className={styles.hospitalName}>{hospital.name}</span>
             </div>
 
-            <div className={styles.rightSide}>
-              <ContactInfo icon={iconTelephone} text="+380671234567" />
-              <ContactInfo icon={iconEmail} text="tcinnistamb@gmail.com" />
+            <div className={styles.middleRow}>
+              <div className={styles.clinicType}>{hospital.type} лікарня</div>
+              <div className={styles.schedule}>{hospital.schedule}</div>
+            </div>
+
+            <div className={styles.headerInfo}>
+              <div className={styles.leftSide}>
+                <div className={styles.addressBox}>
+                  <img src={iconAddress} alt="Address Icon" className={styles.iconSmall} />
+                  <span className={styles.address}>{hospital.address}</span>
+                </div>
+              </div>
+
+              <div className={styles.rightSide}>
+                <ContactInfo icon={iconTelephone} text={hospital.phone} />
+                <ContactInfo icon={iconEmail} text={hospital.email} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <h2 className={styles.servicesTitle}>Наші послуги</h2>
       <div className={styles.servicesContainer}>
@@ -109,7 +158,9 @@ const PatientHospitalDetails = () => {
 
       <div className={styles.doctorTitle}>
         <h2 className={styles.sectionTitle}>Наші лікарі</h2>
-        <NavLink to={PATIENT_HOSPITALSCHEDULE_ROUTE} className={styles.scheduleLink}>Розклад прийому лікарів</NavLink>
+        <NavLink to={PATIENT_HOSPITALSCHEDULE_ROUTE} className={styles.scheduleLink}>
+          Розклад прийому лікарів
+        </NavLink>
       </div>
 
       <div className={styles.doctorGrid}>
