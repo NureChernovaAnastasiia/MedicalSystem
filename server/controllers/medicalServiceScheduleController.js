@@ -6,6 +6,7 @@ const {
   Hospital,
   MedicalServiceInfo,
   Doctor,
+  MedicalService,
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const moment = require("moment");
@@ -114,11 +115,15 @@ class MedicalServiceScheduleController {
         patientId = bodyPatientId;
       }
 
-      const doctor_id = (
-        await HospitalMedicalService.findByPk(
-          schedule.hospital_medical_service_id
-        )
-      )?.doctor_id;
+      const hospitalService = await HospitalMedicalService.findByPk(
+        schedule.hospital_medical_service_id
+      );
+      if (!hospitalService)
+        return next(
+          ApiError.badRequest("Послугу медичних процедур не знайдено")
+        );
+
+      const doctor_id = hospitalService.doctor_id;
 
       const appointment = await Appointment.create({
         patient_id: patientId,
@@ -129,6 +134,15 @@ class MedicalServiceScheduleController {
       });
 
       await schedule.update({ is_booked: true });
+
+      // 🔄 Автоматично створюємо запис про процедуру (MedicalService)
+      await MedicalService.create({
+        patient_id: patientId,
+        doctor_id,
+        medical_service_schedule_id,
+        result: null,
+        notes: null,
+      });
 
       return res.json(appointment);
     } catch (e) {
