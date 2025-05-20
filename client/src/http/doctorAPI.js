@@ -24,3 +24,13 @@ export const fetchUniqueHospitalNames = async () => {
   const { data } = await $authHost.get('/api/hospitals/unique-names');
   return data;
 };
+
+export const fetchDoctorsByHospitalId = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`api/doctors/by-hospital/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error(`Помилка при отриманні лікарів для лікарні з ID ${hospitalId}:`, error);
+    throw error;
+  }
+};
