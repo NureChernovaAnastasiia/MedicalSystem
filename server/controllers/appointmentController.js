@@ -1,12 +1,21 @@
-const { Appointment, Doctor, Patient, DoctorSchedule, Hospital } = require('../models/models');
-const ApiError = require('../error/ApiError');
-const { Op } = require('sequelize');
+const {
+  Appointment,
+  Doctor,
+  Patient,
+  DoctorSchedule,
+  Hospital,
+  LabTestSchedule,
+  MedicalServiceSchedule,
+} = require("../models/models");
+const ApiError = require("../error/ApiError");
+const { Op } = require("sequelize");
+const { resolveAndBookSchedule } = require("../utils/scheduleUtils");
 
 class AppointmentController {
   async getAll(req, res, next) {
     try {
-      if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Only admin can view all appointments'));
+      if (req.user.role !== "Admin") {
+        return next(ApiError.forbidden("Only admin can view all appointments"));
       }
 
       const appointments = await Appointment.findAll({
@@ -17,13 +26,15 @@ class AppointmentController {
           },
           Patient,
           DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
         ],
       });
 
       return res.json(AppointmentController._mapStatus(appointments));
     } catch (e) {
-      console.error('getAll error:', e);
-      return next(ApiError.internal('Failed to retrieve appointments'));
+      console.error("getAll error:", e);
+      return next(ApiError.internal("Failed to retrieve appointments"));
     }
   }
 
@@ -38,97 +49,185 @@ class AppointmentController {
           },
           Patient,
           DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
         ],
       });
 
-      if (!appointment) return next(ApiError.notFound('Appointment not found'));
+      if (!appointment) return next(ApiError.notFound("Appointment not found"));
 
-      if (req.user.role === 'Patient') {
-        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (req.user.role === "Patient") {
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!patient || patient.id !== appointment.patient_id) {
-          return next(ApiError.forbidden('Access denied'));
+          return next(ApiError.forbidden("Access denied"));
         }
       }
 
       return res.json(AppointmentController._mapStatus([appointment])[0]);
     } catch (e) {
-      console.error('getById error:', e);
-      return next(ApiError.internal('Failed to get appointment'));
+      console.error("getById error:", e);
+      return next(ApiError.internal("Failed to get appointment"));
     }
   }
 
   async create(req, res, next) {
     try {
-      const { patient_id, doctor_id, doctor_schedule_id, status, notes } = req.body;
+      const {
+        patient_id,
+        doctor_id,
+        doctor_schedule_id,
+        lab_test_schedule_id,
+        medical_service_schedule_id,
+        status,
+        notes,
+      } = req.body;
 
-      if (!patient_id || !doctor_id || !doctor_schedule_id) {
-        return next(ApiError.badRequest('Required fields: patient_id, doctor_id, doctor_schedule_id'));
+      if (!patient_id || !doctor_id) {
+        return next(
+          ApiError.badRequest("Required fields: patient_id, doctor_id")
+        );
       }
 
-      const schedule = await DoctorSchedule.findByPk(doctor_schedule_id);
-      if (!schedule) return next(ApiError.notFound('Doctor schedule not found'));
-
-      if (schedule.is_booked) {
-        return next(ApiError.badRequest('This time slot is already booked'));
+      if (
+        !doctor_schedule_id &&
+        !lab_test_schedule_id &&
+        !medical_service_schedule_id
+      ) {
+        return next(
+          ApiError.badRequest("One of the schedule IDs must be provided")
+        );
       }
 
-      const appointment_date = schedule.appointment_date;
+      let appointment_date = null;
+
+      if (doctor_schedule_id) {
+        appointment_date = await resolveAndBookSchedule(
+          "doctor",
+          doctor_schedule_id,
+          next
+        );
+      } else if (lab_test_schedule_id) {
+        appointment_date = await resolveAndBookSchedule(
+          "lab",
+          lab_test_schedule_id,
+          next
+        );
+      } else if (medical_service_schedule_id) {
+        appointment_date = await resolveAndBookSchedule(
+          "service",
+          medical_service_schedule_id,
+          next
+        );
+      }
+
+      if (!appointment_date) return; // зупиняємось, якщо next() вже викликав помилку
 
       const created = await Appointment.create({
         patient_id,
         doctor_id,
         doctor_schedule_id,
+        lab_test_schedule_id,
+        medical_service_schedule_id,
         appointment_date,
-        status: status || 'Scheduled',
+        status: status || "Scheduled",
         notes: notes || null,
       });
 
-      await schedule.update({ is_booked: true });
-
       return res.json(created);
     } catch (e) {
-      console.error('create error:', e);
-      return next(ApiError.internal('Failed to create appointment'));
+      console.error("create error:", e);
+      return next(ApiError.internal("Failed to create appointment"));
     }
   }
 
   async update(req, res, next) {
     try {
-      if (!['Admin', 'Doctor'].includes(req.user.role)) {
-        return next(ApiError.forbidden('Insufficient permissions'));
+      if (!["Admin", "Doctor"].includes(req.user.role)) {
+        return next(ApiError.forbidden("Insufficient permissions"));
       }
 
       const appointment = await Appointment.findByPk(req.params.id);
-      if (!appointment) return next(ApiError.notFound('Appointment not found'));
+      if (!appointment) return next(ApiError.notFound("Appointment not found"));
 
       await appointment.update(req.body);
       return res.json(appointment);
     } catch (e) {
-      console.error('update error:', e);
-      return next(ApiError.internal('Failed to update appointment'));
+      console.error("update error:", e);
+      return next(ApiError.internal("Failed to update appointment"));
     }
   }
 
   async cancel(req, res, next) {
     try {
-      const appointment = await Appointment.findByPk(req.params.id);
-      if (!appointment) return next(ApiError.notFound('Appointment not found'));
+      const appointment = await Appointment.findByPk(req.params.id, {
+        include: [
+          Doctor,
+          Patient,
+          DoctorSchedule,
+          "LabTestSchedule",
+          "MedicalServiceSchedule",
+        ],
+      });
 
-      if (req.user.role === 'Patient') {
-        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (!appointment) {
+        return next(ApiError.notFound("Appointment not found"));
+      }
+
+      const { notes } = req.body;
+
+      // 🔐 Доступ для пацієнта до свого запису
+      if (req.user.role === "Patient") {
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
+
         if (!patient || patient.id !== appointment.patient_id) {
-          return next(ApiError.forbidden('Access denied'));
+          return next(ApiError.forbidden("Access denied"));
+        }
+
+        // Дозволити запис коментаря тільки пацієнту
+        if (notes) {
+          appointment.notes = notes;
         }
       }
 
-      appointment.status = 'Cancelled';
+      // Статус та запис
+      appointment.status = "Cancelled";
       await appointment.save();
-      await DoctorSchedule.update({ is_booked: false }, { where: { id: appointment.doctor_schedule_id } });
 
-      return res.json({ message: 'Appointment cancelled' });
+      // Звільнення розкладу, якщо є
+      if (appointment.doctor_schedule_id) {
+        await DoctorSchedule.update(
+          { is_booked: false },
+          { where: { id: appointment.doctor_schedule_id } }
+        );
+      }
+
+      if (appointment.lab_test_schedule_id) {
+        const { LabTestSchedule } = require("../models/models");
+        await LabTestSchedule.update(
+          { is_booked: false },
+          { where: { id: appointment.lab_test_schedule_id } }
+        );
+      }
+
+      if (appointment.medical_service_schedule_id) {
+        const { MedicalServiceSchedule } = require("../models/models");
+        await MedicalServiceSchedule.update(
+          { is_booked: false },
+          { where: { id: appointment.medical_service_schedule_id } }
+        );
+      }
+
+      return res.json({
+        message: "Appointment cancelled",
+        appointment,
+      });
     } catch (e) {
-      console.error('cancel error:', e);
-      return next(ApiError.internal('Failed to cancel appointment'));
+      console.error("cancel error:", e);
+      return next(ApiError.internal("Failed to cancel appointment"));
     }
   }
 
@@ -136,10 +235,12 @@ class AppointmentController {
     try {
       const { patientId } = req.params;
 
-      if (req.user.role === 'Patient') {
-        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (req.user.role === "Patient") {
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!patient || patient.id !== parseInt(patientId)) {
-          return next(ApiError.forbidden('Access denied'));
+          return next(ApiError.forbidden("Access denied"));
         }
       }
 
@@ -151,13 +252,15 @@ class AppointmentController {
             include: [Hospital],
           },
           DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
         ],
       });
 
       return res.json(AppointmentController._mapStatus(items));
     } catch (e) {
-      console.error('getByPatient error:', e);
-      return next(ApiError.internal('Failed to retrieve patient appointments'));
+      console.error("getByPatient error:", e);
+      return next(ApiError.internal("Failed to retrieve patient appointments"));
     }
   }
 
@@ -165,10 +268,12 @@ class AppointmentController {
     try {
       const { doctorId } = req.params;
 
-      if (req.user.role === 'Doctor') {
-        const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
+      if (req.user.role === "Doctor") {
+        const doctor = await Doctor.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!doctor || doctor.id !== parseInt(doctorId)) {
-          return next(ApiError.forbidden('Access denied'));
+          return next(ApiError.forbidden("Access denied"));
         }
       }
 
@@ -181,13 +286,15 @@ class AppointmentController {
           },
           Patient,
           DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
         ],
       });
 
       return res.json(AppointmentController._mapStatus(appointments));
     } catch (e) {
-      console.error('getByDoctor error:', e);
-      return next(ApiError.internal('Failed to retrieve doctor appointments'));
+      console.error("getByDoctor error:", e);
+      return next(ApiError.internal("Failed to retrieve doctor appointments"));
     }
   }
 
@@ -195,10 +302,12 @@ class AppointmentController {
     try {
       const { patientId } = req.params;
 
-      if (req.user.role === 'Patient') {
-        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (req.user.role === "Patient") {
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!patient || patient.id !== parseInt(patientId)) {
-          return next(ApiError.forbidden('Access denied'));
+          return next(ApiError.forbidden("Access denied"));
         }
       }
 
@@ -208,7 +317,7 @@ class AppointmentController {
         where: {
           patient_id: patientId,
           appointment_date: { [Op.gte]: now },
-          status: { [Op.ne]: 'Cancelled' },
+          status: { [Op.ne]: "Cancelled" },
         },
         include: [
           {
@@ -216,33 +325,93 @@ class AppointmentController {
             include: [Hospital],
           },
           DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
         ],
-        order: [['appointment_date', 'ASC']],
+        order: [["appointment_date", "ASC"]],
       });
 
       return res.json(AppointmentController._mapStatus(upcomingAppointments));
     } catch (e) {
-      console.error('getUpcomingByPatient error:', e);
-      return next(ApiError.internal('Failed to retrieve upcoming appointments'));
+      console.error("getUpcomingByPatient error:", e);
+      return next(
+        ApiError.internal("Failed to retrieve upcoming appointments")
+      );
     }
   }
 
   static _mapStatus(list) {
     const now = new Date();
-    return list.map(item => {
+    return list.map((item) => {
       const date = new Date(item.appointment_date);
 
       let status;
-      if (item.status === 'Cancelled') {
-        status = 'Cancelled';
+      if (item.status === "Cancelled") {
+        status = "Cancelled";
       } else if (date < now) {
-        status = 'Past';
+        status = "Past";
       } else {
-        status = 'Scheduled';
+        status = "Scheduled";
       }
 
       return { ...item.toJSON(), computed_status: status };
     });
+  }
+  async markAsCompleted(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      console.log("✅ markAsCompleted called");
+      console.log("📥 req.params.id:", id);
+      console.log("🔑 req.user:", req.user);
+
+      const appointment = await Appointment.findByPk(id);
+      if (!appointment) {
+        return next(ApiError.notFound("Прийом не знайдено"));
+      }
+
+      console.log("📄 appointment.doctor_id:", appointment.doctor_id);
+
+      if (req.user.role === "Doctor") {
+        const doctor = await Doctor.findOne({
+          where: { user_id: req.user.id },
+        });
+
+        console.log("👨‍⚕️ Found doctor:", doctor?.id);
+
+        if (!doctor) {
+          return next(ApiError.badRequest("Лікаря не знайдено"));
+        }
+
+        if (doctor.id !== appointment.doctor_id) {
+          console.log("⛔ Access denied: doctor.id !== appointment.doctor_id");
+          return next(ApiError.forbidden("Немає доступу до цього прийому"));
+        }
+      } else if (req.user.role !== "Admin") {
+        console.log("⛔ Access denied: role is not Admin or Doctor");
+        return next(
+          ApiError.forbidden(
+            "Тільки лікар або адміністратор можуть підтвердити прийом"
+          )
+        );
+      }
+
+      // 📝 Оновлення статусу
+      appointment.status = "Completed";
+      await appointment.save();
+
+      console.log("✅ Appointment marked as completed");
+
+      return res.json({
+        message: "Прийом успішно підтверджено як завершений",
+        appointment,
+      });
+    } catch (e) {
+      console.error("❌ markAsCompleted error:", e);
+      return next(
+        ApiError.internal("Не вдалося підтвердити завершення прийому")
+      );
+    }
   }
 }
 
