@@ -1,39 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from '../../style/PatientAnalyseOrder.module.css';
 
-import iconSearch from '../../img/icons/search.png';
+import { getHospitalMedicalServices } from '../../http/servicesAPI';  
 
-const ServiceItem = ({ name, provider, address, price }) => (
-  <div className={styles.analyseItem}>
-    <span className={styles.analyseName}>{name}</span>
-    <span className={styles.labName}>{provider}</span>
-    <span className={styles.labAddress}>{address}</span>
-    <span className={styles.price}>{price} грн</span>
-    <button className={styles.orderButton}>Замовити</button>
-  </div>
-);
+import SearchByHospital from '../../components/elements/SearchByHospital';
+import SearchByCity from '../../components/elements/SearchByCity';
+import SearchInput from '../../components/elements/SearchInput';
+import SortByPrice from '../../components/elements/SortByPrice';
+import AnalyseItem from '../../components/elements/AnalyseItem'; 
 
 const PatientServiceOrder = () => {
-  const services = [
-    {
-      name: 'Консультація терапевта',
-      provider: 'Клініка "Добробут"',
-      address: 'Київ, вулиця Сім’ї Ідзиковських, 3',
-      price: 600,
-    },
-    {
-      name: 'УЗД серця (ехокардіографія)',
-      provider: 'Медичний центр "Оберіг"',
-      address: 'Київ, вулиця Зоологічна, 3',
-      price: 950,
-    },
-    {
-      name: 'Консультація дерматолога',
-      provider: 'Клініка "Лікарня майбутнього"',
-      address: 'Львів, вулиця Наукова, 7',
-      price: 750,
-    },
-  ];
+  const [analyses, setAnalyses] = useState([]);
+  const [filteredAnalyses, setFilteredAnalyses] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedHospital, setSelectedHospital] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [sortOrder, setSortOrder] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getHospitalMedicalServices(); 
+        setAnalyses(data);
+        setFilteredAnalyses(data);
+      } catch (error) {
+        console.error('Помилка при завантаженні послуг:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    let filtered = analyses;
+
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(a =>
+        a.MedicalServiceInfo?.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (selectedHospital) {
+      filtered = filtered.filter(a => a.Hospital?.name === selectedHospital);
+    }
+    if (selectedCity) {
+      filtered = filtered.filter(a =>
+        a.Hospital?.address?.toLowerCase().includes(selectedCity.toLowerCase())
+      );
+    }
+
+    if (sortOrder === 'asc') {
+      filtered = [...filtered].sort((a, b) => a.MedicalServiceInfo.price - b.MedicalServiceInfo.price);
+    } else if (sortOrder === 'desc') {
+      filtered = [...filtered].sort((a, b) => b.MedicalServiceInfo.price - a.MedicalServiceInfo.price);
+    }
+
+    setFilteredAnalyses(filtered);
+  }, [searchTerm, selectedHospital, selectedCity, sortOrder, analyses]);
 
   return (
     <div className={styles.container}>
@@ -44,24 +66,13 @@ const PatientServiceOrder = () => {
 
       <div className={styles.searchGroup}>
         <div className={styles.inputWrapper}>
-          <img src={iconSearch} alt="Search Icon" className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Введіть назву послуги"
-          />
+          <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Введіть назву послуги" />
         </div>
 
         <div className={styles.selectGroup}>
-          <select className={styles.select}>
-            <option>Місто</option>
-          </select>
-          <select className={styles.select}>
-            <option>Клініка</option>
-          </select>
-          <select className={styles.select}>
-            <option>Сортувати за</option>
-          </select>
+          <SearchByCity value={selectedCity} onChange={setSelectedCity} />
+          <SearchByHospital value={selectedHospital} onChange={setSelectedHospital} />
+          <SortByPrice value={sortOrder} onChange={setSortOrder} />
         </div>
       </div>
 
@@ -73,14 +84,8 @@ const PatientServiceOrder = () => {
       </div>
 
       <div className={styles.analyseList}>
-        {services.map((service, index) => (
-          <ServiceItem
-            key={index}
-            name={service.name}
-            provider={service.provider}
-            address={service.address}
-            price={service.price}
-          />
+        {filteredAnalyses.map((analyse, index) => (
+          <AnalyseItem key={index} analyse={analyse} />
         ))}
       </div>
     </div>

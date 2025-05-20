@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo'; 
+import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo';
 
 const baseStyles = {
   analyseItem: {
@@ -16,7 +16,7 @@ const baseStyles = {
     color: '#00C3A1',
     fontSize: '1.2rem',
     wordBreak: 'break-word',
-    cursor: 'pointer', 
+    cursor: 'pointer',
   },
   labName: {
     fontWeight: 300,
@@ -105,6 +105,12 @@ const AnalyseItem = ({ analyse }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  const info = analyse.LabTestInfo || analyse.MedicalServiceInfo || {};
+  const name = info.name || '—';
+  const price = info.price ? Math.round(Number(info.price)) : '—';
+  const hospitalName = analyse.Hospital?.name || '—';
+  const hospitalAddress = analyse.Hospital?.address || '—';
+
   const combinedStyles = {
     analyseItem: {
       ...baseStyles.analyseItem,
@@ -139,12 +145,12 @@ const AnalyseItem = ({ analyse }) => {
           style={combinedStyles.analyseName}
           onClick={() => setIsModalOpen(true)}
         >
-          {analyse.LabTestInfo?.name || '—'}
+          {name}
         </span>
-        <span style={combinedStyles.labName}>{analyse.Hospital?.name || '—'}</span>
-        <span style={combinedStyles.labAddress}>{analyse.Hospital?.address || '—'}</span>
+        <span style={combinedStyles.labName}>{hospitalName}</span>
+        <span style={combinedStyles.labAddress}>{hospitalAddress}</span>
         <span style={combinedStyles.price}>
-          {analyse.LabTestInfo?.price ? Math.round(analyse.LabTestInfo.price) : '—'} грн
+          {price} грн
         </span>
         <button
           style={combinedStyles.orderButton}
