@@ -17,6 +17,22 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
     }
   };
 
+  const schedule = appointment.DoctorSchedule || appointment.LabTestSchedule || appointment.MedicalServiceSchedule;
+
+  const appointmentDate = appointment.appointment_date || (schedule && schedule.appointment_date) || '';
+
+  const startTime = schedule?.start_time || '00:00:00';
+
+  const dateTimeString = appointmentDate && startTime 
+    ? new Date(`${appointmentDate}T${startTime}`).toLocaleString("uk-UA", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      })
+    : "Дата і час не вказані";
+
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
@@ -36,15 +52,7 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
             <strong>Клініка: </strong>{" "}
             {appointment.Doctor?.Hospital?.name || "Невідома лікарня"}, {appointment.Doctor?.Hospital?.address}
             <br />
-            <strong>Дата та час: </strong>{" "}
-            {new Date(`${appointment.appointment_date}T${appointment.DoctorSchedule?.start_time}`)
-              .toLocaleString("uk-UA", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-              })}
+            <strong>Дата та час: </strong> {dateTimeString}
             <br />
             <strong>Статус: </strong> {formatStatus(appointment.status)}
             <br />
@@ -68,3 +76,4 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
 };
 
 export default ModalAppointmentDetails;
+

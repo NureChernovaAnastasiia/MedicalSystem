@@ -57,13 +57,21 @@ const PatientDashboard = () => {
 
         const upcomingAppointments = await fetchUpcomingAppointments(patientData.id);
         const formattedAppointments = upcomingAppointments.map((a) => {
-          const dateObj = new Date(`${a.appointment_date}T${a.DoctorSchedule.start_time}`);
-          const formattedDate = dateObj.toLocaleString("uk-UA", {
-            day: "numeric", month: "long", year: "numeric",
-            hour: "2-digit", minute: "2-digit"
-          });
+          const schedule = a.DoctorSchedule || a.LabTestSchedule || a.MedicalServiceSchedule;
 
-          return { ...a, formattedDate }; 
+          const appointmentDate = a.appointment_date || (schedule && schedule.appointment_date) || '';
+          const startTime = schedule?.start_time || '00:00:00';
+
+          const dateObj = appointmentDate && startTime ? new Date(`${appointmentDate}T${startTime}`) : null;
+
+          const formattedDate = dateObj
+            ? dateObj.toLocaleString("uk-UA", {
+                day: "numeric", month: "long", year: "numeric",
+                hour: "2-digit", minute: "2-digit"
+              })
+            : "Дата і час не вказані";
+
+          return { ...a, formattedDate };
         });
 
         setAppointments(formattedAppointments);
