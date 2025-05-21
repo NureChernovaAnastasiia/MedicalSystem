@@ -185,6 +185,21 @@ class MedicalServiceController {
       return next(ApiError.internal("Не вдалося згенерувати PDF"));
     }
   }
+  async markReadyStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const service = await MedicalService.findByPk(id);
+      if (!service) return next(ApiError.notFound("Medical service not found"));
+
+      await service.update({ is_ready: true });
+
+      return res.json({ message: "Medical service marked as ready" });
+    } catch (e) {
+      console.error("markReady error:", e);
+      return next(ApiError.internal("Failed to mark medical service as ready"));
+    }
+  }
 }
 
 module.exports = new MedicalServiceController();

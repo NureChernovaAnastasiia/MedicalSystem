@@ -203,6 +203,21 @@ class LabTestController {
       return next(ApiError.internal("Не вдалося згенерувати PDF"));
     }
   }
+  async markReadyStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const labTest = await LabTest.findByPk(id);
+      if (!labTest) return next(ApiError.notFound("Lab test not found"));
+
+      await labTest.update({ is_ready: true });
+
+      return res.json({ message: "Lab test marked as ready" });
+    } catch (e) {
+      console.error("markReady error:", e);
+      return next(ApiError.internal("Failed to mark lab test as ready"));
+    }
+  }
 }
 
 module.exports = new LabTestController();
