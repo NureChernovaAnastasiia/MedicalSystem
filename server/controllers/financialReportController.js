@@ -1,61 +1,39 @@
-const { FinancialReport } = require('../models/models');
-const ApiError = require('../error/ApiError');
+const { FinancialReport, Hospital } = require('../models/models');
+const { Op } = require('sequelize');
 
-class FinancialReportController {
-    async getAll(req, res, next) {
-        try {
-            const items = await FinancialReport.findAll();
-            return res.json(items);
-        } catch (e) {
-            console.error('getAll error:', e);
-            return next(ApiError.internal('Не вдалося отримати фінансові звіти'));
-        }
+// 📊 Отримати загальну виручку по всіх клініках за обраний період
+const getSummaryReport = async (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+
+    const where = {};
+    if (from || to) {
+      where.report_date = {};
+      if (from) where.report_date[Op.gte] = new Date(from);
+      if (to) where.report_date[Op.lte] = new Date(to);
     }
 
-    async getById(req, res, next) {
-        try {
-            const item = await FinancialReport.findByPk(req.params.id);
-            if (!item) return next(ApiError.notFound('Фінансовий звіт не знайдено'));
-            return res.json(item);
-        } catch (e) {
-            console.error('getById error:', e);
-            return next(ApiError.internal('Помилка отримання фінансового звіту'));
-        }
-    }
+    const reports = await FinancialReport.findAll({
+      where,
+      include: [Hospital],
+    });
 
-    async create(req, res, next) {
-        try {
-            const created = await FinancialReport.create(req.body);
-            return res.json(created);
-        } catch (e) {
-            console.error('create error:', e);
-            return next(ApiError.badRequest('Не вдалося створити фінансовий звіт'));
-        }
-    }
+    const summary = reports.reduce(
+      (acc, r) => {
+        acc.total_income += parseFloat(r.total_income || 0);
+        acc.total_expenses += parseFloat(r.total_expenses || 0);
+        return acc;
+      },
+      { total_income: 0, total_expenses: 0 }
+    );
 
-    async update(req, res, next) {
-        try {
-            const item = await FinancialReport.findByPk(req.params.id);
-            if (!item) return next(ApiError.notFound('Фінансовий звіт не знайдено'));
-            await item.update(req.body);
-            return res.json(item);
-        } catch (e) {
-            console.error('update error:', e);
-            return next(ApiError.internal('Помилка оновлення фінансового звіту'));
-        }
-    }
+    res.json({ summary, reports });
+  } catch (error) {
+    console.error('Помилка отримання фінансового звіту:', error);
+    return res.status(500).json({ message: 'Не вдалося отримати фінансовий звіт' });
+  }
+};
 
-    async delete(req, res, next) {
-        try {
-            const item = await FinancialReport.findByPk(req.params.id);
-            if (!item) return next(ApiError.notFound('Фінансовий звіт не знайдено'));
-            await item.destroy();
-            return res.json({ message: 'Фінансовий звіт видалено' });
-        } catch (e) {
-            console.error('delete error:', e);
-            return next(ApiError.internal('Помилка видалення фінансового звіту'));
-        }
-    }
-}
-
-module.exports = new FinancialReportController();
+module.exports = {
+  getSummaryReport,
+};

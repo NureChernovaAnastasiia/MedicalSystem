@@ -10,6 +10,8 @@ const {
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const moment = require("moment");
+const paypalService = require('../services/paypalService');
+
 
 class LabTestScheduleController {
   // 🔍 Get all schedules (All authenticated users)
@@ -171,68 +173,68 @@ class LabTestScheduleController {
     }
   }
 
-  async bookLabTest(req, res, next) {
-    try {
-      const { lab_test_schedule_id, patient_id: bodyPatientId } = req.body;
+  async payAndBookLabTest(req, res, next) {
+  try {
+    const { lab_test_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
 
-      // 1. Знайти запис розкладу
-      const schedule = await LabTestSchedule.findByPk(lab_test_schedule_id);
-      if (!schedule)
-        return next(ApiError.notFound("Розклад аналізу не знайдено"));
-      if (schedule.is_booked)
-        return next(ApiError.badRequest("Час вже зайнято"));
+    // 1. Отримати user_id
+    const userId = req.user.id;
 
-      // 2. Визначити ID пацієнта
-      let patientId;
-      if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({
-          where: { user_id: req.user.id },
-        });
-        if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
-        patientId = patient.id;
-      } else {
-        if (!bodyPatientId)
-          return next(ApiError.badRequest("Не вказано patient_id"));
-        patientId = bodyPatientId;
-      }
-
-      // 3. Отримати doctor_id з HospitalLabService
-      const hospitalLabService = await HospitalLabService.findByPk(
-        schedule.hospital_lab_service_id
-      );
-      if (!hospitalLabService)
-        return next(ApiError.badRequest("Послугу лабораторії не знайдено"));
-
-      const doctor_id = hospitalLabService.doctor_id;
-
-      // 4. Створити запис про прийом (Appointment)
-      const appointment = await Appointment.create({
-        patient_id: patientId,
-        doctor_id,
-        lab_test_schedule_id,
-        appointment_date: schedule.appointment_date,
-        status: "Scheduled",
-      });
-
-      // 5. Позначити час як зайнятий
-      await schedule.update({ is_booked: true });
-
-      // 6. 🔄 Автоматично створити пустий аналіз (LabTest)
-      await LabTest.create({
-        patient_id: patientId,
-        doctor_id,
-        lab_test_schedule_id,
-        result: null,
-        notes: null,
-      });
-
-      // 7. Відповідь
-      return res.json(appointment);
-    } catch (e) {
-      console.error("bookLabTest error:", e);
-      return next(ApiError.internal("Не вдалося забронювати аналіз"));
+    // 2. Перевірити оплату через PayPal (і використання)
+    const paymentResult = await paypalService.captureOrder(orderId, 'lab', userId);
+    if (paymentResult.status !== "COMPLETED") {
+      return next(ApiError.badRequest("Оплата не була підтверджена"));
     }
+
+    const schedule = await LabTestSchedule.findByPk(lab_test_schedule_id);
+    if (!schedule) return next(ApiError.notFound("Розклад не знайдено"));
+    if (schedule.is_booked) return next(ApiError.badRequest("Час зайнято"));
+
+    let patientId;
+    if (req.user.role === "Patient") {
+      const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
+      patientId = patient.id;
+    } else {
+      if (!bodyPatientId) return next(ApiError.badRequest("Не вказано patient_id"));
+      patientId = bodyPatientId;
+    }
+
+    const hospitalLabService = await HospitalLabService.findByPk(schedule.hospital_lab_service_id);
+    if (!hospitalLabService) {
+      return next(ApiError.badRequest("Послугу лабораторії не знайдено"));
+    }
+
+    const doctor_id = hospitalLabService.doctor_id;
+
+    const appointment = await Appointment.create({
+      patient_id: patientId,
+      doctor_id,
+      lab_test_schedule_id,
+      appointment_date: schedule.appointment_date,
+      status: "Scheduled",
+    });
+
+    await schedule.update({ is_booked: true });
+
+    await LabTest.create({
+      patient_id: patientId,
+      doctor_id,
+      lab_test_schedule_id,
+      results: null,
+      notes: null,
+      is_ready: false,
+    });
+
+    return res.json({
+      message: "Бронювання підтверджено після оплати",
+      appointment,
+    });
+  } catch (e) {
+    console.error("payAndBookLabTest error:", e);
+    return next(ApiError.internal(e.message || "Не вдалося оплатити та забронювати аналіз"));
   }
+}
 
   // ✏️ Update (Admin or Doctor only)
   async update(req, res, next) {

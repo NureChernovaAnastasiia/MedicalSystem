@@ -6,7 +6,7 @@ const roleMiddleware = require('../middleware/checkRoleMiddleware');
 
 router.use(authMiddleware);
 
-router.post('/book', labTestScheduleController.bookLabTest); 
+router.post('/pay-and-book', labTestScheduleController.payAndBookLabTest); 
 
 // 🆕 Розклад по medicalServiceId та даті
 router.get(

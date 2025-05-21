@@ -21,6 +21,7 @@ const medicalServiceInfoRoutes = require("./medicalServiceInfoRoutes");
 const hospitalMedicalServiceRoutes = require("./hospitalMedicalServiceRoutes");
 const medicalServiceScheduleRoutes = require("./medicalServiceScheduleRoutes");
 const medicalServiceRoutes = require("./medicalServiceRoutes");
+const paypalRoutes = require('./paypalRoutes');
 
 router.use("/users", userRoutes);
 router.use("/patients", patientRoutes);
@@ -42,5 +43,6 @@ router.use("/medical-service-info", medicalServiceInfoRoutes);
 router.use("/hospital-medical-services", hospitalMedicalServiceRoutes);
 router.use("/medical-service-schedules", medicalServiceScheduleRoutes);
 router.use("/medical-services", medicalServiceRoutes);
+router.use('/paypal', paypalRoutes); 
 
 module.exports = router;

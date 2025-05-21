@@ -10,6 +10,7 @@ const {
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const moment = require("moment");
+const paypalService = require('../services/paypalService');
 
 class MedicalServiceScheduleController {
   // 🔍 Отримати всі розклади процедур (всі авторизовані)
@@ -89,67 +90,65 @@ class MedicalServiceScheduleController {
     }
   }
   async bookMedicalService(req, res, next) {
-    try {
-      const { medical_service_schedule_id, patient_id: bodyPatientId } =
-        req.body;
+  try {
+    const { medical_service_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
 
-      const schedule = await MedicalServiceSchedule.findByPk(
-        medical_service_schedule_id
-      );
-      if (!schedule)
-        return next(ApiError.notFound("Розклад процедури не знайдено"));
-      if (schedule.is_booked)
-        return next(ApiError.badRequest("Час вже зайнято"));
+    const userId = req.user.id;
 
-      let patientId;
-
-      if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({
-          where: { user_id: req.user.id },
-        });
-        if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
-        patientId = patient.id;
-      } else {
-        if (!bodyPatientId)
-          return next(ApiError.badRequest("Не вказано patient_id"));
-        patientId = bodyPatientId;
-      }
-
-      const hospitalService = await HospitalMedicalService.findByPk(
-        schedule.hospital_medical_service_id
-      );
-      if (!hospitalService)
-        return next(
-          ApiError.badRequest("Послугу медичних процедур не знайдено")
-        );
-
-      const doctor_id = hospitalService.doctor_id;
-
-      const appointment = await Appointment.create({
-        patient_id: patientId,
-        doctor_id,
-        medical_service_schedule_id,
-        appointment_date: schedule.appointment_date,
-        status: "Scheduled",
-      });
-
-      await schedule.update({ is_booked: true });
-
-      // 🔄 Автоматично створюємо запис про процедуру (MedicalService)
-      await MedicalService.create({
-        patient_id: patientId,
-        doctor_id,
-        medical_service_schedule_id,
-        result: null,
-        notes: null,
-      });
-
-      return res.json(appointment);
-    } catch (e) {
-      console.error("bookMedicalService error:", e);
-      return next(ApiError.internal("Не вдалося забронювати процедуру"));
+    const paymentResult = await paypalService.captureOrder(orderId, 'medical', userId);
+    if (paymentResult.status !== "COMPLETED") {
+      return next(ApiError.badRequest("Оплата не була підтверджена"));
     }
+
+    const schedule = await MedicalServiceSchedule.findByPk(medical_service_schedule_id);
+    if (!schedule) return next(ApiError.notFound("Розклад процедури не знайдено"));
+    if (schedule.is_booked) return next(ApiError.badRequest("Час вже зайнято"));
+
+    let patientId;
+    if (req.user.role === "Patient") {
+      const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+      if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
+      patientId = patient.id;
+    } else {
+      if (!bodyPatientId) return next(ApiError.badRequest("Не вказано patient_id"));
+      patientId = bodyPatientId;
+    }
+
+    const hospitalService = await HospitalMedicalService.findByPk(schedule.hospital_medical_service_id);
+    if (!hospitalService) {
+      return next(ApiError.badRequest("Послугу медичних процедур не знайдено"));
+    }
+
+    const doctor_id = hospitalService.doctor_id;
+
+    const appointment = await Appointment.create({
+      patient_id: patientId,
+      doctor_id,
+      medical_service_schedule_id,
+      appointment_date: schedule.appointment_date,
+      status: "Scheduled"
+    });
+
+    await schedule.update({ is_booked: true });
+
+    await MedicalService.create({
+      patient_id: patientId,
+      doctor_id,
+      medical_service_schedule_id,
+      result: null,
+      notes: null
+    });
+
+    return res.json({
+      message: "Процедуру заброньовано після підтвердженої оплати",
+      appointment
+    });
+  } catch (e) {
+    console.error("bookMedicalService error:", e);
+    return next(ApiError.internal(e.message || "Не вдалося оплатити та забронювати процедуру"));
   }
+}
+
 
   // ➕ Створити (лише Admin або Doctor)
   async create(req, res, next) {
