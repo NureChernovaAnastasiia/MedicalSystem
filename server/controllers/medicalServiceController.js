@@ -85,15 +85,21 @@ class MedicalServiceController {
             include: [Hospital],
           },
           {
-            model: MedicalServiceSchedule,
-            include: [
-              {
-                model: HospitalMedicalService,
-                include: [MedicalServiceInfo],
-              },
-            ],
-          },
-        ],
+                model: MedicalServiceSchedule,
+    include: [
+      {
+        model: HospitalMedicalService,
+        include: [
+          {
+              model: MedicalServiceInfo,
+            as: 'MedicalServiceInfo', // ✅ обов’язково явно назви alias, якщо десь використовував
+            attributes: ['id', 'name', 'description'],
+          }
+        ]
+      }
+    ]
+  }
+]
       });
 
       return res.json(items);
