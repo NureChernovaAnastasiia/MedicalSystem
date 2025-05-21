@@ -1,12 +1,19 @@
 import { $authHost, $host } from "./index";
 import { jwtDecode } from "jwt-decode";
 
-
 // Функція для входу користувача
 export const login = async (email, password) => {
-  const { data } = await $host.post("api/users/login", { email, password });
-  localStorage.setItem("token", data.token);
-  return jwtDecode(data.token);
+  try {
+    const { data } = await $host.post("api/users/login", { email, password });
+    localStorage.setItem("token", data.token);
+    return jwtDecode(data.token);
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error("Помилка під час входу. Спробуйте пізніше.");
+    }
+  }
 };
 
 // Функція для перевірки автентичності користувача
