@@ -1,12 +1,15 @@
 import React from 'react';
 import styles from '../../style/modalstyle/ModalDocInformation.module.css';
 
-import specIcon from '../../img/icons/specialisation.png';
-import expIcon from '../../img/icons/doctor.png';
-import workIcon from '../../img/icons/hospital.png';
-import addressIcon from '../../img/icons/location.png';
-import bioIcon from '../../img/icons/bio.png';
-import contactIcon from '../../img/icons/telephone.png';
+import {
+  iconSpecialisation,
+  iconDoctor,
+  iconHospital,
+  iconLocation,
+  iconBio,
+  iconTelephone,
+} from '../../utils/icons';
+
 
 const ModalDocInformation = ({ doctor, onClose }) => {
   const handleOverlayClick = (e) => {
@@ -55,7 +58,7 @@ const ModalDocInformation = ({ doctor, onClose }) => {
           )}
           <div className={styles.contactGroup}>
             <div className={styles.infoItem}>
-            <img src={contactIcon} alt="icon" className={styles.icon} />
+            <img src={iconTelephone} alt="icon" className={styles.icon} />
             <h3><strong>Контакти:</strong></h3></div>
             <p><strong>E-mail: </strong></p> 
               <p>{doctor.email}</p>
@@ -73,27 +76,27 @@ const ModalDocInformation = ({ doctor, onClose }) => {
           <h1 className={styles.name}>{`${doctor.last_name} ${doctor.first_name} ${doctor.middle_name}`}</h1>
 
           <div className={styles.infoItem}>
-            <img src={specIcon} alt="icon" className={styles.icon} />
+            <img src={iconSpecialisation} alt="icon" className={styles.icon} />
             <p><strong>Спеціалізація: </strong> {doctor.specialization}</p>
           </div>
 
           <div className={styles.infoItem}>
-            <img src={expIcon} alt="icon" className={styles.icon} />
+            <img src={iconDoctor} alt="icon" className={styles.icon} />
             <p><strong>Стаж: </strong> {formattedExperience}</p>
           </div>
 
           <div className={styles.infoItem}>
-            <img src={workIcon} alt="icon" className={styles.icon} />
+            <img src={iconHospital} alt="icon" className={styles.icon} />
             <p><strong>Місце роботи: </strong>{doctor.Hospital?.name}</p>
           </div>
 
           <div className={styles.infoItem}>
-            <img src={addressIcon} alt="icon" className={styles.icon} />
+            <img src={iconLocation} alt="icon" className={styles.icon} />
             <p><strong>Адреса: </strong>{doctor.Hospital?.address}</p>
           </div>
 
           <div className={styles.bio}>
-            <img src={bioIcon} alt="icon" className={styles.icon} />
+            <img src={iconBio} alt="icon" className={styles.icon} />
             <p><strong>Коротка біографія: </strong>"{doctor.bio}"</p>
           </div>
         </div>

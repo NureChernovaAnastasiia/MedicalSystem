@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from '../../style/PatientAnalysis.module.css';
+import styles from '../../style/patientpanel/PatientAnalysis.module.css';
 
-import iconSearch from '../../img/icons/search.png';
+import { iconSearch } from '../../utils/icons';
 import { PATIENT_SERVICEDETAILS_ROUTE, PATIENT_SERVICEORDER_ROUTE } from '../../utils/consts';
 
 const Card = ({ status, title, date, clinic, statusClass, footerClass, footerText, isReady }) => {

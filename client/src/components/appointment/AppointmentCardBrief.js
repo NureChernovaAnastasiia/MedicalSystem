@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "../../style/PatientDashboard.module.css";
+import styles from "../../style/patientpanel/PatientDashboard.module.css";
 
 const AppointmentCard = ({ appointment, onDetailsClick }) => {
   const doctor = `${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`;

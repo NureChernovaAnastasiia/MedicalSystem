@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { PATIENT_DOCSCHEDULE_ROUTE } from '../../utils/consts';
-import iconSpecialisation from '../../img/icons/specialisation.png';
-import iconHospital from '../../img/icons/hospital.png';
-import iconLocation from '../../img/icons/location.png';
-import iconSchedule from '../../img/icons/schedule.png';
+import {
+  iconSpecialisation,
+  iconHospital,
+  iconLocation,
+  iconSchedule
+} from '../../utils/icons';
 
 const baseStyles = {
   doctorCard: {

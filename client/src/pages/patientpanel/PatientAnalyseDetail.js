@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../../style/PatientAnalyseDetail.module.css';
+import styles from '../../style/patientpanel/PatientAnalyseDetail.module.css';
 
-import iconDoctor from '../../img/icons/doctor.png';
-import iconHospital from '../../img/icons/hospital.png';
+import { iconDoctor, iconHospital } from '../../utils/icons';
 
 const PatientAnalyseDetail = () => {
   const navigate = useNavigate();

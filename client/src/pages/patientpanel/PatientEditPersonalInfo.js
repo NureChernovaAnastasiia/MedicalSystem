@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styles from '../../style/PatientEditPersonalInfo.module.css';
+import styles from '../../style/patientpanel/PatientEditPersonalInfo.module.css';
 
 import { genderMap } from '../../constants/gender';
 import { BLOOD_GROUPS } from '../../constants/bloodType';

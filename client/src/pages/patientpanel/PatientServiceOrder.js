@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import styles from '../../style/PatientAnalyseOrder.module.css';
+import styles from '../../style/patientpanel/PatientAnalyseOrder.module.css';
 
 import { getHospitalMedicalServices } from '../../http/servicesAPI';  
 
-import SearchByHospital from '../../components/elements/SearchByHospital';
-import SearchByCity from '../../components/elements/SearchByCity';
-import SearchInput from '../../components/elements/SearchInput';
-import SortByPrice from '../../components/elements/SortByPrice';
-import AnalyseItem from '../../components/elements/AnalyseItem'; 
+import SearchByHospital from '../../components/options/SearchByHospital';
+import SearchByCity from '../../components/options/SearchByCity';
+import SearchInput from '../../components/options/SearchInput';
+import SortByPrice from '../../components/options/SortByPrice';
+import AnalyseItem from '../../components/service/AnalyseItem'; 
 
 const PatientServiceOrder = () => {
   const [analyses, setAnalyses] = useState([]);

@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import styles from "../../style/PatientDashboard.module.css";
+import styles from "../../style/patientpanel/PatientDashboard.module.css";
 
 const InfoCard = ({ icon, title, to }) => (
   <NavLink to={to} className={styles.cardLink}>

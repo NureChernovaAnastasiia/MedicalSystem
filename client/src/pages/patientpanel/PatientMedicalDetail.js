@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from '../../style/PatientMedicalDetail.module.css';
+import styles from '../../style/patientpanel/PatientMedicalDetail.module.css';
 
-import iconDoctor from '../../img/icons/doctor.png';
-import iconHospital from '../../img/icons/hospital.png';
+import { iconDoctor, iconHospital } from '../../utils/icons';
 
 import { fetchMedicalRecordById } from '../../http/medicalRecordAPI';
 import { fetchDoctorById } from '../../http/doctorAPI';

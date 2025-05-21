@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {useParams} from 'react-router-dom'
-import styles from "../../style/PatientDoctorSchedule.module.css";
+import styles from "../../style/patientpanel/PatientDoctorSchedule.module.css";
 import ModalConfirmAppointment from "../../components/modals/ModalConfirmAppointment";
 import { daysOfWeekShort } from '../../constants/daysOfWeek';
 import { fetchDoctorScheduleByIdAndDate } from "../../http/doctorScheduleAPI";

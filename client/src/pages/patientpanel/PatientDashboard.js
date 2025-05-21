@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from "react";
-import styles from "../../style/PatientDashboard.module.css";
+import styles from "../../style/patientpanel/PatientDashboard.module.css";
 import { Context } from "../../index";
 import { fetchPatientByUserId } from "../../http/patientAPI";
 import { fetchUpcomingAppointments } from "../../http/appointmentAPI";
 import { formatAppointmentDate } from "../../utils/formatDate";
 
 import InfoCard from "../../components/elements/InfoCard";
-import AppointmentCard from "../../components/elements/AppointmentCardBrief";
+import AppointmentCard from "../../components/appointment/AppointmentCardBrief";
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
 import ModalAddReview from "../../components/modals/ModalAddReview";
 
@@ -64,13 +64,17 @@ const PatientDashboard = () => {
       <div className={styles.appointmentsSection}>
         <h2 className={styles.appointmentsTitle}>Наступні прийоми</h2>
         <div className={styles.appointmentsList}>
-          {appointments.map((appointment, index) => (
-            <AppointmentCard
-              key={index}
-              appointment={appointment}
-              onDetailsClick={handleOpenAppointmentModal}
-            />
-          ))}
+          {appointments.length === 0 ? (
+            <p className={styles.noAppointments}>Наразі прийомів не заплановано</p>
+          ) : (
+            appointments.map((appointment, index) => (
+              <AppointmentCard
+                key={index}
+                appointment={appointment}
+                onDetailsClick={handleOpenAppointmentModal}
+              />
+            ))
+          )}
         </div>
 
         <div className={styles.feedbackSection}>
