@@ -4,15 +4,17 @@ import '../../style/LogIn.css';
 import logo from "../../img/Logo.png";
 import unlockIcon from "../../img/icons/unlock.png";       
 import lockIcon from "../../img/icons/lock.png"; 
-import {Context} from "../../index";
+import { Context } from "../../index";
 import { login, check } from '../../http/userAPI';
 import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, MAIN_ROUTE, PATIENT_PANEL_ROUTE } from '../../utils/consts';
+import AlertPopup from '../../components/elements/AlertPopup';
 
 const LogIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [alert, setAlert] = useState(null); 
   const { user } = useContext(Context);
   const navigate = useNavigate();
 
@@ -45,27 +47,33 @@ const LogIn = () => {
 
         user.setUser(userData);
         user.setIsAuth(true);
-        user.setRole(userData.role);
+        user.setRole(role);
 
-        // Визначаємо маршрут за роллю
         let redirectPath = MAIN_ROUTE;
-        if (userData.role === "Admin") redirectPath = ADMIN_PANEL_ROUTE;
-        else if (userData.role === "Patient") redirectPath = PATIENT_PANEL_ROUTE;
-        else if (userData.role === "Doctor") redirectPath = DOCTOR_PANEL_ROUTE;
+        if (role === "Admin") redirectPath = ADMIN_PANEL_ROUTE;
+        else if (role === "Patient") redirectPath = PATIENT_PANEL_ROUTE;
+        else if (role === "Doctor") redirectPath = DOCTOR_PANEL_ROUTE;
 
-        // Зберігаємо шлях та роль
         localStorage.setItem("token", localStorage.getItem("token")); 
         localStorage.setItem("role", role);
 
         navigate(redirectPath);
       } catch (e) {
-        console.error("Помилка при вході:", e);
+        setAlert({ message: e.message, type: 'error' });
       }
     }
   };
 
   return (
     <div className="login-container">
+      {alert && (
+        <AlertPopup
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
+
       <div className="login-left">
         <div className="login-left-content">
           <img src={logo} alt="LifeLine Logo" className="login-logo" />
@@ -74,8 +82,8 @@ const LogIn = () => {
             Авторизуйтесь, щоб отримати доступ до ваших медичних даних та записів.
           </p>
           <p className="login-note">
-          * Якщо ви ще не зареєстровані в системі, зверніться до вашого лікаря для створення акаунту.
-        </p>
+            * Якщо ви ще не зареєстровані в системі, зверніться до вашого лікаря для створення акаунту.
+          </p>
         </div>
       </div>
 

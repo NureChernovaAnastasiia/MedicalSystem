@@ -1,6 +1,7 @@
 import React, { useState, useEffect  } from 'react';
 import { NavLink } from "react-router-dom";
 import { ABOUTUS_ROUTE, LOGIN_ROUTE } from '../../utils/consts';
+import { fetchAllReviews } from '../../http/reviewAPI'; 
 import '../../style/Main.css';
 
 import bannerImage from '../../img/Healthcare.png';
@@ -8,41 +9,7 @@ import iconBooking from '../../img/icons/cellphone.png';
 import iconCard from '../../img/icons/medical.png';
 import iconReminder from '../../img/icons/reminder.png';
 import iconAnalysis from '../../img/icons/analysis.png';
-import avatar1 from '../../img/Woman1.jpg';
-import avatar2 from '../../img/Man1.jpg';
-import avatar3 from '../../img/Woman2.jpg';
-import avatar4 from '../../img/Man2.jpg';
-
-const reviews = [
-  {
-    img: avatar1,
-    name: 'Анна К.',
-    age: '42 роки',
-    stars: 5,
-    quote: 'Дуже зручно! Записалася до лікаря за хвилину і отримала нагадування про прийом. Більше не потрібно дзвонити в клініку!'
-  },
-  {
-    img: avatar2,
-    name: 'Ігор С.',
-    age: '35 років',
-    stars: 4,
-    quote: 'Зберігати медичну картку стало набагато простіше. Усе в одному місці! І найголовніше — я завжди маю доступ до результатів аналізів незалежно від того, де я знаходжусь.'
-  },
-  {
-    img: avatar3,
-    name: 'Марина Т.',
-    age: '27 років',
-    stars: 5,
-    quote: 'Це справжня революція у сфері медицини! Я більше не боюсь забути про візит — система завжди нагадує вчасно. А ще можна легко переглянути історію всіх прийомів і порад лікаря.'
-  },
-  {
-    img: avatar4,
-    name: 'Олег М.',
-    age: '47 років',
-    stars: 4,
-    quote: 'Інтерфейс зручний, навіть для тих, хто не дуже дружить із технологіями. Завдяки додатку я швидко знайшов хорошого спеціаліста і зберіг усі аналізи в одному місці. Хотілося б ще додати можливість відеоконсультацій.'
-  }
-];
+import noPhoto from '../../img/NoPhoto.jpg';
 
 const InfoCard = ({ icon, title, text }) => (
   <div className="card">
@@ -52,13 +19,16 @@ const InfoCard = ({ icon, title, text }) => (
   </div>
 );
 
-const ReviewCard = ({ img, name, age, stars, quote }) => (
+const ReviewCard = ({ img, name, age, stars, quote }) => {
+  const photo = img || noPhoto;
+ 
+  return (
   <div className="review">
     <div className="review-left">
-      <img src={img} alt={name} />
+        <img src={photo} alt={name} />
       <div className="author-info">
         <span className="name">{name}</span>
-        <span className="age">{age}</span>
+        <span className="age">{age} років</span>
       </div>
     </div>
     <div className="review-right">
@@ -66,23 +36,33 @@ const ReviewCard = ({ img, name, age, stars, quote }) => (
       <p className="quote">"{quote}"</p>
     </div>
   </div>
-);
+)};
 
 const Main = () => {
+  const [reviews, setReviews] = useState([]);
   const [current, setCurrent] = useState(0);
 
   const nextReview = () => setCurrent((prev) => (prev + 1) % reviews.length);
   const prevReview = () => setCurrent((prev) => (prev - 1 + reviews.length) % reviews.length);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % reviews.length);
-    }, 5000); 
-
-    return () => clearInterval(interval); 
+    fetchAllReviews()
+      .then(data => {
+        const lastSix = data.slice(-6); 
+        setReviews(lastSix);
+      })
+      .catch(error => console.error("Не вдалося завантажити коментарі", error));
   }, []);
 
-  const { img, name, age, stars, quote } = reviews[current];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % reviews.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [reviews.length]);
+
+  const currentReview = reviews[current];
 
   return (
     <div className="homepage">
@@ -119,13 +99,22 @@ const Main = () => {
 
       <div className="reviews-section">
         <h2 className="reviews-title">Що кажуть наші користувачі?</h2>
-        <div className="review-wrapper">
-          <div className="arrow arrow-left" onClick={prevReview}>‹</div>
-          <ReviewCard img={img} name={name} age={age} stars={stars} quote={quote} />
-          <div className="arrow arrow-right" onClick={nextReview}>›</div>
-        </div>
+        {reviews.length > 0 ? (
+          <div className="review-wrapper">
+            <div className="arrow arrow-left" onClick={prevReview}>‹</div>
+            <ReviewCard
+              img={currentReview.reviewer.photo_url}
+              name={currentReview.reviewer.name}
+              age={currentReview.reviewer.age}
+              stars={currentReview.rating}
+              quote={currentReview.comment}
+            />
+            <div className="arrow arrow-right" onClick={nextReview}>›</div>
+          </div>
+        ) : (
+          <p>Коментарі завантажуються...</p>
+        )}
       </div>
-
     </div>
   );
 };

@@ -8,28 +8,35 @@ import {
 } from '../../utils/icons';
 
 const ModalAnalysInfo = ({ onClose, analyse }) => {
+  const serviceInfo = analyse?.LabTestInfo || analyse?.MedicalServiceInfo;
+
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
         <div className={styles.header}>
-          <p className={styles.title}>Детальна інформація про аналіз</p>
+          <p className={styles.title}>Детальна інформація про послугу</p>
         </div>
 
         <div className={styles.headerForm}>
-          <p className={styles.analysName}>{analyse?.LabTestInfo?.name || '—'}</p>
+          <p className={styles.analysName}>{serviceInfo?.name || '—'}</p>
           <p className={styles.duration}>
-            Тривалість виконання: {analyse?.LabTestInfo?.duration_days || '—'} день(ів)
+            Тривалість виконання:{" "}
+            {serviceInfo?.duration_days
+              ? `${serviceInfo.duration_days} днів`
+              : serviceInfo?.duration_minutes
+              ? `${serviceInfo.duration_minutes} хвилин`
+              : "—"}
           </p>
         </div>
 
         <div className={styles.section}>
-            <div className={styles.iconTitleWrapper}>
-                <img className={styles.icon} src={iconDescription} alt="info" />
-                <h3 className={styles.sectionTitle}>Опис</h3>
-            </div>
-            <p className={styles.description}>
-                {analyse?.LabTestInfo?.description || 'Немає опису аналіза'}
-            </p>
+          <div className={styles.iconTitleWrapper}>
+            <img className={styles.icon} src={iconDescription} alt="info" />
+            <h3 className={styles.sectionTitle}>Опис</h3>
+          </div>
+          <p className={styles.description}>
+            {serviceInfo?.description || 'Немає опису'}
+          </p>
         </div>
 
         <div className={styles.columns}>
@@ -40,7 +47,7 @@ const ModalAnalysInfo = ({ onClose, analyse }) => {
                 </div>
                 <div className={styles.columnTextWrapper}>
                 <p className={styles.text}>
-                    {analyse?.LabTestInfo?.preparation || 'Немає даних аналіза'}
+                    {serviceInfo?.preparation || 'Немає даних аналіза'}
                 </p>
                 </div>
             </div>
@@ -52,7 +59,7 @@ const ModalAnalysInfo = ({ onClose, analyse }) => {
                 </div>
                 <div className={styles.columnTextWrapper}>
                 <p className={styles.text}>
-                    {analyse?.LabTestInfo?.indications || 'Немає даних аналіза'}
+                    {serviceInfo?.indications || 'Немає даних аналіза'}
                 </p>
                 </div>
             </div>

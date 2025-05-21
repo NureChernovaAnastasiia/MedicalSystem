@@ -62,44 +62,79 @@ const PatientAppointments = () => {
         const data = await fetchAllPatientsAppointments(patient.id);
 
         const formattedAppointments = data.map((a) => {
-          const schedule = a.DoctorSchedule || a.LabTestSchedule || a.MedicalServiceSchedule;
+          let appointmentDate;
+          let startTime;
+          let endTime;
 
-          const appointmentDate = a.appointment_date || (schedule && schedule.appointment_date) || '';
-          const startTime = schedule?.start_time || '00:00:00';
-          const endTime = schedule?.end_time || '00:00:00';
+          if (a.DoctorSchedule) {
+            const schedule = a.DoctorSchedule;
+            appointmentDate = a.appointment_date || schedule.appointment_date;
+            startTime = schedule.start_time;
+            endTime = schedule.end_time;
 
-          const dateObj = new Date(`${appointmentDate}T${startTime}`);
+            const dateObj = new Date(`${appointmentDate}T${startTime}`);
 
-          const formattedDate = dateObj.toLocaleDateString("uk-UA", {
-            day: "2-digit", month: "2-digit", year: "numeric"
-          });
+            appointmentDate = dateObj.toLocaleDateString("uk-UA", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            });
 
-          const formatTime = (timeStr) => {
-            const [hours, minutes] = timeStr.split(':');
-            return `${hours}:${minutes}`;
-          };
+            const formatTime = (timeStr) => {
+              const [hours, minutes] = timeStr.split(":");
+              return `${hours}:${minutes}`;
+            };
 
-          const formattedTime = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+            startTime = formatTime(startTime);
+            endTime = formatTime(endTime);
+          } else if (a.LabTestSchedule || a.MedicalServiceSchedule) {
+            const schedule = a.LabTestSchedule || a.MedicalServiceSchedule;
 
-          let statusLabel = '';
-          let type = '';
+            const startDate = new Date(schedule.start_time);
+            const endDate = new Date(schedule.end_time);
+
+            appointmentDate = startDate.toLocaleDateString("uk-UA", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            });
+
+            const formatTime = (dateObj) =>
+              `${dateObj.getHours().toString().padStart(2, "0")}:${dateObj
+                .getMinutes()
+                .toString()
+                .padStart(2, "0")}`;
+
+            startTime = formatTime(startDate);
+            endTime = formatTime(endDate);
+          } else {
+            appointmentDate = "Невідома дата";
+            startTime = "??:??";
+            endTime = "??:??";
+          }
+
+          const formattedDate = appointmentDate;
+          const formattedTime = `${startTime} - ${endTime}`;
+
+          let statusLabel = "";
+          let type = "";
 
           switch (a.status) {
-            case 'Scheduled':
-              statusLabel = '● Майбутній';
-              type = 'upcoming';
+            case "Scheduled":
+              statusLabel = "● Майбутній";
+              type = "upcoming";
               break;
-            case 'Completed':
-              statusLabel = '● Минулий';
-              type = 'past';
+            case "Completed":
+              statusLabel = "● Минулий";
+              type = "past";
               break;
-            case 'Cancelled':
-              statusLabel = '● Скасований';
-              type = 'canceled';
+            case "Cancelled":
+              statusLabel = "● Скасований";
+              type = "canceled";
               break;
             default:
-              statusLabel = '● Невідомо';
-              type = 'unknown';
+              statusLabel = "● Невідомо";
+              type = "unknown";
           }
 
           return { ...a, formattedDate, formattedTime, statusLabel, type };

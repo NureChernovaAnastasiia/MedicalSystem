@@ -19,3 +19,13 @@ export const bookDoctorScheduleById = async (scheduleId) => {
     throw error;
   }
 };
+
+export const fetchDoctorWorkingHoursByIdAndDate = async (doctorId, date) => {
+  try {
+    const { data } = await $authHost.get(`/api/doctor-schedules/working-hours/${doctorId}/${date}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні робочого графіку лікаря за ID і датою:", error);
+    throw error;
+  }
+};

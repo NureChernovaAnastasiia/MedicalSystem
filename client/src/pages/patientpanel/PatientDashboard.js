@@ -5,6 +5,7 @@ import { Context } from "../../index";
 import { fetchPatientByUserId } from "../../http/patientAPI";
 import { fetchUpcomingAppointments } from "../../http/appointmentAPI";
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
+import ModalAddReview from "../../components/modals/ModalAddReview";
 
 import iconBooking from '../../img/icons/inspection.png';
 import iconAnalysis from '../../img/icons/labour.png';
@@ -47,6 +48,7 @@ const PatientDashboard = () => {
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   useEffect(() => {
     const getPatientAndAppointments = async () => {
@@ -56,22 +58,42 @@ const PatientDashboard = () => {
         setPatient(patientData);
 
         const upcomingAppointments = await fetchUpcomingAppointments(patientData.id);
-        const formattedAppointments = upcomingAppointments.map((a) => {
-          const schedule = a.DoctorSchedule || a.LabTestSchedule || a.MedicalServiceSchedule;
 
-          const appointmentDate = a.appointment_date || (schedule && schedule.appointment_date) || '';
-          const startTime = schedule?.start_time || '00:00:00';
+        const formattedAppointments = upcomingAppointments.map((appointment) => {
+          const schedule = appointment.DoctorSchedule || appointment.LabTestSchedule || appointment.MedicalServiceSchedule;
 
-          const dateObj = appointmentDate && startTime ? new Date(`${appointmentDate}T${startTime}`) : null;
+          let formattedDateTime = "Дата і час не вказані";
 
-          const formattedDate = dateObj
-            ? dateObj.toLocaleString("uk-UA", {
-                day: "numeric", month: "long", year: "numeric",
-                hour: "2-digit", minute: "2-digit"
-              })
-            : "Дата і час не вказані";
+          if (appointment.DoctorSchedule) {
+            const appointmentDate = appointment.appointment_date || schedule?.appointment_date;
+            const startTime = schedule?.start_time;
 
-          return { ...a, formattedDate };
+            if (appointmentDate && startTime) {
+              const dateObj = new Date(`${appointmentDate}T${startTime}`);
+              if (!isNaN(dateObj)) {
+                formattedDateTime = dateObj.toLocaleString("uk-UA", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                });
+              }
+            }
+          } else if (appointment.LabTestSchedule || appointment.MedicalServiceSchedule) {
+            const startDate = new Date(schedule?.start_time);
+            if (!isNaN(startDate)) {
+              formattedDateTime = startDate.toLocaleString("uk-UA", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+              });
+            }
+          }
+
+          return { ...appointment, formattedDate: formattedDateTime };
         });
 
         setAppointments(formattedAppointments);
@@ -111,6 +133,19 @@ const PatientDashboard = () => {
             />
           ))}
         </div>
+
+        <div className={styles.feedbackSection}>
+          <h2 className={styles.feedbackTitle}>Маєте враження від нашого сервісу?</h2>
+          <p className={styles.feedbackText}>Залиште, будь ласка, ваш відгук – він допоможе нам стати кращими!</p>
+          <button className={styles.feedbackButton} onClick={() => setShowReviewModal(true)}>Залишити відгук</button>
+
+          {showReviewModal && (
+            <ModalAddReview
+              onClose={() => setShowReviewModal(false)}
+            />
+          )}
+        </div>
+
         {selectedAppointment && (
           <ModalAppointmentDetails
             appointment={selectedAppointment}

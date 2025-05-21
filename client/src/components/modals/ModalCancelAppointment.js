@@ -4,20 +4,42 @@ import { cancelAppointment } from "../../http/appointmentAPI";
 import AlertPopup from "../../components/elements/AlertPopup";
 
 const REASONS = [
-  { value: "bad_feeling", label: "Погане самопочуття" },
-  { value: "plans_changed", label: "Зміна планів" },
-  { value: "mistake", label: "Запис помилковий" },
+  { value: "Погане самопочуття", label: "Погане самопочуття" },
+  { value: "Зміна планів", label: "Зміна планів" },
+  { value: "Запис помилковий", label: "Запис помилковий" },
 ];
 
-const formatDateTime = (dateStr, timeStr) => {
-  const date = new Date(`${dateStr}T${timeStr}`);
-  return date.toLocaleString("uk-UA", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const getFormattedDateTime = (appointment) => {
+  const schedule = appointment.DoctorSchedule || appointment.LabTestSchedule || appointment.MedicalServiceSchedule;
+
+  if (appointment.DoctorSchedule) {
+    const appointmentDate = appointment.appointment_date || schedule.appointment_date;
+    const startTime = schedule?.start_time;
+
+    if (appointmentDate && startTime) {
+      const dateObj = new Date(`${appointmentDate}T${startTime}`);
+      return dateObj.toLocaleString("uk-UA", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+  } else if (schedule?.start_time) {
+    const dateObj = new Date(schedule.start_time);
+    if (!isNaN(dateObj)) {
+      return dateObj.toLocaleString("uk-UA", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+  }
+
+  return "Дата і час не вказані";
 };
 
 const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }) => {
@@ -32,7 +54,7 @@ const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }
     }
 
     try {
-      await cancelAppointment(appointment.id);
+      await cancelAppointment(appointment.id, selectedReason);
       setAlert({ message: "Запис успішно скасовано", type: "success" });
 
       setTimeout(() => {
@@ -63,7 +85,7 @@ const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }
           <div className={styles.infoBox}>
             <p className={styles.infoText}>
               <strong>Дата і час прийому: </strong>
-              {formatDateTime(appointment.appointment_date, appointment.DoctorSchedule?.start_time)} <br />
+              {getFormattedDateTime(appointment)} <br />
               <strong>Лікар: </strong>
               {`${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`} <br />
               <strong>Місцезнаходження: </strong>

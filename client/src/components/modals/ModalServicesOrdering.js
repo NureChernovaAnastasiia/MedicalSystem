@@ -6,7 +6,14 @@ import {
   iconSyringe,
   iconMoney,
 } from '../../utils/icons';
-import { getAvailableLabTestTimes, bookLabTestScheduleById } from '../../http/analysisScheduleAPI.js';
+import {
+  getAvailableLabTestTimes,
+  bookLabTestScheduleById,
+} from '../../http/analysisScheduleAPI.js';
+import {
+  getAvailableMedicalServiceTimes,
+  bookMedicalServiceScheduleById,
+} from '../../http/servicesScheduleAPI.js';
 import AlertPopup from '../../components/elements/AlertPopup';
 
 const InfoRow = ({ icon, label, value }) => (
@@ -27,7 +34,7 @@ const formatTimeDisplay = (isoTime) =>
     hour12: false,
   });
 
-const ModalServicesOrdering = ({ onClose, analyse }) => {
+const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
   const [dateOptions, setDateOptions] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [availableTimes, setAvailableTimes] = useState([]);
@@ -35,10 +42,11 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
   const [alert, setAlert] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const labServiceId = analyse?.id;
+  const isLabTest = !!analyse?.LabTestInfo;
+  const itemId = isLabTest ? analyse?.id : analyse?.id;
 
   const fetchAvailableDates = useCallback(async () => {
-    if (!labServiceId) return;
+    if (!itemId) return;
 
     const today = new Date();
     const datesToCheck = Array.from({ length: 10 }, (_, i) => {
@@ -51,7 +59,14 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
       const results = await Promise.all(
         datesToCheck.map(async (date) => {
           const isoDate = formatDateISO(date);
-          const times = await getAvailableLabTestTimes(labServiceId, isoDate);
+
+          let times = [];
+          if (isLabTest) {
+            times = await getAvailableLabTestTimes(itemId, isoDate);
+          } else {
+            times = await getAvailableMedicalServiceTimes(itemId, isoDate);
+          }
+
           const available = times.filter((t) => !t.is_booked);
           if (!available.length) return null;
           return { value: isoDate, label: formatDateDisplay(date), times: available };
@@ -61,7 +76,7 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
     } catch (error) {
       console.error('Помилка при завантаженні доступних дат:', error);
     }
-  }, [labServiceId]);
+  }, [itemId, isLabTest]);
 
   useEffect(() => {
     fetchAvailableDates();
@@ -87,9 +102,13 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
         return;
       }
 
-      await bookLabTestScheduleById(schedule.id);
+      if (isLabTest) {
+        await bookLabTestScheduleById(schedule.id);
+      } else {
+        await bookMedicalServiceScheduleById(schedule.id);
+      }
 
-      setAlert({ message: 'Запис на аналіз успішно створено', type: 'success' });
+      setAlert({ message: 'Запис успішно створено', type: 'success' });
       setTimeout(() => {
         setAlert(null);
         onClose();
@@ -104,8 +123,8 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
 
   const analysisName = analyse?.LabTestInfo?.name || analyse?.MedicalServiceInfo?.name || '—';
   const price = analyse?.LabTestInfo?.price || analyse?.MedicalServiceInfo?.price || '—';
-  const labName = analyse?.Hospital?.name || '—';
-  const labAddress = analyse?.Hospital?.address || '—';
+  const labName = analyse?.Hospital?.name || hospital.name || '—';
+  const labAddress = analyse?.Hospital?.address || hospital.address || '—';
 
   return (
     <>
@@ -116,15 +135,19 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
       <div className={styles.modalOverlay}>
         <div className={styles.modalContainer}>
           <div className={styles.headerBackground}>
-            <p className={styles.analysisInfo}>Інформація про аналіз</p>
-            <InfoRow icon={iconSyringe} label="Аналіз" value={analysisName} />
-            <InfoRow icon={iconHospital} label="Лабораторія" value={labName} />
+            <p className={styles.analysisInfo}>
+              {isLabTest ? 'Інформація про аналіз' : 'Інформація про послугу'}
+            </p>
+            <InfoRow icon={iconSyringe} label={isLabTest ? 'Аналіз' : 'Послуга'} value={analysisName} />
+            <InfoRow icon={iconHospital} label="Лікарня" value={labName} />
             <InfoRow icon={iconAddress} label="Адреса" value={labAddress} />
             <InfoRow icon={iconMoney} label="Ціна" value={`${parseInt(price)} грн`} />
           </div>
 
-          <p className={styles.orderTitle}>Замовлення аналізу</p>
-          <p className={styles.dateInstruction}>Будь ласка, оберіть дату проходження аналізу.</p>
+          <p className={styles.orderTitle}>
+            {isLabTest ? 'Замовлення аналізу' : 'Замовлення послуги'}
+          </p>
+          <p className={styles.dateInstruction}>Будь ласка, оберіть дату та час.</p>
 
           <div className={styles.dateSelectWrapper}>
             <select
