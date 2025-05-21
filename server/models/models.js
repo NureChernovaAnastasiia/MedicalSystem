@@ -322,6 +322,36 @@ const MedicalService = sequelize.define("MedicalService", {
   is_ready: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
+const UsedOrder = sequelize.define("UsedOrder", {
+  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  order_id: { type: DataTypes.STRING, allowNull: false, unique: true },
+
+  used_for: {
+    type: DataTypes.ENUM("lab", "medical", "other"),
+    allowNull: false,
+    defaultValue: "other",
+  },
+
+  used_by_user_id: { type: DataTypes.INTEGER, allowNull: false },
+
+  used_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+
+  // 💲 Додатково: платіжна інформація
+  payer_email: { type: DataTypes.STRING },
+  payer_name: { type: DataTypes.STRING },
+  payer_id: { type: DataTypes.STRING },
+  amount: { type: DataTypes.DECIMAL(10, 2) },
+  currency: { type: DataTypes.STRING },
+  paypal_fee: { type: DataTypes.DECIMAL(10, 2) },
+  net_amount: { type: DataTypes.DECIMAL(10, 2) },
+
+  // 📅 Час підтвердження транзакції
+  confirmed_at: { type: DataTypes.DATE },
+});
+
 // User
 User.hasOne(Patient, { foreignKey: "user_id", onDelete: "CASCADE" });
 User.hasOne(Doctor, { foreignKey: "user_id", onDelete: "CASCADE" });
@@ -340,6 +370,7 @@ Hospital.hasMany(HospitalStaff, {
   foreignKey: "hospital_id",
   onDelete: "CASCADE",
 });
+FinancialReport.belongsTo(Hospital, { foreignKey: 'hospital_id' });
 Hospital.hasMany(FinancialReport, { foreignKey: "hospital_id" });
 Hospital.hasMany(Analytics, { foreignKey: "hospital_id" });
 Hospital.hasMany(HospitalLabService, { foreignKey: "hospital_id" });
@@ -488,7 +519,7 @@ HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
 
 // MedicalServiceInfo ↔ HospitalMedicalService
 MedicalServiceInfo.hasMany(HospitalMedicalService, { foreignKey: 'medical_service_info_id' });
-HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id' });
+HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id' ,as: 'MedicalServiceInfo'});
 
 HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
 HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
@@ -499,6 +530,8 @@ LabTestSchedule.hasMany(Appointment, { foreignKey: 'lab_test_schedule_id' });
 Appointment.belongsTo(MedicalServiceSchedule, { foreignKey: 'medical_service_schedule_id' });
 MedicalServiceSchedule.hasMany(Appointment, { foreignKey: 'medical_service_schedule_id' });
 
+UsedOrder.belongsTo(User, { foreignKey: "used_by_user_id" });
+User.hasMany(UsedOrder, { foreignKey: "used_by_user_id" });
 
 
 module.exports = {
@@ -522,4 +555,5 @@ module.exports = {
   HospitalMedicalService,
   MedicalServiceSchedule,
   MedicalService,
+  UsedOrder,
 };
