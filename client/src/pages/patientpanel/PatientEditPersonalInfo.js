@@ -9,6 +9,7 @@ import { iconContacts,  iconHealth,  iconUnlock } from '../../utils/icons';
 import { updatePatientData } from '../../http/patientAPI';
 
 import ModalChangePhoto from '../../components/modals/ModalChangePhoto'; 
+import ModalChangePassword from '../../components/modals/ModalChangePassword';
 
 const PatientEditPersonalInfo = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const PatientEditPersonalInfo = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [photoUrlInput, setPhotoUrlInput] = useState(formData.photo_url);
   const [photoPreview, setPhotoPreview] = useState(formData.photo_url);
@@ -55,6 +57,9 @@ const PatientEditPersonalInfo = () => {
       setLoading(false);
     }
   };
+
+  const openPasswordModal = () => setIsPasswordModalOpen(true);
+  const closePasswordModal = () => setIsPasswordModalOpen(false);
 
   const openModal = () => {
     setPhotoUrlInput(formData.photo_url);
@@ -203,7 +208,7 @@ const PatientEditPersonalInfo = () => {
         </div>
 
         <div className={styles.buttonGroup}>
-          <div className={styles.passwordButton}>
+          <div className={styles.passwordButton} onClick={openPasswordModal}>
             <img src={iconUnlock} alt="Unlock Icon" className={styles.infoIcon} />
             Змінити пароль
           </div>
@@ -212,6 +217,10 @@ const PatientEditPersonalInfo = () => {
           </button>
         </div>
       </form>
+
+      {isPasswordModalOpen && (
+        <ModalChangePassword onClose={closePasswordModal} />
+      )}
 
       {isModalOpen && (
         <ModalChangePhoto

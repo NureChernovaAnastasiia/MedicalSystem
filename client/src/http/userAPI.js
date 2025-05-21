@@ -29,3 +29,11 @@ export const check = async () => {
     throw error;  
   }
 };
+
+export const changePassword = async (oldPassword, newPassword) => {
+  const { data } = await $authHost.post("api/users/change-password", {
+    oldPassword,
+    newPassword,
+  });
+  return data;
+};
