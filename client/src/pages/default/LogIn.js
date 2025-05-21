@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../style/LogIn.css';
+import '../../style/default/LogIn.css';
 import logo from "../../img/Logo.png";
-import unlockIcon from "../../img/icons/unlock.png";       
-import lockIcon from "../../img/icons/lock.png"; 
+import { iconUnlock, iconLock } from '../../utils/icons';
 import { Context } from "../../index";
 import { login, check } from '../../http/userAPI';
 import { ADMIN_PANEL_ROUTE, DOCTOR_PANEL_ROUTE, MAIN_ROUTE, PATIENT_PANEL_ROUTE } from '../../utils/consts';
@@ -112,7 +111,7 @@ const LogIn = () => {
             onClick={() => setShowPassword((prev) => !prev)}
           >
             <img
-              src={showPassword ? lockIcon : unlockIcon}
+              src={showPassword ? iconLock : iconUnlock}
               alt="Toggle visibility"
               className="password-icon"
             />

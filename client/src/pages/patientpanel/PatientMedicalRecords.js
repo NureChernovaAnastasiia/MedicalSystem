@@ -5,10 +5,10 @@ import { format } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
-import SearchInput from '../../components/elements/SearchInput';
-import DateRangeFilter from '../../components/elements/DateRangeFilter';
-import DiagnosisCard from '../../components/elements/DiagnosisCard';
-import styles from '../../style/PatientMedicalRecords.module.css';
+import SearchInput from '../../components/options/SearchInput';
+import DateRangeFilter from '../../components/options/DateRangeFilter';
+import DiagnosisCard from '../../components/medcard/DiagnosisCard';
+import styles from '../../style/patientpanel/PatientMedicalRecords.module.css';
 
 import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 import { fetchPatientByUserId } from '../../http/patientAPI';

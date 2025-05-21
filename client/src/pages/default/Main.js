@@ -2,13 +2,10 @@ import React, { useState, useEffect  } from 'react';
 import { NavLink } from "react-router-dom";
 import { ABOUTUS_ROUTE, LOGIN_ROUTE } from '../../utils/consts';
 import { fetchAllReviews } from '../../http/reviewAPI'; 
-import '../../style/Main.css';
+import '../../style/default/Main.css';
 
 import bannerImage from '../../img/Healthcare.png';
-import iconBooking from '../../img/icons/cellphone.png';
-import iconCard from '../../img/icons/medical.png';
-import iconReminder from '../../img/icons/reminder.png';
-import iconAnalysis from '../../img/icons/analysis.png';
+import { iconBooking, iconHealth, iconReminder, iconServices } from '../../utils/icons';
 import noPhoto from '../../img/NoPhoto.jpg';
 
 const InfoCard = ({ icon, title, text }) => (
@@ -91,9 +88,9 @@ const Main = () => {
         <h2 className="info-title">Що дає LifeLine?</h2>
         <div className="info-cards">
           <InfoCard icon={iconBooking} title="Онлайн-запис" text="Зручне бронювання без дзвінків та очікувань" />
-          <InfoCard icon={iconCard} title="Медична картка" text="Зберігайте історію хвороби в безпеці" />
+          <InfoCard icon={iconHealth} title="Медична картка" text="Зберігайте історію хвороби в безпеці" />
           <InfoCard icon={iconReminder} title="Нагадування" text="Отримуйте автоматичні нагадування про прийоми" />
-          <InfoCard icon={iconAnalysis} title="Аналізи та результати" text="Переглядайте результати онлайн без візиту в лікарню" />
+          <InfoCard icon={iconServices} title="Аналізи та результати" text="Переглядайте результати онлайн без візиту в лікарню" />
         </div>
       </div>
 

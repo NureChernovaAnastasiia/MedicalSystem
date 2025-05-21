@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import defaultIcon from "../../img/icons/search.png";
+import { iconSearch } from "../../utils/icons";
 
 const baseInputStyle = {
   width: "100%",
@@ -46,7 +46,7 @@ const SearchInput = ({
   value,
   onChange,
   placeholder = "Пошук...",
-  icon = defaultIcon,
+  icon = iconSearch,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);

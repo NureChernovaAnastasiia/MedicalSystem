@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from 'react-router-dom';
 import styles from "../../style/modalstyle/ModalAppointmentDetails.module.css";
 import { PATIENT_MEDCARD_ROUTE } from "../../utils/consts";
+import { formatAppointmentDate } from "../../utils/formatDate"; 
 
 const ModalAppointmentDetails = ({ appointment, onClose }) => {
   const formatStatus = (status) => {
@@ -17,36 +18,7 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
     }
   };
 
-  const schedule = appointment.DoctorSchedule || appointment.LabTestSchedule || appointment.MedicalServiceSchedule;
-
-  let formattedDateTime = "Дата і час не вказані";
-
-  if (appointment.DoctorSchedule) {
-    const appointmentDate = appointment.appointment_date || schedule.appointment_date;
-    const startTime = schedule.start_time;
-
-    if (appointmentDate && startTime) {
-      const dateObj = new Date(`${appointmentDate}T${startTime}`);
-      formattedDateTime = dateObj.toLocaleString("uk-UA", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-    }
-  } else if (appointment.LabTestSchedule || appointment.MedicalServiceSchedule) {
-    const startDate = new Date(schedule?.start_time);
-    if (!isNaN(startDate)) {
-      formattedDateTime = startDate.toLocaleString("uk-UA", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-    }
-  }
+  const formattedDateTime = formatAppointmentDate(appointment);
 
   return (
     <div className={styles.modalOverlay}>

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
-import styles from '../../style/PatientMedCard.module.css';
+import styles from '../../style/patientpanel/PatientMedCard.module.css';
 import { Context } from '../../index';
 import { fetchPatientByUserId } from '../../http/patientAPI';
 import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
 
-import PatientCard from '../../components/elements/PatientCard';
-import DiagnosisPreview from '../../components/elements/DiagnosisPreview';
-import PrescriptionPreview from '../../components/elements/PrescriptionPreview';
+import PatientCard from '../../components/patient/PatientCard';
+import DiagnosisPreview from '../../components/medcard/DiagnosisPreview';
+import PrescriptionPreview from '../../components/medcard/PrescriptionPreview';
 
 const PatientMedCard = () => {
   const { user } = useContext(Context);

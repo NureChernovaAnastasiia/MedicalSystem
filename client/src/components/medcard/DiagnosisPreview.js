@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from '../../style/PatientMedCard.module.css';
+import styles from '../../style/patientpanel/PatientMedCard.module.css';
 import { PATIENT_MEDDETAIL_ROUTE, PATIENT_MEDRECORDS_ROUTE } from '../../utils/consts';
 
 const DiagnosisPreview = ({ diagnoses = [] }) => {
@@ -11,7 +11,9 @@ const DiagnosisPreview = ({ diagnoses = [] }) => {
   return (
     <div className={styles.diagnosisColumn}>
       <h2 className={styles.sectionTitle}>Діагнози</h2>
-      {sortedDiagnoses.length === 0 && <p>Діагнози відсутні</p>}
+      {sortedDiagnoses.length === 0 && (
+        <p className={styles.noDiagnosesMessage}>Діагнози відсутні</p>
+      )}
       {sortedDiagnoses.slice(0, 4).map((diagnosis, index) => (
         <div key={index} className={styles.diagnosisItem}>
           <p className={styles.diagnosisText}>{diagnosis.diagnosis}</p>

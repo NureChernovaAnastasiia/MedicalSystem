@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import styles from '../../style/PatientPrescriptions.module.css';
-import iconSearch from '../../img/icons/search.png';
-import iconDrugs from '../../img/icons/drugs.png';
+import styles from '../../style/patientpanel/PatientPrescriptions.module.css';
+import { iconSearch, iconDrugs } from '../../utils/icons';
 
 import { Context } from '../../index';
 import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
@@ -32,7 +31,7 @@ const PatientPrescriptions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [selectedPrescription, setSelectedPrescription] = useState(null); // ⬅️ Додай стан для модалки
+  const [selectedPrescription, setSelectedPrescription] = useState(null); 
 
   const loadPatient = useCallback(async () => {
     if (!user?.user?.id) return;

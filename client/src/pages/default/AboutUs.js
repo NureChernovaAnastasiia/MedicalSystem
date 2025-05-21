@@ -2,10 +2,8 @@ import React from 'react';
 import logo from "../../img/Logo.png";
 import doc from "../../img/Doctor.jpg";
 import tech from "../../img/Technologies.png";
-import iconLaptop from '../../img/icons/laptop.png';
-import iconReduce from '../../img/icons/reduce.png';
-import iconSecure from '../../img/icons/secure.png';
-import '../../style/AboutUs.css';
+import { iconLaptop, iconReduce, iconSecure } from "../../utils/icons";
+import '../../style/default/AboutUs.css';
 
 const FeatureCard = ({ icon, title, description }) => (
   <div className="feature">

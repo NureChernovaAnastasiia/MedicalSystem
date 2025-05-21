@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from '../../style/PatientMedCard.module.css';
+import styles from '../../style/patientpanel/PatientMedCard.module.css';
 import { PATIENT_PRESCRIPTIONS_ROUTE } from '../../utils/consts';
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo'; 
 
@@ -22,7 +22,9 @@ const PrescriptionPreview = ({ prescriptions = [], referenceCount = 1 }) => {
   return (
     <div className={styles.recipeColumn}>
       <h2 className={styles.sectionTitle}>Рецепти</h2>
-      {sortedPrescriptions.length === 0 && <p>Рецепти відсутні</p>}
+      {sortedPrescriptions.length === 0 && (
+        <p className={styles.noDiagnosesMessage}>Рецепти відсутні</p>
+      )}
       <div className={styles.recipeGrid}>
         {sortedPrescriptions.slice(0, Math.max(1, referenceCount)).map((recipe, index) => (
           <div

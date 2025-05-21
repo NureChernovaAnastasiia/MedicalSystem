@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from '../../style/PatientMedCard.module.css';
+import styles from '../../style/patientpanel/PatientMedCard.module.css';
 import {
   iconDate,
   iconGender,

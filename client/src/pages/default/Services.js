@@ -5,7 +5,7 @@ import online from "../../img/Fromhome.jpg";
 import card from "../../img/Medicalcard.jpg";
 import med from "../../img/Medicine.png";
 import analis from "../../img/Analisys.jpeg";
-import '../../style/Services.css';
+import '../../style/default/Services.css';
 
 const ServiceItem = ({ imgSrc, alt, title, desc, className }) => (
   <>

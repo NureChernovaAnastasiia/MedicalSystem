@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-import styles from '../../style/PatientMedicalRecords.module.css';
-import iconDiagnosis from '../../img/icons/diagnosis.png';
+import styles from '../../style/patientpanel/PatientMedicalRecords.module.css';
+import { iconDiagnosis } from '../../utils/icons';
 import { PATIENT_MEDDETAIL_ROUTE } from '../../utils/consts';
 
 const formatDate = (isoDate) => {

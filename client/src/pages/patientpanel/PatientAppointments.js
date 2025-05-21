@@ -1,49 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
-import styles from '../../style/PatientAppointments.module.css';
+import styles from '../../style/patientpanel/PatientAppointments.module.css';
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
 import ModalCancelAppointment from "../../components/modals/ModalCancelAppointment";
+import AppointmentCard from "../../components/appointment/AppointmentCard";
+import { formatAppointmentDate } from '../../utils/formatDate';
 
-import iconSearch from '../../img/icons/search.png';
+import { iconSearch } from '../../utils/icons';
 import { Context } from '../../index';
 import { fetchPatientByUserId } from '../../http/patientAPI';
 import { fetchAllPatientsAppointments } from '../../http/appointmentAPI';
-
-const AppointmentCard = ({ appointment, onDetailsClick, onCancelClick  }) => {
-  const doctor = `${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`;
-  const specialization = appointment.Doctor?.specialization || 'Невідома спеціалізація';
-  const location = `${appointment.Doctor?.Hospital?.name || "Невідома лікарня"},  ${appointment.Doctor?.Hospital?.address}`;
-
-  const statusStyle = styles[appointment.type] || '';
-  const canCancel = appointment.type === 'upcoming';
-
-  return (
-    <div className={`${styles.appointmentCard} ${statusStyle}`}>
-      <div className={styles.cardStatus}>{appointment.statusLabel}</div>
-
-      <div className={styles.cardInfo}>
-        <p><span className={styles.boldText}>Ім'я лікаря:</span><span> {doctor}</span></p>
-        <p><span className={styles.boldText}>Спеціалізація:</span><span> {specialization}</span></p>
-        <p><span className={styles.boldText}>Дата прийому:</span><span> {appointment.formattedDate}</span></p>
-        <p><span className={styles.boldText}>Час:</span><span> {appointment.formattedTime}</span></p>
-        <p><span className={styles.boldText}>Місце прийому:</span><span> {location}</span></p>
-      </div>
-
-      <div className={styles.cardFooter}>
-        <div className={styles.cardDetails} onClick={() => onDetailsClick(appointment)}>
-          <span className={styles.questionMark}>?</span>
-          <span className={styles.detailsText}>Переглянути деталі</span>
-        </div>
-
-        {canCancel && (
-          <div className={styles.cardActions} onClick={() => onCancelClick(appointment)}>
-            <span className={styles.cancelCross}>×</span>
-            <span className={styles.cancelText}>Скасувати</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const PatientAppointments = () => {
   const { user } = useContext(Context);
@@ -62,59 +27,7 @@ const PatientAppointments = () => {
         const data = await fetchAllPatientsAppointments(patient.id);
 
         const formattedAppointments = data.map((a) => {
-          let appointmentDate;
-          let startTime;
-          let endTime;
-
-          if (a.DoctorSchedule) {
-            const schedule = a.DoctorSchedule;
-            appointmentDate = a.appointment_date || schedule.appointment_date;
-            startTime = schedule.start_time;
-            endTime = schedule.end_time;
-
-            const dateObj = new Date(`${appointmentDate}T${startTime}`);
-
-            appointmentDate = dateObj.toLocaleDateString("uk-UA", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            });
-
-            const formatTime = (timeStr) => {
-              const [hours, minutes] = timeStr.split(":");
-              return `${hours}:${minutes}`;
-            };
-
-            startTime = formatTime(startTime);
-            endTime = formatTime(endTime);
-          } else if (a.LabTestSchedule || a.MedicalServiceSchedule) {
-            const schedule = a.LabTestSchedule || a.MedicalServiceSchedule;
-
-            const startDate = new Date(schedule.start_time);
-            const endDate = new Date(schedule.end_time);
-
-            appointmentDate = startDate.toLocaleDateString("uk-UA", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            });
-
-            const formatTime = (dateObj) =>
-              `${dateObj.getHours().toString().padStart(2, "0")}:${dateObj
-                .getMinutes()
-                .toString()
-                .padStart(2, "0")}`;
-
-            startTime = formatTime(startDate);
-            endTime = formatTime(endDate);
-          } else {
-            appointmentDate = "Невідома дата";
-            startTime = "??:??";
-            endTime = "??:??";
-          }
-
-          const formattedDate = appointmentDate;
-          const formattedTime = `${startTime} - ${endTime}`;
+          const formattedDateTime = formatAppointmentDate(a);
 
           let statusLabel = "";
           let type = "";
@@ -137,7 +50,13 @@ const PatientAppointments = () => {
               type = "unknown";
           }
 
-          return { ...a, formattedDate, formattedTime, statusLabel, type };
+          return {
+            ...a,
+            formattedDate: formattedDateTime,
+            formattedTime: "", 
+            statusLabel,
+            type
+          };
         });
 
         setAppointments(formattedAppointments);

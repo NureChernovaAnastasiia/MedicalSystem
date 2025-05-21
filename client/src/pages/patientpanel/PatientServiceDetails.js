@@ -1,53 +1,87 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from '../../style/PatientAnalyseDetail.module.css';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import styles from '../../style/patientpanel/PatientAnalyseDetail.module.css';
 
-import iconDoctor from '../../img/icons/doctor.png';
-import iconHospital from '../../img/icons/hospital.png';
+import { iconDoctor, iconHospital } from '../../utils/icons';
+import { fetchMedicalServiceById } from '../../http/servicesAPI'; 
 
 const PatientServiceDetails = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); 
+  const [service, setService] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const goBack = () => {
     navigate(-1);
   };
+
+  useEffect(() => {
+    const loadService = async () => {
+      try {
+        const data = await fetchMedicalServiceById(id);
+        setService(data);
+      } catch (err) {
+        setError('Не вдалося завантажити деталі послуги');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadService();
+  }, [id]);
+
+  if (loading) return <p className={styles.loading}>Завантаження...</p>;
+  if (error) return <p className={styles.error}>{error}</p>;
+  if (!service) return null;
+
+  const serviceName = service.MedicalServiceInfo?.name || 'Невідома послуга';
+  const serviceDate = service.MedicalServiceSchedulee?.appointment_date
+    ? new Date(service.date).toLocaleDateString('uk-UA')
+    : 'Дата не вказана';
+
+  const doctorName = service.Doctor
+    ? `${service.Doctor.last_name || ''} ${service.Doctor.first_name || ''} ${service.Doctor.middle_name || ''}`.trim()
+    : 'Невідомий лікар';
+
+  const hospitalName = service.Hospital?.name || 'Невідомий заклад';
+
+  const resultsText = service.results || 'Результати відсутні';
+  const doctorComment = service.doctor_comment || 'Коментар відсутній';
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Деталі послуги</h1>
 
       <div className={styles.analysisHeader}>
-        <h2 className={styles.analysisTitle}>УЗД органів черевної порожнини</h2>
-        <p className={styles.analysisDate}>Дата проведення: 20.01.2025</p>
+        <h2 className={styles.analysisTitle}>{serviceName}</h2>
+        <p className={styles.analysisDate}>Дата проведення: {serviceDate}</p>
       </div>
 
       <div className={styles.detailsSection}>
         <div className={styles.detailItem}>
           <img src={iconDoctor} alt="Doctor Icon" className={styles.icon} />
-          <p className={styles.detailText}><strong>Відповідаючий лікар:</strong> Іван Іванов</p>
+          <p className={styles.detailText}><strong>Відповідаючий лікар:</strong> {doctorName}</p>
         </div>
         <div className={styles.detailItem}>
           <img src={iconHospital} alt="Hospital Icon" className={styles.icon} />
-          <p className={styles.detailText}><strong>Місце проведення:</strong> Медичний центр "Здоров'я"</p>
+          <p className={styles.detailText}><strong>Місце проведення:</strong> {hospitalName}</p>
         </div>
       </div>
 
       <h3 className={styles.resultsTitle}>Результати</h3>
       <div className={styles.resultsBlock}>
-        <p className={styles.resultsText}>
-          Печінка: розміри в нормі, структура однорідна.<br />
-          Жовчний міхур: без конкрементів, стінки не потовщені.<br />
-          Підшлункова залоза: розміри в межах норми.<br />
-          Селезінка: не збільшена.
-        </p>
-        <a href="#" className={styles.viewPdf}>Переглянути PDF</a>
+        <p className={styles.resultsText}>{resultsText}</p>
+        {service.result_pdf && (
+          <a href={service.result_pdf} target="_blank" rel="noopener noreferrer" className={styles.viewPdf}>
+            Переглянути PDF
+          </a>
+        )}
       </div>
-      
+
       <h3 className={styles.commentTitle}>Коментар лікаря</h3>
       <div className={styles.commentBlock}>
-        <p className={styles.commentText}>
-          Ультразвукове обстеження не виявило патологічних змін. Рекомендовано щорічний профілактичний огляд.
-        </p>
+        <p className={styles.commentText}>{doctorComment}</p>
       </div>
 
       <div className={styles.backLink}>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import styles from '../../style/PatientHospitalDetails.module.css';
+import styles from '../../style/patientpanel/PatientHospitalDetails.module.css';
 
 import { Context } from '../../index';
 import { fetchPatientByUserId } from '../../http/patientAPI';
@@ -11,81 +11,11 @@ import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
 import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo';
 import ModalServicesOrdering from '../../components/modals/ModalServicesOrdering';
 
-import iconHospital from '../../img/icons/hospital.png';
-import iconAddress from '../../img/icons/address.png';
-import iconTelephone from '../../img/icons/telephone.png';
-import iconEmail from '../../img/icons/email.png';
-import iconSpecialisation from '../../img/icons/specialisation.png';
-import iconDoctor from '../../img/icons/doctor.png';
-import iconSchedule from '../../img/icons/schedule.png';
-import { PATIENT_DOCSCHEDULE_ROUTE, PATIENT_HOSPITALSCHEDULE_ROUTE } from '../../utils/consts';
+import HospitalHeader from '../../components/hospital/HospitalHeader';
+import DoctorCard from '../../components/doctor/DoctorCardBrief';
+import ServiceList from '../../components/service/ServiceList';
 
-
-const DoctorCard = ({ doctor }) => {
-  const experienceYears = doctor.experience_start_date
-    ? new Date().getFullYear() - new Date(doctor.experience_start_date).getFullYear()
-    : '—';
-
-  return (
-  <div className={styles.doctorCard}>
-    <div className={styles.cardHeader}>
-      <button className={styles.detailsButton}><span>?</span></button>
-    </div>
-    <img src={doctor.photo_url} alt="Doctor" className={styles.doctorImage} />
-    <div className={styles.doctorInfo}>
-      <h2 className={styles.doctorName}>{doctor.last_name} {doctor.first_name} {doctor.middle_name}</h2>
-      <InfoItem icon={iconSpecialisation} label={`Спеціальність: ${doctor.specialization}`} />
-      <InfoItem icon={iconDoctor} label={`Стаж: ${experienceYears} років`} />
-      <div className={styles.infoItem}>
-        <img src={iconSchedule} alt="Schedule Icon" className={styles.buttonIcon} />
-          <NavLink to={`${PATIENT_DOCSCHEDULE_ROUTE}/${doctor.id}`} className={styles.scheduleButton}>
-            Записатися
-          </NavLink>
-      </div>
-    </div>
-  </div>
-)};
-
-const InfoItem = ({ icon, label }) => (
-  <div className={styles.infoItem}>
-    <img src={icon} alt="Info Icon" className={styles.infoIcon} />
-    <p>{label}</p>
-  </div>
-);
-
-const ContactInfo = ({ icon, text }) => (
-  <div className={styles.contactItem}>
-    <img src={icon} alt="Icon" className={styles.iconSmall} />
-    <span className={styles.contactText}>{text}</span>
-  </div>
-);
-
-const ServiceList = ({ items, onInfoClick, onOrderClick }) => {
-  if (!items || items.length === 0) return <p>Немає даних для відображення</p>;
-
-  return (
-    <div className={styles.scrollableList}>
-      <div className={styles.scrollContent}>
-        {items.map((item) => {
-          const isMedical = !!item.MedicalServiceInfo;
-          const serviceInfo = isMedical ? item.MedicalServiceInfo : item.LabTestInfo;
-
-          const title = serviceInfo?.name || 'Без назви';
-          const priceValue = serviceInfo?.price;
-          const price = priceValue != null ? `${Math.round(priceValue)} грн` : 'Ціна відсутня';
-
-          return (
-            <div key={item.id} className={styles.itemCard}>
-              <div onClick={() => onInfoClick(item)}>{title}</div>
-              <div>{price}</div>
-              <button className={styles.orderButton} onClick={() => onOrderClick(item)}>Замовити</button>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+import { PATIENT_HOSPITALSCHEDULE_ROUTE } from '../../utils/consts';
 
 const PatientHospitalDetails = () => {
   const { user } = useContext(Context);
@@ -137,35 +67,7 @@ const PatientHospitalDetails = () => {
 
   return (
     <div className={styles.container}>
-      {hospital && (
-        <div className={styles.headerContainer}>
-          <div className={styles.headerBox}>
-            <div className={styles.hospitalNameBlock}>
-              <img src={iconHospital} alt="Hospital Icon" className={styles.hospitalIcon} />
-              <span className={styles.hospitalName}>{hospital.name}</span>
-            </div>
-
-            <div className={styles.middleRow}>
-              <div className={styles.clinicType}>{hospital.type} лікарня</div>
-              <div className={styles.schedule}>{hospital.working_hours}</div>
-            </div>
-
-            <div className={styles.headerInfo}>
-              <div className={styles.leftSide}>
-                <div className={styles.addressBox}>
-                  <img src={iconAddress} alt="Address Icon" className={styles.iconSmall} />
-                  <span className={styles.address}>{hospital.address}</span>
-                </div>
-              </div>
-
-              <div className={styles.rightSide}>
-                <ContactInfo icon={iconTelephone} text={hospital.phone} />
-                <ContactInfo icon={iconEmail} text={hospital.email} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {hospital && <HospitalHeader hospital={hospital} />}
 
       <h2 className={styles.servicesTitle}>Наші послуги</h2>
       <div className={styles.servicesContainer}>

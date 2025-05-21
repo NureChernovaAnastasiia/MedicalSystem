@@ -1,58 +1,90 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from '../../style/PatientAnalyseDetail.module.css';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import styles from '../../style/patientpanel/PatientAnalyseDetail.module.css';
 
-import iconDoctor from '../../img/icons/doctor.png';
-import iconHospital from '../../img/icons/hospital.png';
+import { iconDoctor, iconHospital } from '../../utils/icons';
+import { fetchLabTestById } from '../../http/analysisAPI';
 
 const PatientAnalyseDetail = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); 
+  const [labTest, setLabTest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const goBack = () => {
-    navigate(-1); 
+    navigate(-1);
   };
+
+  useEffect(() => {
+    const loadLabTest = async () => {
+      try {
+        const data = await fetchLabTestById(id);
+        setLabTest(data);
+      } catch (err) {
+        setError('Не вдалося завантажити деталі аналізу');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLabTest();
+  }, [id]);
+
+  if (loading) return <p className={styles.loading}>Завантаження...</p>;
+  if (error) return <p className={styles.error}>{error}</p>;
+  if (!labTest) return null;
+
+  const testName = labTest.LabTestSchedule?.hospital_lab_service?.lab_service?.name || 'Невідомий аналіз';
+  const testDate = labTest.LabTestSchedule?.appointment_date
+    ? new Date(labTest.LabTestSchedule.appointment_date).toLocaleDateString('uk-UA')
+    : 'Дата не вказана';
+
+  const doctorName = labTest.Doctor
+    ? `${labTest.Doctor.last_name || ''} ${labTest.Doctor.first_name || ''} ${labTest.Doctor.middle_name || ''}`.trim()
+    : 'Невідомий лікар';
+  const hospitalName = labTest.Doctor?.Hospital?.name || 'Невідомий заклад';
+  const resultsText = labTest.result || 'Результат відсутній';
+  const doctorComment = labTest.doctor_comment || 'Коментар відсутній';
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Деталі аналізу</h1>
 
       <div className={styles.analysisHeader}>
-        <h2 className={styles.analysisTitle}>Загальний аналіз крові</h2>
-        <p className={styles.analysisDate}>Дата проведення: 14.01.2025</p>
+        <h2 className={styles.analysisTitle}>{testName}</h2>
+        <p className={styles.analysisDate}>Дата проведення: {testDate}</p>
       </div>
 
       <div className={styles.detailsSection}>
         <div className={styles.detailItem}>
           <img src={iconDoctor} alt="Doctor Icon" className={styles.icon} />
-          <p className={styles.detailText}><strong>Відповідаючий лікар:</strong> Олександра Петрова</p>
+          <p className={styles.detailText}><strong>Відповідаючий лікар:</strong> {doctorName}</p>
         </div>
         <div className={styles.detailItem}>
           <img src={iconHospital} alt="Hospital Icon" className={styles.icon} />
-          <p className={styles.detailText}><strong>Місце проведення:</strong> Амбулаторія сімейної медицини "Цінність"</p>
+          <p className={styles.detailText}><strong>Місце проведення:</strong> {hospitalName}</p>
         </div>
       </div>
 
       <h3 className={styles.resultsTitle}>Результати</h3>
       <div className={styles.resultsBlock}>
-        <p className={styles.resultsText}>
-          Гемоглобін 145 г/л (130–160 г/л) — У нормі<br />
-          Лейкоцити 12.0 (4.0–9.0) — Підвищено<br />
-          ШОЕ 8 мм/год (2–15 мм/год) — У нормі<br />
-          Тромбоцити 95 (150–400) — Знижено
-        </p>
-        <a href="#" className={styles.viewPdf}>Переглянути PDF</a>
+        <p className={styles.resultsText}>{resultsText}</p>
+        {labTest.result_pdf && (
+          <a href={labTest.result_pdf} target="_blank" rel="noopener noreferrer" className={styles.viewPdf}>
+            Переглянути PDF
+          </a>
+        )}
       </div>
-      
+
       <h3 className={styles.commentTitle}>Коментар лікаря</h3>
       <div className={styles.commentBlock}>
-        <p className={styles.commentText}>
-          Лейкоцити підвищені, що може свідчити про запальний процес. Рекомендується консультація терапевта.
-        </p>
+        <p className={styles.commentText}>{doctorComment}</p>
       </div>
 
       <div className={styles.backLink}>
         <button onClick={goBack} className={styles.backButton}>
-        ‹ Повернутися назад до списку аналізів
+          ‹ Повернутися назад до списку аналізів
         </button>
       </div>
     </div>

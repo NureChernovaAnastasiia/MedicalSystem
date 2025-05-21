@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import styles from '../../style/PatientDoctorAppointment.module.css';
-import DoctorCard from '../../components/elements/DoctorCard';
+import styles from '../../style/patientpanel//PatientDoctorAppointment.module.css';
+import DoctorCard from '../../components/doctor/DoctorCard';
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
 
-import SearchInput from '../../components/elements/SearchInput';
-import SearchByHospital from '../../components/elements/SearchByHospital';
-import SearchBySpecialization from '../../components/elements/SearchBySpecialization';
-import SearchByCity from '../../components/elements/SearchByCity';
+import SearchInput from '../../components/options/SearchInput';
+import SearchByHospital from '../../components/options/SearchByHospital';
+import SearchBySpecialization from '../../components/options/SearchBySpecialization';
+import SearchByCity from '../../components/options/SearchByCity';
 
 import { fetchAllDoctors } from '../../http/doctorAPI';
 
