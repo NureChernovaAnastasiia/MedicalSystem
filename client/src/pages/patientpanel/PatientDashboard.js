@@ -5,6 +5,7 @@ import { Context } from "../../index";
 import { fetchPatientByUserId } from "../../http/patientAPI";
 import { fetchUpcomingAppointments } from "../../http/appointmentAPI";
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
+import ModalAddReview from "../../components/modals/ModalAddReview";
 
 import iconBooking from '../../img/icons/inspection.png';
 import iconAnalysis from '../../img/icons/labour.png';
@@ -47,6 +48,7 @@ const PatientDashboard = () => {
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   useEffect(() => {
     const getPatientAndAppointments = async () => {
@@ -131,6 +133,19 @@ const PatientDashboard = () => {
             />
           ))}
         </div>
+
+        <div className={styles.feedbackSection}>
+          <h2 className={styles.feedbackTitle}>Маєте враження від нашого сервісу?</h2>
+          <p className={styles.feedbackText}>Залиште, будь ласка, ваш відгук – він допоможе нам стати кращими!</p>
+          <button className={styles.feedbackButton} onClick={() => setShowReviewModal(true)}>Залишити відгук</button>
+
+          {showReviewModal && (
+            <ModalAddReview
+              onClose={() => setShowReviewModal(false)}
+            />
+          )}
+        </div>
+
         {selectedAppointment && (
           <ModalAppointmentDetails
             appointment={selectedAppointment}

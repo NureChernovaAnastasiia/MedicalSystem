@@ -155,6 +155,43 @@
   font-weight: 100;
 }
 
+.feedbackSection {
+  margin-top: 40px;
+  padding: 24px;
+  background-color: #f4f8f9;
+  text-align: center;
+}
+
+.feedbackTitle {
+  font-size: 26px;
+  margin-bottom: 10px;
+  color: #00C3A1;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.feedbackText {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #555;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+}
+
+.feedbackButton {
+  background-color: rgba(0, 195, 161, 0.42);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.feedbackButton:hover {
+  background-color: #00c8a7;
+}
+
 @media (max-width: 1200px) {
   .appointmentsList {
     grid-template-columns: repeat(2, 1fr); 
