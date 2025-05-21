@@ -4,9 +4,9 @@ import { cancelAppointment } from "../../http/appointmentAPI";
 import AlertPopup from "../../components/elements/AlertPopup";
 
 const REASONS = [
-  { value: "bad_feeling", label: "Погане самопочуття" },
-  { value: "plans_changed", label: "Зміна планів" },
-  { value: "mistake", label: "Запис помилковий" },
+  { value: "Погане самопочуття", label: "Погане самопочуття" },
+  { value: "Зміна планів", label: "Зміна планів" },
+  { value: "Запис помилковий", label: "Запис помилковий" },
 ];
 
 const getFormattedDateTime = (appointment) => {
@@ -54,7 +54,7 @@ const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }
     }
 
     try {
-      await cancelAppointment(appointment.id);
+      await cancelAppointment(appointment.id, selectedReason);
       setAlert({ message: "Запис успішно скасовано", type: "success" });
 
       setTimeout(() => {

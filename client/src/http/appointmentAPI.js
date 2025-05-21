@@ -10,7 +10,7 @@ export const fetchAllPatientsAppointments = async (patientId) => {
   return data;
 };
 
-export const cancelAppointment = async (appointmentId) => {
-  const { data } = await $authHost.patch(`/api/appointments/${appointmentId}/cancel`);
+export const cancelAppointment = async (appointmentId, notes) => {
+  const { data } = await $authHost.patch(`/api/appointments/${appointmentId}/cancel`, { notes });
   return data;
 };
