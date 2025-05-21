@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const financialReportController = require('../controllers/financialReportController');
+const authMiddleware = require('../middleware/authMiddleware');
+const roleMiddleware = require('../middleware/checkRoleMiddleware');
 
-router.get('/', financialReportController.getAll);
-router.get('/:id', financialReportController.getById);
-router.post('/', financialReportController.create);
-router.put('/:id', financialReportController.update);
-router.delete('/:id', financialReportController.delete);
+router.get(
+  '/summary',
+  authMiddleware,
+  roleMiddleware('Admin'),
+  financialReportController.getSummaryReport
+);
 
 module.exports = router;
