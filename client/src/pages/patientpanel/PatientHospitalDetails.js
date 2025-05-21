@@ -130,7 +130,7 @@ const PatientHospitalDetails = () => {
 
             <div className={styles.middleRow}>
               <div className={styles.clinicType}>{hospital.type} лікарня</div>
-              <div className={styles.schedule}>{hospital.schedule}</div>
+              <div className={styles.schedule}>{hospital.working_hours}</div>
             </div>
 
             <div className={styles.headerInfo}>
@@ -158,9 +158,11 @@ const PatientHospitalDetails = () => {
 
       <div className={styles.doctorTitle}>
         <h2 className={styles.sectionTitle}>Наші лікарі</h2>
-        <NavLink to={PATIENT_HOSPITALSCHEDULE_ROUTE} className={styles.scheduleLink}>
-          Розклад прийому лікарів
-        </NavLink>
+        {hospital && (
+          <NavLink to={`${PATIENT_HOSPITALSCHEDULE_ROUTE}/${hospital.id}`} className={styles.scheduleLink}>
+            Розклад прийому лікарів
+          </NavLink>
+        )}
       </div>
 
       <div className={styles.doctorGrid}>
