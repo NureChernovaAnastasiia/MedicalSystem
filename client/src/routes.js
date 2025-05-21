@@ -40,7 +40,7 @@ export const adminRoutes = [
     { path: PATIENT_EDITPERSONALINFO_ROUTE, Component: PatientEditPersonalInfo },
     { path: PATIENT_MEDRECORDS_ROUTE, Component: PatientMedicalRecords },
     { path: PATIENT_PRESCRIPTIONS_ROUTE, Component: PatientPrescriptions },
-    { path: PATIENT_ANALYSEDETAIL_ROUTE, Component: PatientAnalyseDetail },
+    { path: PATIENT_ANALYSEDETAIL_ROUTE + '/:id', Component: PatientAnalyseDetail },
     { path: PATIENT_ANALYSEORDER_ROUTE, Component: PatientAnalyseOrder },
     { path: PATIENT_ANALYSIS_ROUTE, Component: PatientAnalysis },
     { path: PATIENT_APPOINTMENTS_ROUTE, Component: PatientAppointments },
@@ -51,7 +51,7 @@ export const adminRoutes = [
     { path: PATIENT_MEDDETAIL_ROUTE + '/:id', Component: PatientMedicalDetail },
     { path: PATIENT_SERVICEORDER_ROUTE, Component: PatientServiceOrder },
     { path: PATIENT_SERVICE_ROUTE, Component: PatientServices },
-    { path: PATIENT_SERVICEDETAILS_ROUTE, Component: PatientServiceDetails },
+    { path: PATIENT_SERVICEDETAILS_ROUTE + '/:id', Component: PatientServiceDetails },
   ];
   
   export const doctorRoutes = [
