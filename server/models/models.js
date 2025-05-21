@@ -246,6 +246,7 @@ const LabTest = sequelize.define("LabTest", {
   lab_test_schedule_id: { type: DataTypes.INTEGER, allowNull: false },
   results: { type: DataTypes.TEXT },
   notes: { type: DataTypes.TEXT },
+  is_ready: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
 // Financial Report
@@ -318,6 +319,7 @@ const MedicalService = sequelize.define("MedicalService", {
   medical_service_schedule_id: { type: DataTypes.INTEGER, allowNull: false },
   results: { type: DataTypes.TEXT },
   notes: { type: DataTypes.TEXT },
+  is_ready: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
 
 // User
