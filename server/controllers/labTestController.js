@@ -77,9 +77,23 @@ class LabTestController {
       }
 
       const items = await LabTest.findAll({
-        where: { patient_id: patientId },
-        include: [{ model: Doctor, include: [Hospital] }, LabTestSchedule],
-      });
+  where: { patient_id: patientId },
+  include: [
+    {
+      model: Doctor,
+      include: [Hospital],
+    },
+    {
+      model: LabTestSchedule,
+      include: [
+        {
+          model: HospitalLabService,
+          include: [LabTestInfo],
+        },
+      ],
+    },
+  ],
+});
 
       return res.json(items);
     } catch (e) {
