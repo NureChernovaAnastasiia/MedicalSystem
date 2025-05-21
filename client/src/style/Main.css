@@ -210,7 +210,7 @@
 }
 
 .author-info {
-  display: flex;
+  display: grid;
   justify-content: center;
   gap: 6px;
   font-weight: 525;
