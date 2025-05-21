@@ -8,6 +8,8 @@ import { fetchHospitalById } from '../../http/hospitalAPI';
 import { getHospitalLabServicesByHospitalId } from '../../http/analysisAPI';
 import { getHospitalMedicalServicesByHospitalId } from '../../http/servicesAPI';
 import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
+import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo';
+import ModalServicesOrdering from '../../components/modals/ModalServicesOrdering';
 
 import iconHospital from '../../img/icons/hospital.png';
 import iconAddress from '../../img/icons/address.png';
@@ -16,7 +18,7 @@ import iconEmail from '../../img/icons/email.png';
 import iconSpecialisation from '../../img/icons/specialisation.png';
 import iconDoctor from '../../img/icons/doctor.png';
 import iconSchedule from '../../img/icons/schedule.png';
-import { PATIENT_HOSPITALSCHEDULE_ROUTE } from '../../utils/consts';
+import { PATIENT_DOCSCHEDULE_ROUTE, PATIENT_HOSPITALSCHEDULE_ROUTE } from '../../utils/consts';
 
 
 const DoctorCard = ({ doctor }) => {
@@ -36,7 +38,9 @@ const DoctorCard = ({ doctor }) => {
       <InfoItem icon={iconDoctor} label={`Стаж: ${experienceYears} років`} />
       <div className={styles.infoItem}>
         <img src={iconSchedule} alt="Schedule Icon" className={styles.buttonIcon} />
-        <button className={styles.scheduleButton}>Записатися</button>
+          <NavLink to={`${PATIENT_DOCSCHEDULE_ROUTE}/${doctor.id}`} className={styles.scheduleButton}>
+            Записатися
+          </NavLink>
       </div>
     </div>
   </div>
@@ -56,7 +60,7 @@ const ContactInfo = ({ icon, text }) => (
   </div>
 );
 
-const ServiceList = ({ items }) => {
+const ServiceList = ({ items, onInfoClick, onOrderClick }) => {
   if (!items || items.length === 0) return <p>Немає даних для відображення</p>;
 
   return (
@@ -72,9 +76,9 @@ const ServiceList = ({ items }) => {
 
           return (
             <div key={item.id} className={styles.itemCard}>
-              <div>{title}</div>
+              <div onClick={() => onInfoClick(item)}>{title}</div>
               <div>{price}</div>
-              <button className={styles.orderButton}>Замовити</button>
+              <button className={styles.orderButton} onClick={() => onOrderClick(item)}>Замовити</button>
             </div>
           );
         })}
@@ -89,6 +93,19 @@ const PatientHospitalDetails = () => {
   const [analyses, setAnalyses] = useState([]);
   const [services, setServices] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [selectedAnalyse, setSelectedAnalyse] = useState(null);
+
+  const handleOpenModal = (analyse) => {
+    setSelectedAnalyse(analyse);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenOrderModal = (analyse) => {
+    setSelectedAnalyse(analyse);
+    setIsOrderModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchHospital = async () => {
@@ -152,8 +169,16 @@ const PatientHospitalDetails = () => {
 
       <h2 className={styles.servicesTitle}>Наші послуги</h2>
       <div className={styles.servicesContainer}>
-        <ServiceList items={analyses} />
-        <ServiceList items={services} />
+        <ServiceList
+          items={analyses}
+          onInfoClick={handleOpenModal}
+          onOrderClick={handleOpenOrderModal}
+        />
+        <ServiceList
+          items={services}
+          onInfoClick={handleOpenModal}
+          onOrderClick={handleOpenOrderModal}
+        />
       </div>
 
       <div className={styles.doctorTitle}>
@@ -168,6 +193,16 @@ const PatientHospitalDetails = () => {
       <div className={styles.doctorGrid}>
         {doctors.map(doctor => <DoctorCard key={doctor.id} doctor={doctor} />)}
       </div>
+      {isModalOpen && selectedAnalyse && (
+        <ModalAnalysInfo onClose={() => setIsModalOpen(false)} analyse={selectedAnalyse} />
+      )}
+      {isOrderModalOpen && selectedAnalyse && hospital && (
+        <ModalServicesOrdering
+          onClose={() => setIsOrderModalOpen(false)}
+          analyse={selectedAnalyse}
+          hospital={hospital}
+        />
+      )}
     </div>
   );
 };

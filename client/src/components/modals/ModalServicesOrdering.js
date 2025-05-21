@@ -34,7 +34,7 @@ const formatTimeDisplay = (isoTime) =>
     hour12: false,
   });
 
-const ModalServicesOrdering = ({ onClose, analyse }) => {
+const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
   const [dateOptions, setDateOptions] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [availableTimes, setAvailableTimes] = useState([]);
@@ -123,8 +123,8 @@ const ModalServicesOrdering = ({ onClose, analyse }) => {
 
   const analysisName = analyse?.LabTestInfo?.name || analyse?.MedicalServiceInfo?.name || '—';
   const price = analyse?.LabTestInfo?.price || analyse?.MedicalServiceInfo?.price || '—';
-  const labName = analyse?.Hospital?.name || '—';
-  const labAddress = analyse?.Hospital?.address || '—';
+  const labName = analyse?.Hospital?.name || hospital.name || '—';
+  const labAddress = analyse?.Hospital?.address || hospital.address || '—';
 
   return (
     <>
