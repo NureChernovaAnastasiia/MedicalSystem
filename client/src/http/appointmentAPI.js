@@ -14,3 +14,8 @@ export const cancelAppointment = async (appointmentId, notes) => {
   const { data } = await $authHost.patch(`/api/appointments/${appointmentId}/cancel`, { notes });
   return data;
 };
+
+export const fetchAllDoctorAppointments = async (doctorId) => {
+  const { data } = await $authHost.get(`/api/appointments/doctor/${doctorId}`);
+  return data;
+};
