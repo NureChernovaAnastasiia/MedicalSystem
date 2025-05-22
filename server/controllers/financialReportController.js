@@ -1,39 +1,77 @@
 const { FinancialReport, Hospital } = require('../models/models');
 const { Op } = require('sequelize');
 
-// 📊 Отримати загальну виручку по всіх клініках за обраний період
-const getSummaryReport = async (req, res, next) => {
+// 📅 Сьогоднішня дата
+const getTodayReport = async (req, res, next) => {
   try {
-    const { from, to } = req.query;
-
-    const where = {};
-    if (from || to) {
-      where.report_date = {};
-      if (from) where.report_date[Op.gte] = new Date(from);
-      if (to) where.report_date[Op.lte] = new Date(to);
-    }
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
     const reports = await FinancialReport.findAll({
-      where,
+      where: {
+        report_date: { [Op.gte]: start, [Op.lt]: end },
+      },
       include: [Hospital],
     });
 
-    const summary = reports.reduce(
-      (acc, r) => {
-        acc.total_income += parseFloat(r.total_income || 0);
-        acc.total_expenses += parseFloat(r.total_expenses || 0);
-        return acc;
-      },
-      { total_income: 0, total_expenses: 0 }
-    );
+    const total_income = reports.reduce((sum, r) => sum + parseFloat(r.total_income || 0), 0);
 
-    res.json({ summary, reports });
+    res.json({ period: 'day', date: start.toISOString().slice(0, 10), total_income, reports });
   } catch (error) {
-    console.error('Помилка отримання фінансового звіту:', error);
-    return res.status(500).json({ message: 'Не вдалося отримати фінансовий звіт' });
+    console.error('❌ Day report error:', error);
+    res.status(500).json({ message: 'Помилка отримання денного звіту' });
+  }
+};
+
+// 📆 Поточний місяць
+const getMonthReport = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    const reports = await FinancialReport.findAll({
+      where: {
+        report_date: { [Op.gte]: start, [Op.lt]: end },
+      },
+      include: [Hospital],
+    });
+
+    const total_income = reports.reduce((sum, r) => sum + parseFloat(r.total_income || 0), 0);
+
+    res.json({ period: 'month', month: start.getMonth() + 1, year: start.getFullYear(), total_income, reports });
+  } catch (error) {
+    console.error('❌ Month report error:', error);
+    res.status(500).json({ message: 'Помилка отримання місячного звіту' });
+  }
+};
+
+// 📅 Поточний рік
+const getYearReport = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    const end = new Date(now.getFullYear() + 1, 0, 1);
+
+    const reports = await FinancialReport.findAll({
+      where: {
+        report_date: { [Op.gte]: start, [Op.lt]: end },
+      },
+      include: [Hospital],
+    });
+
+    const total_income = reports.reduce((sum, r) => sum + parseFloat(r.total_income || 0), 0);
+
+    res.json({ period: 'year', year: start.getFullYear(), total_income, reports });
+  } catch (error) {
+    console.error('❌ Year report error:', error);
+    res.status(500).json({ message: 'Помилка отримання річного звіту' });
   }
 };
 
 module.exports = {
-  getSummaryReport,
+  getTodayReport,
+  getMonthReport,
+  getYearReport,
 };
