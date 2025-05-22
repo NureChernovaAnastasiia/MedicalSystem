@@ -132,7 +132,6 @@
 .scheduleWrapper {
   overflow-x: auto;
   width: 100%;
-  padding: 0 20px;
 }
 
 .scheduleWrapper::-webkit-scrollbar {
