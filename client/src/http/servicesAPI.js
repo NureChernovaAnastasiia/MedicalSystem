@@ -29,3 +29,18 @@ export const fetchMedicalServiceById = async (serviceId) => {
     throw error;
   }
 };
+
+export const fetchMedicalServicePdf = async (serviceId) => {
+  try {
+    const response = await $authHost.get(`api/medical-services/${serviceId}/pdf`, {
+      responseType: 'blob',
+    });
+
+    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    window.open(pdfUrl, '_blank');
+  } catch (error) {
+    console.error('Помилка при отриманні PDF послуги:', error);
+    alert('Не вдалося відкрити PDF документ медичної послуги');
+  }
+};

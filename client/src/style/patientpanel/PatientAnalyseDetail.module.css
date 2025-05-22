@@ -87,17 +87,25 @@
     line-height: 1.8;
   }
   
+  .pdfWrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem; 
+  }
+
   .viewPdf {
+    background: none;
+    border: none;
     display: block;
     margin-top: 1rem;
-    text-align: right;
     font-style: italic;
     font-weight: 600;
     font-size: 16px;
     color: #333;
     text-decoration: underline;
+    cursor: pointer;
   }
-  
+
   .commentBlock {
     background: #F6F6F6;
     border: 1px solid #D9D9D9;

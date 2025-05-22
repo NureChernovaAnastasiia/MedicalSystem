@@ -107,7 +107,7 @@ const PatientAnalysis = () => {
             : 'Не вказано';
 
           const clinic = test.Doctor?.Hospital?.name || 'Не вказано';
-          const title = `Аналіз #${test.id}`;
+          const title = test.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || `Аналіз #${test.id}`;
 
           return (
             <Card

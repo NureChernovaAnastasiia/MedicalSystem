@@ -8,7 +8,7 @@ const Card = ({ id, status, title, date, clinic, statusClass, footerClass, foote
       <div className={styles.innerCard}>
         <div className={statusClass}>● {status}</div>
         <h2 className={styles.cardTitle}>{title}</h2>
-        <p className={styles.cardDate}><strong>Дата:</strong> {date}</p>
+        <p className={styles.cardDate}><strong>Дата проведення:</strong> {date}</p>
         <p className={styles.cardClinic}><strong>Клініка:</strong> {clinic}</p>
       </div>
       {isReady ? (
