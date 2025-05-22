@@ -10,17 +10,25 @@ const {
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const moment = require("moment");
-const paypalService = require('../services/paypalService');
+const paypalService = require("../services/paypalService");
 
 class MedicalServiceScheduleController {
-  // 🔍 Отримати всі розклади процедур (всі авторизовані)
+  // 🔍 Отримати всі розклади процедур
   async getAll(req, res, next) {
     try {
       const schedules = await MedicalServiceSchedule.findAll({
         include: {
           model: HospitalMedicalService,
-          include: [Hospital, MedicalServiceInfo, Doctor],
+          include: [
+            Hospital,
+            {
+              model: MedicalServiceInfo,
+              as: "MedicalServiceInfo",
+            },
+            Doctor,
+          ],
         },
+        order: [["appointment_date", "ASC"], ["start_time", "ASC"]],
       });
 
       const formatted = schedules.map((schedule) => {
@@ -36,9 +44,7 @@ class MedicalServiceScheduleController {
           is_booked: schedule.is_booked,
           hospital: hospital?.name,
           procedure_name: service?.MedicalServiceInfo?.name,
-          doctor: `${service?.Doctor?.first_name || ""} ${
-            service?.Doctor?.last_name || ""
-          }`,
+          doctor: `${service?.Doctor?.first_name || ""} ${service?.Doctor?.last_name || ""}`.trim(),
           ...(isPrivate && {
             procedure_price: service?.MedicalServiceInfo?.price,
           }),
@@ -48,9 +54,7 @@ class MedicalServiceScheduleController {
       return res.json(formatted);
     } catch (e) {
       console.error("getAll error:", e);
-      return next(
-        ApiError.internal("Не вдалося отримати список розкладів процедур")
-      );
+      return next(ApiError.internal("Не вдалося отримати список розкладів процедур"));
     }
   }
 
@@ -60,7 +64,14 @@ class MedicalServiceScheduleController {
       const item = await MedicalServiceSchedule.findByPk(req.params.id, {
         include: {
           model: HospitalMedicalService,
-          include: [Hospital, MedicalServiceInfo, Doctor],
+          include: [
+            Hospital,
+            {
+              model: MedicalServiceInfo,
+              as: "MedicalServiceInfo",
+            },
+            Doctor,
+          ],
         },
       });
 
@@ -77,9 +88,7 @@ class MedicalServiceScheduleController {
         is_booked: item.is_booked,
         hospital: service?.Hospital?.name,
         procedure_name: service?.MedicalServiceInfo?.name,
-        doctor: `${service?.Doctor?.first_name || ""} ${
-          service?.Doctor?.last_name || ""
-        }`,
+        doctor: `${service?.Doctor?.first_name || ""} ${service?.Doctor?.last_name || ""}`.trim(),
         ...(isPrivate && {
           procedure_price: service?.MedicalServiceInfo?.price,
         }),
@@ -89,94 +98,80 @@ class MedicalServiceScheduleController {
       return next(ApiError.internal("Помилка отримання розкладу процедури"));
     }
   }
+
+  // 💳 Бронювання з оплатою
   async bookMedicalService(req, res, next) {
-  try {
-    const { medical_service_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
+    try {
+      const { medical_service_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
 
-    const userId = req.user.id;
+      const userId = req.user.id;
 
-    const paymentResult = await paypalService.captureOrder(orderId, 'medical', userId);
-    if (paymentResult.status !== "COMPLETED") {
-      return next(ApiError.badRequest("Оплата не була підтверджена"));
+      const paymentResult = await paypalService.captureOrder(orderId, "medical", userId);
+      if (paymentResult.status !== "COMPLETED") {
+        return next(ApiError.badRequest("Оплата не була підтверджена"));
+      }
+
+      const schedule = await MedicalServiceSchedule.findByPk(medical_service_schedule_id);
+      if (!schedule) return next(ApiError.notFound("Розклад процедури не знайдено"));
+      if (schedule.is_booked) return next(ApiError.badRequest("Час вже зайнято"));
+
+      let patientId;
+      if (req.user.role === "Patient") {
+        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+        if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
+        patientId = patient.id;
+      } else {
+        if (!bodyPatientId) return next(ApiError.badRequest("Не вказано patient_id"));
+        patientId = bodyPatientId;
+      }
+
+      const hospitalService = await HospitalMedicalService.findByPk(schedule.hospital_medical_service_id);
+      if (!hospitalService) {
+        return next(ApiError.badRequest("Послугу не знайдено"));
+      }
+
+      const doctor_id = hospitalService.doctor_id;
+
+      const appointment = await Appointment.create({
+        patient_id: patientId,
+        doctor_id,
+        medical_service_schedule_id,
+        appointment_date: schedule.appointment_date,
+        status: "Scheduled",
+      });
+
+      await schedule.update({ is_booked: true });
+
+      await MedicalService.create({
+        patient_id: patientId,
+        doctor_id,
+        medical_service_schedule_id,
+        is_ready: false,
+        results: null,
+        notes: null,
+      });
+
+      return res.json({
+        message: "Процедуру заброньовано після оплати",
+        appointment,
+      });
+    } catch (e) {
+      console.error("bookMedicalService error:", e);
+      return next(ApiError.internal(e.message || "Не вдалося оплатити та забронювати процедуру"));
     }
-
-    const schedule = await MedicalServiceSchedule.findByPk(medical_service_schedule_id);
-    if (!schedule) return next(ApiError.notFound("Розклад процедури не знайдено"));
-    if (schedule.is_booked) return next(ApiError.badRequest("Час вже зайнято"));
-
-    let patientId;
-    if (req.user.role === "Patient") {
-      const patient = await Patient.findOne({ where: { user_id: req.user.id } });
-      if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
-      patientId = patient.id;
-    } else {
-      if (!bodyPatientId) return next(ApiError.badRequest("Не вказано patient_id"));
-      patientId = bodyPatientId;
-    }
-
-    const hospitalService = await HospitalMedicalService.findByPk(schedule.hospital_medical_service_id);
-    if (!hospitalService) {
-      return next(ApiError.badRequest("Послугу медичних процедур не знайдено"));
-    }
-
-    const doctor_id = hospitalService.doctor_id;
-
-    const appointment = await Appointment.create({
-      patient_id: patientId,
-      doctor_id,
-      medical_service_schedule_id,
-      appointment_date: schedule.appointment_date,
-      status: "Scheduled"
-    });
-
-    await schedule.update({ is_booked: true });
-
-    await MedicalService.create({
-      patient_id: patientId,
-      doctor_id,
-      medical_service_schedule_id,
-      result: null,
-      notes: null
-    });
-
-    return res.json({
-      message: "Процедуру заброньовано після підтвердженої оплати",
-      appointment
-    });
-  } catch (e) {
-    console.error("bookMedicalService error:", e);
-    return next(ApiError.internal(e.message || "Не вдалося оплатити та забронювати процедуру"));
   }
-}
 
-
-  // ➕ Створити (лише Admin або Doctor)
+  // ➕ Створити розклади по шаблону
   async create(req, res, next) {
     try {
       if (req.user.role !== "Admin") {
-        return next(
-          ApiError.forbidden("Тільки адміністратор може створювати розклад")
-        );
+        return next(ApiError.forbidden("Тільки адміністратор може створювати розклад"));
       }
 
-      const {
-        hospital_medical_service_id,
-        start_date,
-        end_date,
-        time_template,
-      } = req.body;
+      const { hospital_medical_service_id, start_date, end_date, time_template } = req.body;
 
-      if (
-        !hospital_medical_service_id ||
-        !start_date ||
-        !end_date ||
-        !time_template
-      ) {
-        return next(
-          ApiError.badRequest(
-            "Необхідно вказати hospital_medical_service_id, start_date, end_date та time_template"
-          )
-        );
+      if (!hospital_medical_service_id || !start_date || !end_date || !time_template) {
+        return next(ApiError.badRequest("Необхідно вказати всі обов'язкові поля"));
       }
 
       const schedulesToCreate = [];
@@ -184,19 +179,13 @@ class MedicalServiceScheduleController {
       const end = moment(end_date);
 
       while (current.isSameOrBefore(end, "day")) {
-        const dayOfWeek = current.format("dddd"); // e.g. 'Monday'
+        const dayOfWeek = current.format("dddd");
         const template = time_template[dayOfWeek];
 
         if (template) {
           const { start_time, end_time } = template;
-          const slotStart = moment(
-            `${current.format("YYYY-MM-DD")} ${start_time}`,
-            "YYYY-MM-DD HH:mm"
-          );
-          const slotEndLimit = moment(
-            `${current.format("YYYY-MM-DD")} ${end_time}`,
-            "YYYY-MM-DD HH:mm"
-          );
+          const slotStart = moment(`${current.format("YYYY-MM-DD")} ${start_time}`, "YYYY-MM-DD HH:mm");
+          const slotEndLimit = moment(`${current.format("YYYY-MM-DD")} ${end_time}`, "YYYY-MM-DD HH:mm");
 
           let slotCurrent = slotStart.clone();
           while (slotCurrent.isBefore(slotEndLimit)) {
@@ -218,25 +207,22 @@ class MedicalServiceScheduleController {
         current.add(1, "day");
       }
 
-      const created = await MedicalServiceSchedule.bulkCreate(
-        schedulesToCreate
-      );
+      const created = await MedicalServiceSchedule.bulkCreate(schedulesToCreate);
       return res.status(201).json({
         message: `Успішно створено ${created.length} розкладів`,
         created,
       });
     } catch (e) {
-      console.error("create (medicalServiceSchedule) error:", e);
+      console.error("create schedule error:", e);
       return next(ApiError.internal("Не вдалося створити розклад процедур"));
     }
   }
-  // ✏️ Оновити (лише Admin або Doctor)
+
+  // ✏️ Оновити
   async update(req, res, next) {
     try {
       if (!["Admin", "Doctor"].includes(req.user.role)) {
-        return next(
-          ApiError.forbidden("Недостатньо прав для оновлення розкладу")
-        );
+        return next(ApiError.forbidden("Недостатньо прав для оновлення розкладу"));
       }
 
       const item = await MedicalServiceSchedule.findByPk(req.params.id);
@@ -250,7 +236,7 @@ class MedicalServiceScheduleController {
     }
   }
 
-  // 🗑 Видалити (лише Admin або Doctor)
+  // 🗑 Видалити
   async delete(req, res, next) {
     try {
       if (!["Admin", "Doctor"].includes(req.user.role)) {
@@ -267,6 +253,8 @@ class MedicalServiceScheduleController {
       return next(ApiError.internal("Помилка видалення розкладу"));
     }
   }
+
+  // 🔍 За послугою та датою
   async getByServiceAndDate(req, res, next) {
     try {
       const { medicalServiceId, date } = req.params;
@@ -282,7 +270,14 @@ class MedicalServiceScheduleController {
         },
         include: {
           model: HospitalMedicalService,
-          include: [Hospital, MedicalServiceInfo, Doctor],
+          include: [
+            Hospital,
+            {
+              model: MedicalServiceInfo,
+              as: "MedicalServiceInfo",
+            },
+            Doctor,
+          ],
         },
       });
 
@@ -292,14 +287,14 @@ class MedicalServiceScheduleController {
       return next(ApiError.internal("Не вдалося отримати розклад процедур"));
     }
   }
+
+  // 🕒 Отримати години роботи на день
   async getWorkingHoursByDate(req, res, next) {
     try {
       const { hospital_medical_service_id, date } = req.params;
 
       if (!hospital_medical_service_id || !date) {
-        return next(
-          ApiError.badRequest("Потрібні hospital_medical_service_id і date")
-        );
+        return next(ApiError.badRequest("Потрібні hospital_medical_service_id і date"));
       }
 
       const slots = await MedicalServiceSchedule.findAll({
@@ -321,14 +316,12 @@ class MedicalServiceScheduleController {
       return res.json({
         hospital_medical_service_id,
         date,
-        start_time: moment(slots[0].start_time, "HH:mm").format("HH:mm:ss"),
-        end_time: moment(slots[slots.length - 1].end_time, "HH:mm").format(
-          "HH:mm:ss"
-        ),
+        start_time: moment(slots[0].start_time).format("HH:mm:ss"),
+        end_time: moment(slots[slots.length - 1].end_time).format("HH:mm:ss"),
       });
     } catch (e) {
-      console.error("getWorkingHoursByDate (Medical) error:", e);
-      return next(ApiError.internal("Не вдалося отримати час для процедур"));
+      console.error("getWorkingHoursByDate error:", e);
+      return next(ApiError.internal("Не вдалося отримати години роботи"));
     }
   }
 }
