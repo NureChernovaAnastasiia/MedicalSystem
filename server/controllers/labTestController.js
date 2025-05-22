@@ -34,33 +34,45 @@ class LabTestController {
   }
 
   async getById(req, res, next) {
-    try {
-      const item = await LabTest.findByPk(req.params.id, {
-        include: [
-          { model: Patient, include: [Hospital] },
-          { model: Doctor, include: [Hospital] },
-          LabTestSchedule,
-        ],
+  try {
+    const item = await LabTest.findByPk(req.params.id, {
+      include: [
+        { model: Patient, include: [Hospital] },
+        { model: Doctor, include: [Hospital] },
+        {
+          model: LabTestSchedule,
+          include: [
+            {
+              model: HospitalLabService,
+              include: [LabTestInfo],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!item) return next(ApiError.notFound("Аналіз не знайдено"));
+
+    // Перевірка доступу
+    if (req.user.role === "Patient") {
+      const patient = await Patient.findOne({
+        where: { user_id: req.user.id },
       });
-
-      if (!item) return next(ApiError.notFound("Аналіз не знайдено"));
-
-      // Перевірка доступу
-      if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({
-          where: { user_id: req.user.id },
-        });
-        if (!patient || patient.id !== item.patient_id) {
-          return next(ApiError.forbidden("Немає доступу до цього аналізу"));
-        }
+      if (!patient || patient.id !== item.patient_id) {
+        return next(ApiError.forbidden("Немає доступу до цього аналізу"));
       }
-
-      return res.json(item);
-    } catch (e) {
-      console.error("getById error:", e);
-      return next(ApiError.internal("Помилка отримання аналізу"));
     }
+
+    // Додати назву аналізу (якщо є)
+    const testName =
+      item.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || null;
+
+    return res.json({ ...item.toJSON(), test_name: testName });
+  } catch (e) {
+    console.error("getById error:", e);
+    return next(ApiError.internal("Помилка отримання аналізу"));
   }
+}
 
   async getByPatient(req, res, next) {
     try {
