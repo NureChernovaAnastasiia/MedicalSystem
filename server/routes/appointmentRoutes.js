@@ -8,6 +8,12 @@ const checkRole = require('../middleware/checkRoleMiddleware');
 router.use(authMiddleware);
 
 /**
+ * @route   GET /api/appointments/upcoming/doctor/:doctorId
+ * @desc    Отримати майбутні прийоми лікаря
+ *          (лікар — лише свої, адмін — будь-які)
+ */
+router.get('/upcoming/doctor/:doctorId', appointmentController.getUpcomingByDoctor);
+/**
  * @route   PATCH /api/appointments/:id/complete
  * @desc    Позначити прийом як завершений (Doctor/Admin)
  */

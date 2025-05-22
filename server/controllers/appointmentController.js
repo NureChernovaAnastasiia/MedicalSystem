@@ -298,6 +298,47 @@ class AppointmentController {
     }
   }
 
+  async getUpcomingByDoctor(req, res, next) {
+    try {
+      const { doctorId } = req.params;
+
+      if (req.user.role === "Doctor") {
+        const doctor = await Doctor.findOne({
+          where: { user_id: req.user.id },
+        });
+        if (!doctor || doctor.id !== parseInt(doctorId)) {
+          return next(ApiError.forbidden("Access denied"));
+        }
+      }
+
+      const now = new Date();
+
+      const upcomingAppointments = await Appointment.findAll({
+        where: {
+          doctor_id: doctorId,
+          appointment_date: { [Op.gte]: now },
+          status: { [Op.ne]: "Cancelled" },
+        },
+        include: [
+          {
+            model: Patient,
+            include: [Hospital],
+          },
+          DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
+        ],
+        order: [["appointment_date", "ASC"]],
+      });
+
+      return res.json(AppointmentController._mapStatus(upcomingAppointments));
+    } catch (e) {
+      console.error("getUpcomingByDoctor error:", e);
+      return next(
+        ApiError.internal("Failed to retrieve upcoming appointments")
+      );
+    }
+  }
   async getUpcomingByPatient(req, res, next) {
     try {
       const { patientId } = req.params;
