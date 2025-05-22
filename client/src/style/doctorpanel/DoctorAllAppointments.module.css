@@ -1,0 +1,153 @@
+.container {
+    padding: 30px 60px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.title {
+    text-align: left;
+    color: #000;
+    font-weight: 500;
+    font-size: 36px;
+}
+
+.orderButtonWrapper {
+    display: flex;
+}
+
+.orderButton {
+    background: rgba(0, 195, 161, 0.42);
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 2rem;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 24px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.orderButton:hover {
+    background: #00C3A1;
+}
+
+.fullWidthSearch {
+    margin-bottom: 10px;
+}
+
+.filterRow {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1458px;
+    margin: 0 auto 20px;
+}
+
+.datePickerWrapper {
+    position: relative;
+}
+
+.dateButton {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 300;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1.75rem;
+}
+
+.dateRangeWrapper {
+    position: absolute;
+    z-index: 10;
+}
+
+.clearDateButton {
+    margin-top: 8px;
+    background: rgb(0, 195, 163);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.clearDateButton:hover {
+    background-color: rgb(0, 178, 148);
+}
+
+.searchBox {
+    flex: 1 1 75%;
+    position: relative;
+}
+
+.select {
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 18px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 200px;
+    padding: 14px 12px;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.select:hover,
+.select:focus,
+.dateButton:hover,
+.dateButton:focus {
+    border-color: #00C3A1;
+    box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
+    outline: none;
+}
+
+.tableHeader {
+    display: grid;
+    grid-template-columns: 0.7fr 0.7fr 1.3fr 0.8fr 0.5fr;
+    padding: 1rem;
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 195, 161, 0.42);
+    font-weight: 500;
+    color: #333;
+}
+
+
+@media (max-width: 1024px) {
+    .dateButton,
+    .select {
+        font-size: 16px;
+        padding: 0.6rem 0.9rem;
+        line-height: 1rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .title {
+        font-size: 24px;
+    }
+
+    .orderButton {
+        padding: 0.5rem 1rem;
+        font-size: 16px;
+    }
+
+    .tableHeader {
+        display: none;
+    }
+}
