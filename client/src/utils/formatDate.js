@@ -53,7 +53,7 @@ export const formatAppointmentDateOnly = (appointment) => {
   if (dateObj && !isNaN(dateObj)) {
     return dateObj.toLocaleDateString("uk-UA", {
       day: "numeric",
-      month: "long",
+      month: "numeric",
       year: "numeric",
     });
   }

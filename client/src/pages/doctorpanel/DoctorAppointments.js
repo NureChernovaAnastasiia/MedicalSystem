@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorAppointments.module.css';
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
 import ModalCancelAppointment from "../../components/modals/ModalCancelAppointment";
@@ -8,6 +9,7 @@ import { Context } from '../../index';
 import { fetchDoctorByUserId } from '../../http/doctorAPI';
 import { fetchAllDoctorAppointments } from '../../http/appointmentAPI';
 import { formatAppointmentDate } from '../../utils/formatDate';
+import { DOCTOR_ALLAPPOINTMENTS_ROUTE } from '../../utils/consts';
 
 const DoctorAppointments = () => {
   const { user } = useContext(Context);
@@ -94,7 +96,9 @@ const DoctorAppointments = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Прийоми на сьогодні</h1>
         <div className={styles.orderButtonWrapper}>
-          <button className={styles.orderButton}>Всі прийоми</button>
+          <NavLink to={DOCTOR_ALLAPPOINTMENTS_ROUTE}>
+            <button className={styles.orderButton}>Всі прийоми</button>
+          </NavLink>
         </div>
       </div>
 
