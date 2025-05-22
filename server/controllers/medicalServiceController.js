@@ -11,12 +11,11 @@ const ApiError = require("../error/ApiError");
 const generateMedicalServicePdf = require("../utils/generateMedicalServicePdf");
 
 class MedicalServiceController {
+  // 🧾 All records (Admin / Doctor only)
   async getAll(req, res, next) {
     try {
       if (!["Admin", "Doctor"].includes(req.user.role)) {
-        return next(
-          ApiError.forbidden("Недостатньо прав для перегляду всіх процедур")
-        );
+        return next(ApiError.forbidden("Недостатньо прав для перегляду всіх процедур"));
       }
 
       const items = await MedicalService.findAll({
@@ -34,12 +33,18 @@ class MedicalServiceController {
             include: [
               {
                 model: HospitalMedicalService,
-                include: [MedicalServiceInfo],
+                include: [
+                  {
+                    model: MedicalServiceInfo,
+                    as: "MedicalServiceInfo",
+                  },
+                ],
               },
             ],
           },
         ],
       });
+
       return res.json(items);
     } catch (e) {
       console.error("getAll error:", e);
@@ -47,31 +52,54 @@ class MedicalServiceController {
     }
   }
 
+  // 🧾 One by ID
   async getById(req, res, next) {
     try {
-      const item = await HospitalMedicalService.findByPk(req.params.id, {
-        include: [Hospital, MedicalServiceInfo, Doctor],
+      const service = await MedicalService.findByPk(req.params.id, {
+        include: [
+          {
+            model: Patient,
+            include: [Hospital],
+          },
+          {
+            model: Doctor,
+            include: [Hospital],
+          },
+          {
+            model: MedicalServiceSchedule,
+            include: [
+              {
+                model: HospitalMedicalService,
+                include: [
+                  {
+                    model: MedicalServiceInfo,
+                    as: "MedicalServiceInfo",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       });
 
-      if (!item) {
-        return next(ApiError.notFound("Послугу не знайдено"));
+      if (!service) {
+        return next(ApiError.notFound("Процедуру не знайдено"));
       }
 
-      return res.json(item);
+      return res.json(service);
     } catch (e) {
       console.error("getById error:", e);
-      return next(ApiError.internal("Помилка отримання послуги"));
+      return next(ApiError.internal("Помилка отримання процедури"));
     }
   }
 
+  // 👤 By patient
   async getByPatient(req, res, next) {
     try {
       const { patientId } = req.params;
 
       if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({
-          where: { user_id: req.user.id },
-        });
+        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
         if (!patient || patient.id !== parseInt(patientId)) {
           return next(ApiError.forbidden("Немає доступу до чужих процедур"));
         }
@@ -85,21 +113,21 @@ class MedicalServiceController {
             include: [Hospital],
           },
           {
-                model: MedicalServiceSchedule,
-    include: [
-      {
-        model: HospitalMedicalService,
-        include: [
-          {
-              model: MedicalServiceInfo,
-            as: 'MedicalServiceInfo', // ✅ обов’язково явно назви alias, якщо десь використовував
-            attributes: ['id', 'name', 'description'],
-          }
-        ]
-      }
-    ]
-  }
-]
+            model: MedicalServiceSchedule,
+            include: [
+              {
+                model: HospitalMedicalService,
+                include: [
+                  {
+                    model: MedicalServiceInfo,
+                    as: "MedicalServiceInfo",
+                    attributes: ["id", "name", "description"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       });
 
       return res.json(items);
@@ -109,6 +137,7 @@ class MedicalServiceController {
     }
   }
 
+  // ➕ Create
   async create(req, res, next) {
     try {
       if (!["Admin", "Doctor"].includes(req.user.role)) {
@@ -123,6 +152,7 @@ class MedicalServiceController {
     }
   }
 
+  // ✏️ Update
   async update(req, res, next) {
     try {
       if (!["Admin", "Doctor"].includes(req.user.role)) {
@@ -140,9 +170,10 @@ class MedicalServiceController {
     }
   }
 
+  // 🗑 Delete
   async delete(req, res, next) {
     try {
-      if (!["Admin"].includes(req.user.role)) {
+      if (req.user.role !== "Admin") {
         return next(ApiError.forbidden("Недостатньо прав для видалення"));
       }
 
@@ -156,6 +187,8 @@ class MedicalServiceController {
       return next(ApiError.internal("Помилка видалення"));
     }
   }
+
+  // 📄 PDF download
   async downloadPDF(req, res, next) {
     try {
       const { id } = req.params;
@@ -175,11 +208,8 @@ class MedicalServiceController {
 
       if (!service) return next(ApiError.notFound("Процедуру не знайдено"));
 
-      // 🔐 Перевірка доступу
       if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({
-          where: { user_id: req.user.id },
-        });
+        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
         if (!patient || patient.id !== service.patient_id) {
           return next(ApiError.forbidden("Немає доступу до цієї процедури"));
         }
@@ -191,19 +221,21 @@ class MedicalServiceController {
       return next(ApiError.internal("Не вдалося згенерувати PDF"));
     }
   }
+
+  // ✅ Mark service as ready
   async markReadyStatus(req, res, next) {
     try {
       const { id } = req.params;
 
       const service = await MedicalService.findByPk(id);
-      if (!service) return next(ApiError.notFound("Medical service not found"));
+      if (!service) return next(ApiError.notFound("Процедуру не знайдено"));
 
       await service.update({ is_ready: true });
 
-      return res.json({ message: "Medical service marked as ready" });
+      return res.json({ message: "Процедуру позначено як завершену" });
     } catch (e) {
-      console.error("markReady error:", e);
-      return next(ApiError.internal("Failed to mark medical service as ready"));
+      console.error("markReadyStatus error:", e);
+      return next(ApiError.internal("Не вдалося оновити статус процедури"));
     }
   }
 }

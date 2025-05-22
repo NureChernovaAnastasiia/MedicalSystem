@@ -6,7 +6,11 @@ class HospitalMedicalServiceController {
   async getAll(req, res, next) {
     try {
       const items = await HospitalMedicalService.findAll({
-        include: [Hospital, MedicalServiceInfo, Doctor],
+        include: [
+          Hospital,
+          { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
+          Doctor
+        ],
       });
       return res.json(items);
     } catch (e) {
@@ -14,38 +18,47 @@ class HospitalMedicalServiceController {
       return next(ApiError.internal('Не вдалося отримати список призначених послуг'));
     }
   }
-// 🔍 Отримати конкретний запис за ID
-async getById(req, res, next) {
-  try {
-    const item = await HospitalMedicalService.findByPk(req.params.id, {
-      include: [Hospital, MedicalServiceInfo, Doctor],
-    });
 
-    if (!item) {
-      return next(ApiError.notFound('Запис не знайдено'));
+  // 🔍 Отримати конкретний запис за ID
+  async getById(req, res, next) {
+    try {
+      const item = await HospitalMedicalService.findByPk(req.params.id, {
+        include: [
+          Hospital,
+          { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
+          Doctor
+        ],
+      });
+
+      if (!item) {
+        return next(ApiError.notFound('Запис не знайдено'));
+      }
+
+      return res.json(item);
+    } catch (e) {
+      console.error('getById error:', e);
+      return next(ApiError.internal('Помилка отримання запису'));
     }
-
-    return res.json(item);
-  } catch (e) {
-    console.error('getById error:', e);
-    return next(ApiError.internal('Помилка отримання запису'));
   }
-}
 
   // 🔍 Отримати всі послуги для конкретної лікарні
   async getByHospital(req, res, next) {
-  try {
-    const { hospitalId } = req.params;
-    const items = await HospitalMedicalService.findAll({
-      where: { hospital_id: hospitalId },
-      include: [Hospital, MedicalServiceInfo, Doctor], // Додано Hospital
-    });
-    return res.json(items);
-  } catch (e) {
-    console.error('getByHospital error:', e);
-    return next(ApiError.internal('Не вдалося отримати послуги для лікарні'));
+    try {
+      const { hospitalId } = req.params;
+      const items = await HospitalMedicalService.findAll({
+        where: { hospital_id: hospitalId },
+        include: [
+          Hospital,
+          { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
+          Doctor
+        ],
+      });
+      return res.json(items);
+    } catch (e) {
+      console.error('getByHospital error:', e);
+      return next(ApiError.internal('Не вдалося отримати послуги для лікарні'));
+    }
   }
-}
 
   // 🔍 Отримати всі послуги для лікаря
   async getByDoctor(req, res, next) {
@@ -53,7 +66,10 @@ async getById(req, res, next) {
       const { doctorId } = req.params;
       const items = await HospitalMedicalService.findAll({
         where: { doctor_id: doctorId },
-        include: [Hospital, MedicalServiceInfo],
+        include: [
+          Hospital,
+          { model: MedicalServiceInfo, as: 'MedicalServiceInfo' }
+        ],
       });
       return res.json(items);
     } catch (e) {

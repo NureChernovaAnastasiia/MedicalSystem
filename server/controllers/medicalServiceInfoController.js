@@ -21,7 +21,7 @@ class MedicalServiceInfoController {
       return res.json(services);
     } catch (e) {
       console.error('getAll error:', e);
-      return next(ApiError.internal('Failed to fetch medical services'));
+      return next(ApiError.internal('Не вдалося отримати перелік медичних послуг'));
     }
   }
 
@@ -29,11 +29,11 @@ class MedicalServiceInfoController {
   async getById(req, res, next) {
     try {
       const item = await MedicalServiceInfo.findByPk(req.params.id);
-      if (!item) return next(ApiError.notFound('Medical service not found'));
+      if (!item) return next(ApiError.notFound('Медичну послугу не знайдено'));
       return res.json(item);
     } catch (e) {
       console.error('getById error:', e);
-      return next(ApiError.internal('Error fetching medical service'));
+      return next(ApiError.internal('Помилка отримання медичної послуги'));
     }
   }
 
@@ -44,14 +44,19 @@ class MedicalServiceInfoController {
 
       const services = await HospitalMedicalService.findAll({
         where: { hospital_id: hospitalId },
-        include: [MedicalServiceInfo],
+        include: [
+          {
+            model: MedicalServiceInfo,
+            as: 'MedicalServiceInfo' // ✅ Виправлено
+          }
+        ],
       });
 
-      const result = services.map(s => s.MedicalServiceInfo);
+      const result = services.map(s => s.MedicalServiceInfo).filter(Boolean);
       return res.json(result);
     } catch (e) {
       console.error('getByHospital error:', e);
-      return next(ApiError.internal('Failed to get services for hospital'));
+      return next(ApiError.internal('Не вдалося отримати послуги для лікарні'));
     }
   }
 
@@ -59,14 +64,14 @@ class MedicalServiceInfoController {
   async create(req, res, next) {
     try {
       if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Access denied'));
+        return next(ApiError.forbidden('Доступ заборонено'));
       }
 
       const created = await MedicalServiceInfo.create(req.body);
       return res.status(201).json(created);
     } catch (e) {
       console.error('create error:', e);
-      return next(ApiError.badRequest('Failed to create medical service'));
+      return next(ApiError.badRequest('Не вдалося створити медичну послугу'));
     }
   }
 
@@ -74,17 +79,17 @@ class MedicalServiceInfoController {
   async update(req, res, next) {
     try {
       if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Access denied'));
+        return next(ApiError.forbidden('Доступ заборонено'));
       }
 
       const item = await MedicalServiceInfo.findByPk(req.params.id);
-      if (!item) return next(ApiError.notFound('Medical service not found'));
+      if (!item) return next(ApiError.notFound('Медичну послугу не знайдено'));
 
       await item.update(req.body);
       return res.json(item);
     } catch (e) {
       console.error('update error:', e);
-      return next(ApiError.internal('Failed to update medical service'));
+      return next(ApiError.internal('Не вдалося оновити медичну послугу'));
     }
   }
 
@@ -92,17 +97,17 @@ class MedicalServiceInfoController {
   async delete(req, res, next) {
     try {
       if (req.user.role !== 'Admin') {
-        return next(ApiError.forbidden('Access denied'));
+        return next(ApiError.forbidden('Доступ заборонено'));
       }
 
       const item = await MedicalServiceInfo.findByPk(req.params.id);
-      if (!item) return next(ApiError.notFound('Medical service not found'));
+      if (!item) return next(ApiError.notFound('Медичну послугу не знайдено'));
 
       await item.destroy();
-      return res.json({ message: 'Medical service deleted' });
+      return res.json({ message: 'Медичну послугу видалено' });
     } catch (e) {
       console.error('delete error:', e);
-      return next(ApiError.internal('Failed to delete medical service'));
+      return next(ApiError.internal('Не вдалося видалити медичну послугу'));
     }
   }
 }
