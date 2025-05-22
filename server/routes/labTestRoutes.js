@@ -11,6 +11,7 @@ router.patch(
   roleMiddleware ("Admin", "Doctor"),
   labTestController.markReadyStatus
 );
+router.get('/doctor/:doctorId', labTestController.getByDoctor);
 
 router.get("/", labTestController.getAll);
 router.get("/:id", labTestController.getById);
