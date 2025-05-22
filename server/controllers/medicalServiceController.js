@@ -9,10 +9,11 @@ const {
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const generateMedicalServicePdf = require("../utils/generateMedicalServicePdf");
+const { Op } = require("sequelize");
 
 class MedicalServiceController {
   // 🧾 All records (Admin / Doctor only)
-  async getAll(req, res, next) {
+    async getAll(req, res, next) {
     try {
       if (!["Admin", "Doctor"].includes(req.user.role)) {
         return next(ApiError.forbidden("Недостатньо прав для перегляду всіх процедур"));
@@ -30,29 +31,35 @@ class MedicalServiceController {
           },
           {
             model: MedicalServiceSchedule,
-            include: [
-              {
-                model: HospitalMedicalService,
-                include: [
-                  {
-                    model: MedicalServiceInfo,
-                    as: "MedicalServiceInfo",
-                  },
-                ],
-              },
-            ],
+            include: {
+              model: HospitalMedicalService,
+              include: [Hospital, MedicalServiceInfo, Doctor],
+            },
           },
         ],
       });
 
-      return res.json(items);
+      const formatted = items.map((item) => {
+        const schedule = item.MedicalServiceSchedule;
+        const hospitalService = schedule?.HospitalMedicalService;
+        const procedure = hospitalService?.MedicalServiceInfo;
+        return {
+          ...item.toJSON(),
+          procedure_name: procedure?.name || null,
+          procedure_description: procedure?.description || null,
+          procedure_price: procedure?.price || null,
+          hospital: hospitalService?.Hospital?.name || null,
+          doctor: `${hospitalService?.Doctor?.first_name || ''} ${hospitalService?.Doctor?.last_name || ''}`.trim(),
+        };
+      });
+
+      return res.json(formatted);
     } catch (e) {
       console.error("getAll error:", e);
       return next(ApiError.internal("Не вдалося отримати список процедур"));
     }
   }
 
-  // 🧾 One by ID
   async getById(req, res, next) {
     try {
       const service = await MedicalService.findByPk(req.params.id, {
@@ -67,17 +74,10 @@ class MedicalServiceController {
           },
           {
             model: MedicalServiceSchedule,
-            include: [
-              {
-                model: HospitalMedicalService,
-                include: [
-                  {
-                    model: MedicalServiceInfo,
-                    as: "MedicalServiceInfo",
-                  },
-                ],
-              },
-            ],
+            include: {
+              model: HospitalMedicalService,
+              include: [Hospital, MedicalServiceInfo, Doctor],
+            },
           },
         ],
       });
@@ -86,14 +86,23 @@ class MedicalServiceController {
         return next(ApiError.notFound("Процедуру не знайдено"));
       }
 
-      return res.json(service);
+      const hospitalService = service.MedicalServiceSchedule?.HospitalMedicalService;
+      const procedure = hospitalService?.MedicalServiceInfo;
+
+      return res.json({
+        ...service.toJSON(),
+        procedure_name: procedure?.name || null,
+        procedure_description: procedure?.description || null,
+        procedure_price: procedure?.price || null,
+        hospital: hospitalService?.Hospital?.name || null,
+        doctor: `${hospitalService?.Doctor?.first_name || ''} ${hospitalService?.Doctor?.last_name || ''}`.trim(),
+      });
     } catch (e) {
       console.error("getById error:", e);
       return next(ApiError.internal("Помилка отримання процедури"));
     }
   }
 
-  // 👤 By patient
   async getByPatient(req, res, next) {
     try {
       const { patientId } = req.params;
@@ -108,35 +117,88 @@ class MedicalServiceController {
       const items = await MedicalService.findAll({
         where: { patient_id: patientId },
         include: [
-          {
-            model: Doctor,
-            include: [Hospital],
-          },
+          { model: Doctor, include: [Hospital] },
           {
             model: MedicalServiceSchedule,
-            include: [
-              {
-                model: HospitalMedicalService,
-                include: [
-                  {
-                    model: MedicalServiceInfo,
-                    as: "MedicalServiceInfo",
-                    attributes: ["id", "name", "description"],
-                  },
-                ],
-              },
-            ],
+            include: {
+              model: HospitalMedicalService,
+              include: [Hospital, MedicalServiceInfo, Doctor],
+            },
           },
         ],
       });
 
-      return res.json(items);
+      const result = items.map((s) => {
+        const service = s.MedicalServiceSchedule?.HospitalMedicalService;
+        const procedure = service?.MedicalServiceInfo;
+        const isPrivate = service?.Hospital?.type === "Приватна";
+
+        return {
+          ...s.toJSON(),
+          procedure_name: procedure?.name || null,
+          procedure_description: procedure?.description || null,
+          ...(isPrivate && { procedure_price: procedure?.price || null }),
+          hospital: service?.Hospital?.name || null,
+          doctor: `${service?.Doctor?.first_name || ""} ${service?.Doctor?.last_name || ""}`.trim(),
+        };
+      });
+
+      res.json(result);
     } catch (e) {
       console.error("getByPatient error:", e);
-      return next(ApiError.internal("Не вдалося отримати процедури пацієнта"));
+      next(ApiError.internal("Не вдалося отримати процедури пацієнта"));
     }
   }
 
+  async getByDoctor(req, res, next) {
+    try {
+      const doctorId = parseInt(req.params.doctorId);
+      if (isNaN(doctorId)) {
+        return next(ApiError.badRequest("Некоректний ID лікаря"));
+      }
+
+      const services = await MedicalService.findAll({
+        where: { doctor_id: doctorId },
+        include: [
+          { model: Patient, attributes: ["first_name", "last_name"] },
+          {
+            model: MedicalServiceSchedule,
+            attributes: ["appointment_date", "start_time", "end_time"],
+            include: {
+              model: HospitalMedicalService,
+              include: [Hospital, MedicalServiceInfo],
+            },
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      const result = services.map((s) => {
+        const service = s.MedicalServiceSchedule?.HospitalMedicalService;
+        const procedure = service?.MedicalServiceInfo;
+        const isPrivate = service?.Hospital?.type === "Приватна";
+        const patient = s.Patient;
+
+        return {
+          id: s.id,
+          patient_name: `${patient?.first_name || ""} ${patient?.last_name || ""}`.trim(),
+          procedure_name: procedure?.name || null,
+          procedure_description: procedure?.description || null,
+          ...(isPrivate && { procedure_price: procedure?.price || null }),
+          appointment_date: s.MedicalServiceSchedule?.appointment_date,
+          start_time: s.MedicalServiceSchedule?.start_time,
+          end_time: s.MedicalServiceSchedule?.end_time,
+          hospital: service?.Hospital?.name || null,
+          is_ready: s.is_ready,
+        };
+      });
+
+      res.json(result);
+    } catch (e) {
+      console.error("getByDoctor error:", e);
+      next(ApiError.internal("Не вдалося отримати записи для лікаря"));
+    }
+  }
   // ➕ Create
   async create(req, res, next) {
     try {
