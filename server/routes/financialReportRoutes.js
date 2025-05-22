@@ -1,14 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const financialReportController = require('../controllers/financialReportController');
-const authMiddleware = require('../middleware/authMiddleware');
-const roleMiddleware = require('../middleware/checkRoleMiddleware');
+const Router = require('express');
+const router = new Router();
+const controller = require('../controllers/financialReportController');
 
-router.get(
-  '/summary',
-  authMiddleware,
-  roleMiddleware('Admin'),
-  financialReportController.getSummaryReport
-);
+// 📊 Звіти
+router.get('/report/day', controller.getTodayReport);
+router.get('/report/month', controller.getMonthReport);
+router.get('/report/year', controller.getYearReport);
 
 module.exports = router;
