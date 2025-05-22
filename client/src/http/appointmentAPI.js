@@ -19,3 +19,8 @@ export const fetchAllDoctorAppointments = async (doctorId) => {
   const { data } = await $authHost.get(`/api/appointments/doctor/${doctorId}`);
   return data;
 };
+
+export const fetchUpcomingAppointmentsByDoctor = async (doctorId) => {
+  const { data } = await $authHost.get(`/api/appointments/upcoming/doctor/${doctorId}`);
+  return data;
+};
