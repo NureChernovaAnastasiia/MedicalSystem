@@ -101,7 +101,7 @@ const PatientServices = () => {
           const footerClass = isReady ? styles.cardFooterReady : styles.cardFooter;
           const footerText = isReady ? 'Переглянути деталі' : 'Очікуйте результатів';
 
-          const title = `Послуга #${service.id}`;
+          const title = service.MedicalServiceSchedule?.HospitalMedicalService?.MedicalServiceInf || `Послуга #${service.id}`;
           const date = service.MedicalServiceSchedule?.appointment_date
             ? new Date(service.MedicalServiceSchedule.appointment_date).toLocaleDateString('uk-UA')
             : 'Не вказано';

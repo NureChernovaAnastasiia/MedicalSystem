@@ -1,5 +1,15 @@
 import { $authHost } from "./index";
 
+export const fetchDoctorByUserId = async (userId) => {
+  try {
+    const { data } = await $authHost.get(`api/doctors/by-user/${userId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні лікаря за userId", error);
+    throw error;
+  }
+};
+
 export const fetchAllDoctors = async () => {
   try {
     const { data } = await $authHost.get('api/doctors');
@@ -11,8 +21,13 @@ export const fetchAllDoctors = async () => {
 };
 
 export const fetchDoctorById = async (id) => {
-  const { data } = await $authHost.get(`/api/doctors/${id}`);
-  return data;
+  try {
+    const { data } = await $authHost.get(`api/doctors/${id}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні даних лікаря", error);
+    throw error;
+  }
 };
 
 export const fetchDoctorSpecializations = async () => {

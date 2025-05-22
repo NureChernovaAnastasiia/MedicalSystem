@@ -1,0 +1,79 @@
+.patientDashboard{
+  font-family: 'Montserrat', sans-serif;
+  padding: 0 60px;
+}
+.welcomeMessage {
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.2;
+  color: #00C3A1;
+  margin-bottom: 16px; 
+  font-family: 'Montserrat', sans-serif;
+  padding: 20px 0;
+}
+.cardLink {
+  text-decoration: none;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 90px; 
+  justify-content: center;
+  margin: 0 20px 40px;
+  padding: 0;
+}
+
+.card {
+  background: #E2F6F2;
+  border: 4px solid rgba(0, 195, 161, 0.42);
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  width: 180px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cardImage {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardIcon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.cardTitle {
+  font-style: italic;
+  font-weight: 400;
+  font-size: 16px;
+  color: #333333;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.scheduleContainer {
+  margin: 20px 0 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+ .subtitle {
+    margin-left: 30px;
+    font-style: italic;
+    font-weight: 100;
+    font-size: 18px;
+    line-height: 26px;
+  }
+

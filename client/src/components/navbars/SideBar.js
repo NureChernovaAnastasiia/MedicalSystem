@@ -8,7 +8,7 @@ import logo from "../../img/Logo.png";
 import avatar from '../../img/icons/people.png';  
 import logoutIcon from '../../img/icons/exit.png';
 
-import { PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_SERVICE_ROUTE } from "../../utils/consts";
+import { DOCTOR_APPOINTMENTS_ROUTE, DOCTOR_HOSPITALDETAILS_ROUTE, DOCTOR_PANEL_ROUTE, DOCTOR_PATIENTS_ROUTE, DOCTOR_SERVICES_ROUTE, PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_SERVICE_ROUTE } from "../../utils/consts";
 
 const Sidebar = ({ userRole, fullName }) => {
   const { user, ui } = useContext(Context);
@@ -20,7 +20,7 @@ const Sidebar = ({ userRole, fullName }) => {
         navigate("/admin/dashboard"); 
         break;
       case "Doctor":
-        navigate("/doctor/dashboard"); 
+        navigate(DOCTOR_PANEL_ROUTE); 
         break;
       case "Patient":
         navigate(PATIENT_PANEL_ROUTE); 
@@ -31,7 +31,12 @@ const Sidebar = ({ userRole, fullName }) => {
 
   const menuItems = {
     Admin: [],
-    Doctor: [],
+    Doctor: [
+      { label: 'Пацієнти', path: DOCTOR_PATIENTS_ROUTE },
+      { label: 'Прийоми', path: DOCTOR_APPOINTMENTS_ROUTE },
+      { label: 'Послуги', path: DOCTOR_SERVICES_ROUTE },
+      { label: 'Моя лікарня', path: DOCTOR_HOSPITALDETAILS_ROUTE },
+    ],
     Patient: [
       { label: 'Запис до лікаря', path: PATIENT_DOCAPPOINTMENT_ROUTE },
       { label: 'Мої прийоми', path: PATIENT_APPOINTMENTS_ROUTE },

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientAnalyseDetail.module.css';
 
 import { iconDoctor, iconHospital } from '../../utils/icons';
-import { fetchLabTestById } from '../../http/analysisAPI';
+import { fetchLabTestById, fetchLabTestPdf } from '../../http/analysisAPI';
 
 const PatientAnalyseDetail = () => {
   const navigate = useNavigate();
@@ -44,8 +44,8 @@ const PatientAnalyseDetail = () => {
     ? `${labTest.Doctor.last_name || ''} ${labTest.Doctor.first_name || ''} ${labTest.Doctor.middle_name || ''}`.trim()
     : 'Невідомий лікар';
   const hospitalName = labTest.Doctor?.Hospital?.name || 'Невідомий заклад';
-  const resultsText = labTest.result || 'Результат відсутній';
-  const doctorComment = labTest.doctor_comment || 'Коментар відсутній';
+  const resultsText = labTest.results || 'Результат відсутній';
+  const doctorComment = labTest.notes || 'Коментар відсутній';
 
   return (
     <div className={styles.container}>
@@ -70,11 +70,11 @@ const PatientAnalyseDetail = () => {
       <h3 className={styles.resultsTitle}>Результати</h3>
       <div className={styles.resultsBlock}>
         <p className={styles.resultsText}>{resultsText}</p>
-        {labTest.result_pdf && (
-          <a href={labTest.result_pdf} target="_blank" rel="noopener noreferrer" className={styles.viewPdf}>
-            Переглянути PDF
-          </a>
-        )}
+          <div className={styles.pdfWrapper}>
+            <button onClick={() => fetchLabTestPdf(labTest.id)} className={styles.viewPdf}>
+              Переглянути PDF
+            </button>
+          </div>
       </div>
 
       <h3 className={styles.commentTitle}>Коментар лікаря</h3>

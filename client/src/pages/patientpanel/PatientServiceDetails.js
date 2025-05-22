@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientAnalyseDetail.module.css';
 
 import { iconDoctor, iconHospital } from '../../utils/icons';
-import { fetchMedicalServiceById } from '../../http/servicesAPI'; 
+import { fetchMedicalServiceById, fetchMedicalServicePdf } from '../../http/servicesAPI'; 
 
 const PatientServiceDetails = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const PatientServiceDetails = () => {
   const hospitalName = service.Hospital?.name || 'Невідомий заклад';
 
   const resultsText = service.results || 'Результати відсутні';
-  const doctorComment = service.doctor_comment || 'Коментар відсутній';
+  const doctorComment = service.notes || 'Коментар відсутній';
 
   return (
     <div className={styles.container}>
@@ -72,11 +72,11 @@ const PatientServiceDetails = () => {
       <h3 className={styles.resultsTitle}>Результати</h3>
       <div className={styles.resultsBlock}>
         <p className={styles.resultsText}>{resultsText}</p>
-        {service.result_pdf && (
-          <a href={service.result_pdf} target="_blank" rel="noopener noreferrer" className={styles.viewPdf}>
-            Переглянути PDF
-          </a>
-        )}
+          <div className={styles.pdfWrapper}>
+            <button onClick={() => fetchMedicalServicePdf(service.id)} className={styles.viewPdf}>
+              Переглянути PDF
+            </button>
+          </div>
       </div>
 
       <h3 className={styles.commentTitle}>Коментар лікаря</h3>

@@ -29,3 +29,18 @@ export const fetchLabTestById = async (labTestId) => {
     throw error;
   }
 };
+
+export const fetchLabTestPdf = async (labTestId) => {
+  try {
+    const response = await $authHost.get(`api/lab-tests/${labTestId}/pdf`, {
+      responseType: 'blob',
+    });
+
+    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    window.open(pdfUrl, '_blank');
+  } catch (error) {
+    console.error('Помилка при отриманні PDF аналізу:', error);
+    alert('Не вдалося відкрити PDF документ аналізу');
+  }
+};
