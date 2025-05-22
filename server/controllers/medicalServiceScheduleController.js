@@ -20,11 +20,8 @@ class MedicalServiceScheduleController {
         include: {
           model: HospitalMedicalService,
           include: [
-            Hospital,
-            {
-              model: MedicalServiceInfo,
-              as: "MedicalServiceInfo",
-            },
+              Hospital,
+            MedicalServiceInfo,
             Doctor,
           ],
         },
@@ -66,10 +63,7 @@ class MedicalServiceScheduleController {
           model: HospitalMedicalService,
           include: [
             Hospital,
-            {
-              model: MedicalServiceInfo,
-              as: "MedicalServiceInfo",
-            },
+            MedicalServiceInfo,
             Doctor,
           ],
         },
@@ -276,10 +270,7 @@ class MedicalServiceScheduleController {
           model: HospitalMedicalService,
           include: [
             Hospital,
-            {
-              model: MedicalServiceInfo,
-              as: "MedicalServiceInfo",
-            },
+            MedicalServiceInfo,
             Doctor,
           ],
         },
