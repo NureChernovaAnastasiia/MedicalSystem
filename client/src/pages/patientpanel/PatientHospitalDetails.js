@@ -10,6 +10,7 @@ import { getHospitalMedicalServicesByHospitalId } from '../../http/servicesAPI';
 import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
 import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo';
 import ModalServicesOrdering from '../../components/modals/ModalServicesOrdering';
+import ModalDocInformation from '../../components/modals/ModalDocInformation';
 
 import HospitalHeader from '../../components/hospital/HospitalHeader';
 import DoctorCard from '../../components/doctor/DoctorCardBrief';
@@ -26,6 +27,8 @@ const PatientHospitalDetails = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [selectedAnalyse, setSelectedAnalyse] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);  
 
   const handleOpenModal = (analyse) => {
     setSelectedAnalyse(analyse);
@@ -35,6 +38,16 @@ const PatientHospitalDetails = () => {
   const handleOpenOrderModal = (analyse) => {
     setSelectedAnalyse(analyse);
     setIsOrderModalOpen(true);
+  };
+
+  const handleOpenDoctorModal = (doctor) => {
+    setSelectedDoctor(doctor);
+    setIsDoctorModalOpen(true);
+  };
+
+  const handleCloseDoctorModal = () => {
+    setSelectedDoctor(null);
+    setIsDoctorModalOpen(false);
   };
 
   useEffect(() => {
@@ -93,7 +106,16 @@ const PatientHospitalDetails = () => {
       </div>
 
       <div className={styles.doctorGrid}>
-        {doctors.map(doctor => <DoctorCard key={doctor.id} doctor={doctor} />)}
+        <div className={styles.doctorGrid}>
+          {doctors.map(doctor => (
+            <DoctorCard
+              key={doctor.id}
+              doctor={doctor}
+              onDetailsClick={() => handleOpenDoctorModal(doctor)}
+            />
+          ))}
+        </div>
+
       </div>
       {isModalOpen && selectedAnalyse && (
         <ModalAnalysInfo onClose={() => setIsModalOpen(false)} analyse={selectedAnalyse} />
@@ -104,6 +126,9 @@ const PatientHospitalDetails = () => {
           analyse={selectedAnalyse}
           hospital={hospital}
         />
+      )}
+      {isDoctorModalOpen && selectedDoctor && (
+        <ModalDocInformation doctor={selectedDoctor} onClose={handleCloseDoctorModal} />
       )}
     </div>
   );

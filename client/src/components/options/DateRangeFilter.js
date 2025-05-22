@@ -5,7 +5,7 @@ import { uk } from 'date-fns/locale';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
-import styles from '../../style/patientpanel//PatientMedicalRecords.module.css';
+import styles from '../../style/patientpanel/PatientMedicalRecords.module.css';
 
 const DateRangeFilter = ({ dateRange, setDateRange, showCalendar, setShowCalendar }) => {
 
@@ -36,4 +36,3 @@ const DateRangeFilter = ({ dateRange, setDateRange, showCalendar, setShowCalenda
 };
 
 export default DateRangeFilter;
-

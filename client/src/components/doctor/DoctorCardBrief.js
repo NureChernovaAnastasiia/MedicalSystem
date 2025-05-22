@@ -16,7 +16,7 @@ const InfoItem = ({ icon, label }) => (
   </div>
 );
 
-const DoctorCard = ({ doctor }) => {
+const DoctorCard = ({ doctor, onDetailsClick }) => {
   const experienceYears = doctor.experience_start_date
     ? new Date().getFullYear() - new Date(doctor.experience_start_date).getFullYear()
     : '—';
@@ -24,7 +24,12 @@ const DoctorCard = ({ doctor }) => {
   return (
     <div className={styles.doctorCard}>
       <div className={styles.cardHeader}>
-        <button className={styles.detailsButton}><span>?</span></button>
+        <button
+          className={styles.detailsButton}
+          onClick={onDetailsClick}
+        >
+          <span>?</span>
+        </button>
       </div>
       <img src={doctor.photo_url} alt="Doctor" className={styles.doctorImage} />
       <div className={styles.doctorInfo}>

@@ -38,3 +38,13 @@ export const updatePatientPhoto = async (id, photoUrl) => {
     throw error;
   }
 };
+
+export const fetchPatientsByDoctorId = async (doctorId) => {
+  try {
+    const { data } = await $authHost.get(`api/patients/by-doctor/${doctorId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні пацієнтів за doctorId", error);
+    throw error;
+  }
+};
