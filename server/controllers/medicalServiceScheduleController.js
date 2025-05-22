@@ -99,22 +99,23 @@ class MedicalServiceScheduleController {
     }
   }
 
-  // 💳 Бронювання з оплатою
   async bookMedicalService(req, res, next) {
     try {
       const { medical_service_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
-
       const userId = req.user.id;
 
-      const paymentResult = await paypalService.captureOrder(orderId, "medical", userId);
-      if (paymentResult.status !== "COMPLETED") {
+      // 1. Перевірка платежу без створення запису
+      const payment = await paypalService.captureOrder(orderId);
+      if (payment.status !== "COMPLETED") {
         return next(ApiError.badRequest("Оплата не була підтверджена"));
       }
 
+      // 2. Розклад
       const schedule = await MedicalServiceSchedule.findByPk(medical_service_schedule_id);
       if (!schedule) return next(ApiError.notFound("Розклад процедури не знайдено"));
       if (schedule.is_booked) return next(ApiError.badRequest("Час вже зайнято"));
 
+      // 3. Пацієнт
       let patientId;
       if (req.user.role === "Patient") {
         const patient = await Patient.findOne({ where: { user_id: req.user.id } });
@@ -125,13 +126,13 @@ class MedicalServiceScheduleController {
         patientId = bodyPatientId;
       }
 
+      // 4. Лікар та лікарня
       const hospitalService = await HospitalMedicalService.findByPk(schedule.hospital_medical_service_id);
-      if (!hospitalService) {
-        return next(ApiError.badRequest("Послугу не знайдено"));
-      }
-
+      if (!hospitalService) return next(ApiError.badRequest("Послугу не знайдено"));
       const doctor_id = hospitalService.doctor_id;
+      const hospital_id = hospitalService.hospital_id;
 
+      // 5. Створення записів
       const appointment = await Appointment.create({
         patient_id: patientId,
         doctor_id,
@@ -150,6 +151,9 @@ class MedicalServiceScheduleController {
         results: null,
         notes: null,
       });
+
+      // 6. Запис платіжної інформації
+      await paypalService.saveUsedOrder(payment, "medical", userId, hospital_id);
 
       return res.json({
         message: "Процедуру заброньовано після оплати",
