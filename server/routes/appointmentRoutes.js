@@ -13,6 +13,7 @@ router.use(authMiddleware);
  *          (лікар — лише свої, адмін — будь-які)
  */
 router.get('/upcoming/doctor/:doctorId', appointmentController.getUpcomingByDoctor);
+
 /**
  * @route   PATCH /api/appointments/:id/complete
  * @desc    Позначити прийом як завершений (Doctor/Admin)
