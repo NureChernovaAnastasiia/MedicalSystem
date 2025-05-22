@@ -33,7 +33,7 @@ class LabTestController {
     }
   }
 
-  async getById(req, res, next) {
+ async getById(req, res, next) {
   try {
     const item = await LabTest.findByPk(req.params.id, {
       include: [
@@ -63,11 +63,14 @@ class LabTestController {
       }
     }
 
-    // Додати назву аналізу (якщо є)
-    const testName =
-      item.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || null;
+    const testName = item.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || null;
 
-    return res.json({ ...item.toJSON(), test_name: testName });
+    return res.json({
+      ...item.toJSON(),
+      test_name: testName,
+      results: item.results || null,
+      notes: item.notes || null,
+    });
   } catch (e) {
     console.error("getById error:", e);
     return next(ApiError.internal("Помилка отримання аналізу"));
@@ -111,6 +114,62 @@ class LabTestController {
     } catch (e) {
       console.error("getByPatient error:", e);
       return next(ApiError.internal("Не вдалося отримати аналізи пацієнта"));
+    }
+  }
+  async getByDoctor(req, res, next) {
+    try {
+      const doctorId = parseInt(req.params.doctorId);
+      if (isNaN(doctorId)) {
+        return next(ApiError.badRequest("Некоректний ID лікаря"));
+      }
+
+      const labTests = await LabTest.findAll({
+        where: { doctor_id: doctorId },
+        include: [
+          {
+            model: Patient,
+            attributes: ["first_name", "last_name"],
+          },
+          {
+            model: LabTestSchedule,
+            attributes: ["appointment_date", "start_time", "end_time"],
+            include: [
+              {
+                model: HospitalLabService,
+                include: [
+                  {
+                    model: LabTestInfo,
+                    attributes: ["name"]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        order: [["createdAt", "DESC"]]
+      });
+
+      const result = labTests.map((test) => {
+        const schedule = test.LabTestSchedule;
+        const patient = test.Patient;
+        const hospitalService = schedule?.HospitalLabService;
+        const labTestInfo = hospitalService?.LabTestInfo;
+
+        return {
+          id: test.id,
+          patient_name: `${patient.first_name} ${patient.last_name}`.trim(),
+          test_name: labTestInfo?.name || null,
+          appointment_date: schedule?.appointment_date,
+          start_time: schedule?.start_time,
+          end_time: schedule?.end_time,
+          is_ready: test.is_ready,
+        };
+      });
+
+      return res.json(result);
+    } catch (error) {
+      console.error("getByDoctor error:", error);
+      return next(ApiError.internal("Не вдалося отримати записи для лікаря"));
     }
   }
 
