@@ -35,6 +35,7 @@ import iconBooking from '../img/icons/cellphone.png';
 import iconReminder from '../img/icons/reminder.png';
 import iconServices from '../img/icons/analysis.png';
 import iconDrugs from '../img/icons/drugs.png';
+import iconMedCard from '../img/icons/medcard.png';
 
 export {
   iconDate,
@@ -74,4 +75,5 @@ export {
   iconReminder,
   iconServices,
   iconDrugs,
+  iconMedCard,
 };
