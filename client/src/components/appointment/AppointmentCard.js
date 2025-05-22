@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../style/patientpanel/PatientAppointments.module.css';
+import { formatAppointmentDateOnly, formatAppointmentTimeOnly } from '../../utils/formatDate'; 
 
 const AppointmentCard = ({ appointment, onDetailsClick, onCancelClick }) => {
   const doctor = `${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`;
@@ -9,6 +10,9 @@ const AppointmentCard = ({ appointment, onDetailsClick, onCancelClick }) => {
   const statusStyle = styles[appointment.type] || '';
   const canCancel = appointment.type === 'upcoming';
 
+  const formattedDate = formatAppointmentDateOnly(appointment);
+  const formattedTime = formatAppointmentTimeOnly(appointment);
+
   return (
     <div className={`${styles.appointmentCard} ${statusStyle}`}>
       <div className={styles.cardStatus}>{appointment.statusLabel}</div>
@@ -16,8 +20,8 @@ const AppointmentCard = ({ appointment, onDetailsClick, onCancelClick }) => {
       <div className={styles.cardInfo}>
         <p><span className={styles.boldText}>Ім'я лікаря:</span><span> {doctor}</span></p>
         <p><span className={styles.boldText}>Спеціалізація:</span><span> {specialization}</span></p>
-        <p><span className={styles.boldText}>Дата прийому:</span><span> {appointment.formattedDate}</span></p>
-        <p><span className={styles.boldText}>Час:</span><span> {appointment.formattedTime}</span></p>
+        <p><span className={styles.boldText}>Дата прийому:</span><span> {formattedDate}</span></p>
+        <p><span className={styles.boldText}>Час:</span><span> {formattedTime}</span></p>
         <p><span className={styles.boldText}>Місце прийому:</span><span> {location}</span></p>
       </div>
 
