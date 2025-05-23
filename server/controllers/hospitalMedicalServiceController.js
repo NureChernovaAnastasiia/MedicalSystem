@@ -7,9 +7,9 @@ class HospitalMedicalServiceController {
     try {
       const items = await HospitalMedicalService.findAll({
         include: [
-          Hospital,
-         MedicalServiceInfo,
-          Doctor
+          { model: Hospital },
+          { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
+          { model: Doctor }
         ],
       });
       return res.json(items);
@@ -24,9 +24,9 @@ class HospitalMedicalServiceController {
     try {
       const item = await HospitalMedicalService.findByPk(req.params.id, {
         include: [
-          Hospital,
+          { model: Hospital },
           { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
-          Doctor
+          { model: Doctor }
         ],
       });
 
@@ -48,9 +48,9 @@ class HospitalMedicalServiceController {
       const items = await HospitalMedicalService.findAll({
         where: { hospital_id: hospitalId },
         include: [
-          Hospital,
+          { model: Hospital },
           { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
-          Doctor
+          { model: Doctor }
         ],
       });
       return res.json(items);
@@ -67,7 +67,7 @@ class HospitalMedicalServiceController {
       const items = await HospitalMedicalService.findAll({
         where: { doctor_id: doctorId },
         include: [
-          Hospital,
+          { model: Hospital },
           { model: MedicalServiceInfo, as: 'MedicalServiceInfo' }
         ],
       });
