@@ -2,8 +2,8 @@ const paypal = require("@paypal/checkout-server-sdk");
 const { UsedOrder, FinancialReport } = require("../models/models");
 const { Op } = require("sequelize");
 
-const clientId = "ASeywBe0NF_wNF0UhXCjB0K2EmbgZzG_ulW6iOsVjHYS35kvCL9uEdhXxTxaFV1whFjBSYOCHuU8DhOw";
-const clientSecret = "EAYcdVif-jko-rKjWyXSdRUqkpMroZQpUD8QEueFbfa-jXauqfnxf9jzkgjGPO-pZebbodbZpwqqdrRH";
+const clientId = "";
+const clientSecret = "";
 
 const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
 const client = new paypal.core.PayPalHttpClient(environment);

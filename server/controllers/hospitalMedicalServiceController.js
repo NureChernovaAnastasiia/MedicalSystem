@@ -8,7 +8,7 @@ class HospitalMedicalServiceController {
       const items = await HospitalMedicalService.findAll({
         include: [
           Hospital,
-          { model: MedicalServiceInfo, as: 'MedicalServiceInfo' },
+         MedicalServiceInfo,
           Doctor
         ],
       });

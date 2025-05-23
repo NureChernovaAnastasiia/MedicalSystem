@@ -9,36 +9,50 @@ const REVIEW_RECEIVER_EMAIL = "anastasiia.chernova@nure.ua";
 
 class ReviewController {
   async getAll(req, res, next) {
-  try {
-    const reviews = await Review.findAll({
-      include: [
-        {
-          model: Patient,
-          attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
-        },
-      ],
-    });
+    try {
+      const reviews = await Review.findAll({
+        include: [
+          {
+            model: Patient,
+            attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
+          },
+        ],
+      });
 
-    const reviewsWithAge = reviews.map(r => {
-      const birthDate = new Date(r.Patient?.birth_date);
-      const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
+      const reviewsWithDetails = await Promise.all(reviews.map(async (r) => {
+        const birthDate = new Date(r.Patient?.birth_date);
+        const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
 
-      return {
-        ...r.toJSON(),
-        reviewer: {
-          name: `${r.Patient?.first_name || ''} ${r.Patient?.last_name || ''}`.trim(),
-          age,
-          photo_url: r.Patient?.photo_url || null,
-        },
-      };
-    });
+        let targetHospital = null;
 
-    return res.json(reviewsWithAge);
-  } catch (e) {
-    console.error('getAllReviews error:', e);
-    return next(ApiError.internal('Не вдалося отримати відгуки'));
+        if (r.target_type === "Hospital") {
+          targetHospital = await Hospital.findByPk(r.target_id);
+        } else if (r.target_type === "Doctor") {
+          const doctor = await Doctor.findByPk(r.target_id, { include: [Hospital] });
+          targetHospital = doctor?.Hospital;
+        }
+
+        return {
+          ...r.toJSON(),
+          reviewer: {
+            name: `${r.Patient?.first_name || ''} ${r.Patient?.last_name || ''}`.trim(),
+            age,
+            photo_url: r.Patient?.photo_url || null,
+          },
+          hospital: targetHospital ? {
+            name: targetHospital.name,
+            address: targetHospital.address,
+            type: targetHospital.type
+          } : null,
+        };
+      }));
+
+      return res.json(reviewsWithDetails);
+    } catch (e) {
+      console.error('getAllReviews error:', e);
+      return next(ApiError.internal('Не вдалося отримати відгуки'));
+    }
   }
-}
 
   async getById(req, res, next) {
     try {
@@ -52,76 +66,80 @@ class ReviewController {
   }
 
   async create(req, res, next) {
-  try {
-    if (!req.user?.id) {
-      return next(ApiError.unauthorized("Користувач не авторизований"));
+    try {
+      if (!req.user?.id) {
+        return next(ApiError.unauthorized("Користувач не авторизований"));
+      }
+
+      const userId = req.user.id;
+      const { target_type, target_id, rating, comment } = req.body;
+
+      ReviewValidator.validateCreate(req.body, next);
+
+      const patient = await Patient.findOne({ where: { user_id: userId } });
+      if (!patient) {
+        return next(ApiError.forbidden("Тільки пацієнт може залишати відгуки"));
+      }
+
+      const review = await Review.create({
+        user_id: userId,
+        target_type,
+        target_id,
+        rating,
+        comment,
+      });
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return next(ApiError.internal("Користувача не знайдено"));
+      }
+
+      const patientName = `${patient.first_name || ""} ${patient.last_name || ""}`.trim();
+      const patientPhoto = patient.photo_url || null;
+      const patientEmail = user.email || "невідомо";
+
+      let patientAge = null;
+      if (patient.birth_date) {
+        const birthDate = new Date(patient.birth_date);
+        const today = new Date();
+        patientAge = today.getFullYear() - birthDate.getFullYear();
+      }
+
+      let targetName = "";
+      let hospitalName = null;
+      if (target_type === "Hospital") {
+        const hospital = await Hospital.findByPk(target_id);
+        if (!hospital) return next(ApiError.notFound("Лікарню не знайдено"));
+        targetName = hospital.name;
+        hospitalName = hospital.name;
+      } else if (target_type === "Doctor") {
+        const doctor = await Doctor.findByPk(target_id, { include: [Hospital] });
+        if (!doctor) return next(ApiError.notFound("Лікаря не знайдено"));
+        targetName = `${doctor.first_name} ${doctor.last_name}`;
+        hospitalName = doctor.Hospital?.name;
+      }
+
+      // Відправка email з усіма даними
+      await MailService.sendReviewNotification(REVIEW_RECEIVER_EMAIL, {
+        patientName,
+        patientEmail,
+        patientAge,
+        patientPhoto,
+        targetType: target_type,
+        targetName,
+        hospitalName,
+        rating,
+        comment,
+        createdAt: review.createdAt,
+        reviewId: review.id,
+      });
+
+      return res.json(review);
+    } catch (e) {
+      console.error("❌ create Review error:", e);
+      return next(ApiError.internal("Не вдалося створити відгук"));
     }
-
-    const userId = req.user.id;
-    const { target_type, target_id, rating, comment } = req.body;
-
-    ReviewValidator.validateCreate(req.body, next);
-
-    const patient = await Patient.findOne({ where: { user_id: userId } });
-    if (!patient) {
-      return next(ApiError.forbidden("Тільки пацієнт може залишати відгуки"));
-    }
-
-    const review = await Review.create({
-      user_id: userId,
-      target_type,
-      target_id,
-      rating,
-      comment,
-    });
-
-    const user = await User.findByPk(userId);
-    if (!user) {
-      return next(ApiError.internal("Користувача не знайдено"));
-    }
-
-    const patientName = `${patient.first_name || ""} ${patient.last_name || ""}`.trim();
-    const patientPhoto = patient.photo_url || null;
-    const patientEmail = user.email || "невідомо";
-
-    let patientAge = null;
-    if (patient.birth_date) {
-      const birthDate = new Date(patient.birth_date);
-      const today = new Date();
-      patientAge = today.getFullYear() - birthDate.getFullYear();
-    }
-
-    let targetName = "";
-    if (target_type === "Hospital") {
-      const hospital = await Hospital.findByPk(target_id);
-      if (!hospital) return next(ApiError.notFound("Лікарню не знайдено"));
-      targetName = hospital.name;
-    } else if (target_type === "Doctor") {
-      const doctor = await Doctor.findByPk(target_id);
-      if (!doctor) return next(ApiError.notFound("Лікаря не знайдено"));
-      targetName = `${doctor.first_name} ${doctor.last_name}`;
-    }
-
-    // Відправка email з усіма даними
-    await MailService.sendReviewNotification(REVIEW_RECEIVER_EMAIL, {
-      patientName,
-      patientEmail,
-      patientAge,
-      patientPhoto,
-      targetType: target_type,
-      targetName,
-      rating,
-      comment,
-      createdAt: review.createdAt,
-      reviewId: review.id,
-    });
-
-    return res.json(review);
-  } catch (e) {
-    console.error("❌ create Review error:", e);
-    return next(ApiError.internal("Не вдалося створити відгук"));
   }
-}
 
   async getByTarget(req, res, next) {
     try {

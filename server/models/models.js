@@ -352,44 +352,41 @@ const UsedOrder = sequelize.define("UsedOrder", {
   confirmed_at: { type: DataTypes.DATE },
 });
 
-// User
+// User relations
 User.hasOne(Patient, { foreignKey: "user_id", onDelete: "CASCADE" });
 User.hasOne(Doctor, { foreignKey: "user_id", onDelete: "CASCADE" });
 User.hasOne(HospitalStaff, { foreignKey: "user_id", onDelete: "CASCADE" });
 User.hasMany(Review, { foreignKey: "user_id", onDelete: "CASCADE" });
+User.hasMany(UsedOrder, { foreignKey: "used_by_user_id" });
 
 Patient.belongsTo(User, { foreignKey: "user_id" });
 Doctor.belongsTo(User, { foreignKey: "user_id" });
 HospitalStaff.belongsTo(User, { foreignKey: "user_id" });
 Review.belongsTo(User, { foreignKey: "user_id" });
+UsedOrder.belongsTo(User, { foreignKey: "used_by_user_id" });
 
-// Hospital
+// Hospital core relations
 Hospital.hasMany(Patient, { foreignKey: "hospital_id", onDelete: "CASCADE" });
 Hospital.hasMany(Doctor, { foreignKey: "hospital_id", onDelete: "CASCADE" });
-Hospital.hasMany(HospitalStaff, {
-  foreignKey: "hospital_id",
-  onDelete: "CASCADE",
-});
-FinancialReport.belongsTo(Hospital, { foreignKey: 'hospital_id' });
+Hospital.hasMany(HospitalStaff, { foreignKey: "hospital_id", onDelete: "CASCADE" });
 Hospital.hasMany(FinancialReport, { foreignKey: "hospital_id" });
 Hospital.hasMany(Analytics, { foreignKey: "hospital_id" });
 Hospital.hasMany(HospitalLabService, { foreignKey: "hospital_id" });
+Hospital.hasMany(HospitalMedicalService, { foreignKey: "hospital_id" });
 
 Patient.belongsTo(Hospital, { foreignKey: "hospital_id" });
 Doctor.belongsTo(Hospital, { foreignKey: "hospital_id" });
 HospitalStaff.belongsTo(Hospital, { foreignKey: "hospital_id" });
 
+// Doctor ↔ Patient
+Doctor.hasMany(Patient, { foreignKey: "doctor_id" });
+Patient.belongsTo(Doctor, { foreignKey: "doctor_id" });
+
 // Appointments
-Doctor.hasMany(DoctorSchedule, {
-  foreignKey: "doctor_id",
-  onDelete: "CASCADE",
-});
+Doctor.hasMany(DoctorSchedule, { foreignKey: "doctor_id", onDelete: "CASCADE" });
 DoctorSchedule.belongsTo(Doctor, { foreignKey: "doctor_id" });
 
-DoctorSchedule.hasMany(Appointment, {
-  foreignKey: "doctor_schedule_id",
-  onDelete: "CASCADE",
-});
+DoctorSchedule.hasMany(Appointment, { foreignKey: "doctor_schedule_id", onDelete: "CASCADE" });
 Appointment.belongsTo(DoctorSchedule, { foreignKey: "doctor_schedule_id" });
 
 Doctor.hasMany(Appointment, { foreignKey: "doctor_id" });
@@ -398,13 +395,19 @@ Appointment.belongsTo(Doctor, { foreignKey: "doctor_id" });
 Patient.hasMany(Appointment, { foreignKey: "patient_id" });
 Appointment.belongsTo(Patient, { foreignKey: "patient_id" });
 
+Appointment.belongsTo(LabTestSchedule, { foreignKey: 'lab_test_schedule_id' });
+LabTestSchedule.hasMany(Appointment, { foreignKey: 'lab_test_schedule_id' });
+
+Appointment.belongsTo(MedicalServiceSchedule, { foreignKey: 'medical_service_schedule_id' });
+MedicalServiceSchedule.hasMany(Appointment, { foreignKey: 'medical_service_schedule_id' });
+
 // Medical Records
 Patient.hasMany(MedicalRecord, { foreignKey: "patient_id" });
 Doctor.hasMany(MedicalRecord, { foreignKey: "doctor_id" });
 MedicalRecord.belongsTo(Patient, { foreignKey: "patient_id" });
 MedicalRecord.belongsTo(Doctor, { foreignKey: "doctor_id" });
 
-MedicalRecord.hasMany(Prescription, { foreignKey: "medical_record_id" });
+MedicalRecord.hasMany(Prescription, { foreignKey: "medical_record_id", onDelete: "SET NULL" });
 Prescription.belongsTo(MedicalRecord, { foreignKey: "medical_record_id" });
 
 // Prescriptions
@@ -413,7 +416,7 @@ Patient.hasMany(Prescription, { foreignKey: "patient_id" });
 Prescription.belongsTo(Doctor, { foreignKey: "doctor_id" });
 Prescription.belongsTo(Patient, { foreignKey: "patient_id" });
 
-// Lab Tests
+// Lab Test
 Doctor.hasMany(LabTest, { foreignKey: "doctor_id" });
 Patient.hasMany(LabTest, { foreignKey: "patient_id" });
 LabTest.belongsTo(Doctor, { foreignKey: "doctor_id" });
@@ -422,43 +425,40 @@ LabTest.belongsTo(Patient, { foreignKey: "patient_id" });
 LabTestSchedule.hasMany(LabTest, { foreignKey: "lab_test_schedule_id" });
 LabTest.belongsTo(LabTestSchedule, { foreignKey: "lab_test_schedule_id" });
 
-HospitalLabService.hasMany(LabTestSchedule, {
-  foreignKey: "hospital_lab_service_id",
-});
-
+HospitalLabService.hasMany(LabTestSchedule, { foreignKey: "hospital_lab_service_id" });
+LabTestSchedule.belongsTo(HospitalLabService, { foreignKey: "hospital_lab_service_id" });
 
 HospitalLabService.belongsTo(Hospital, { foreignKey: "hospital_id" });
-Hospital.hasMany(HospitalLabService, { foreignKey: "hospital_id" });
-
 HospitalLabService.belongsTo(Doctor, { foreignKey: "doctor_id" });
-Doctor.hasMany(HospitalLabService, { foreignKey: "doctor_id" });
-
 HospitalLabService.belongsTo(LabTestInfo, { foreignKey: "lab_test_info_id" });
+
 LabTestInfo.hasMany(HospitalLabService, { foreignKey: "lab_test_info_id" });
 
-LabTestSchedule.belongsTo(HospitalLabService, {
-  foreignKey: "hospital_lab_service_id",
-});
-HospitalLabService.belongsTo(Hospital, {
-  foreignKey: "hospital_id"
-});
+// Medical Service
+Doctor.hasMany(MedicalService, { foreignKey: "doctor_id" });
+Patient.hasMany(MedicalService, { foreignKey: "patient_id" });
+MedicalService.belongsTo(Doctor, { foreignKey: "doctor_id" });
+MedicalService.belongsTo(Patient, { foreignKey: "patient_id" });
 
-Review.belongsTo(Doctor, {
-  foreignKey: "target_id",
-  constraints: false,
-  as: "doctorTarget"
-});
+MedicalServiceSchedule.hasMany(MedicalService, { foreignKey: "medical_service_schedule_id" });
+MedicalService.belongsTo(MedicalServiceSchedule, { foreignKey: "medical_service_schedule_id" });
 
-Review.belongsTo(Hospital, {
-  foreignKey: "target_id",
-  constraints: false,
-  as: "hospitalTarget"
-})
+HospitalMedicalService.hasMany(MedicalServiceSchedule, { foreignKey: "hospital_medical_service_id" });
+MedicalServiceSchedule.belongsTo(HospitalMedicalService, { foreignKey: "hospital_medical_service_id" });
 
+HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
+HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
+HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id' });
+
+MedicalServiceInfo.hasMany(HospitalMedicalService, { foreignKey: 'medical_service_info_id' });
+
+// Reviews (Polymorphic)
+Review.belongsTo(Doctor, { foreignKey: "target_id", constraints: false, as: "doctorTarget" });
+Review.belongsTo(Hospital, { foreignKey: "target_id", constraints: false, as: "hospitalTarget" });
 Review.belongsTo(Patient, { foreignKey: 'user_id', targetKey: 'user_id' });
 Patient.hasMany(Review, { foreignKey: 'user_id', sourceKey: 'user_id' });
 
-// Many-to-many: Hospital - LabTestInfo
+// Many-to-Many via HospitalLabService
 Hospital.belongsToMany(LabTestInfo, {
   through: HospitalLabService,
   foreignKey: "hospital_id",
@@ -470,7 +470,7 @@ LabTestInfo.belongsToMany(Hospital, {
   otherKey: "hospital_id",
 });
 
-// Many-to-many Hospital <-> MedicalServiceInfo
+// Many-to-Many via HospitalMedicalService
 Hospital.belongsToMany(MedicalServiceInfo, {
   through: HospitalMedicalService,
   foreignKey: "hospital_id",
@@ -481,58 +481,6 @@ MedicalServiceInfo.belongsToMany(Hospital, {
   foreignKey: "medical_service_info_id",
   otherKey: "hospital_id",
 });
-
-// Schedule and bookings
-HospitalMedicalService.hasMany(MedicalServiceSchedule, {
-  foreignKey: "hospital_medical_service_id",
-});
-MedicalServiceSchedule.belongsTo(HospitalMedicalService, {
-  foreignKey: "hospital_medical_service_id",
-});
-
-MedicalServiceSchedule.hasMany(MedicalService, {
-  foreignKey: "medical_service_schedule_id",
-});
-MedicalService.belongsTo(MedicalServiceSchedule, {
-  foreignKey: "medical_service_schedule_id",
-});
-
-Doctor.hasMany(MedicalService, { foreignKey: "doctor_id" });
-MedicalService.belongsTo(Doctor, { foreignKey: "doctor_id" });
-
-Patient.hasMany(MedicalService, { foreignKey: "patient_id" });
-MedicalService.belongsTo(Patient, { foreignKey: "patient_id" });
-
-Doctor.hasMany(Patient, { foreignKey: "doctor_id" });
-Patient.belongsTo(Doctor, { foreignKey: "doctor_id" });
-
-MedicalRecord.hasMany(Prescription, { foreignKey: "medical_record_id", onDelete: "SET NULL" });
-Prescription.belongsTo(MedicalRecord, { foreignKey: "medical_record_id" })
-
-// Hospital ↔ HospitalMedicalService
-Hospital.hasMany(HospitalMedicalService, { foreignKey: 'hospital_id' });
-HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
-
-// Doctor ↔ HospitalMedicalService
-Doctor.hasMany(HospitalMedicalService, { foreignKey: 'doctor_id' });
-HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
-
-// MedicalServiceInfo ↔ HospitalMedicalService
-MedicalServiceInfo.hasMany(HospitalMedicalService, { foreignKey: 'medical_service_info_id' });
-HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id' ,as: 'MedicalServiceInfo'});
-
-HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
-HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
-
-Appointment.belongsTo(LabTestSchedule, { foreignKey: 'lab_test_schedule_id' });
-LabTestSchedule.hasMany(Appointment, { foreignKey: 'lab_test_schedule_id' });
-
-Appointment.belongsTo(MedicalServiceSchedule, { foreignKey: 'medical_service_schedule_id' });
-MedicalServiceSchedule.hasMany(Appointment, { foreignKey: 'medical_service_schedule_id' });
-
-UsedOrder.belongsTo(User, { foreignKey: "used_by_user_id" });
-User.hasMany(UsedOrder, { foreignKey: "used_by_user_id" });
-
 
 module.exports = {
   User,

@@ -6,6 +6,8 @@ const roleMiddleware = require("../middleware/checkRoleMiddleware");
 
 router.use(authMiddleware);
 
+router.get("/by-doctor/:doctorId", roleMiddleware('Admin', 'Doctor'), medicalServiceController.getByDoctor);
+
 router.patch(
   "/mark-ready/:id",
   roleMiddleware("Admin", "Doctor"),
