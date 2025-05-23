@@ -448,9 +448,10 @@ MedicalServiceSchedule.belongsTo(HospitalMedicalService, { foreignKey: "hospital
 
 HospitalMedicalService.belongsTo(Hospital, { foreignKey: 'hospital_id' });
 HospitalMedicalService.belongsTo(Doctor, { foreignKey: 'doctor_id' });
-HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id' });
+HospitalMedicalService.belongsTo(MedicalServiceInfo, { foreignKey: 'medical_service_info_id', as: 'MedicalServiceInfo', });
 
-MedicalServiceInfo.hasMany(HospitalMedicalService, { foreignKey: 'medical_service_info_id' });
+MedicalServiceInfo.hasMany(HospitalMedicalService, { foreignKey: 'medical_service_info_id',
+  as: 'HospitalMedicalServices', });
 
 // Reviews (Polymorphic)
 Review.belongsTo(Doctor, { foreignKey: "target_id", constraints: false, as: "doctorTarget" });
