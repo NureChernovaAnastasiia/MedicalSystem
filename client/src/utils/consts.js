@@ -4,6 +4,7 @@ export const SERVICES_ROUTE = '/services';
 export const LOGIN_ROUTE = '/login';
 export const DOCTOR_PANEL_ROUTE = '/docpanel';
 export const DOCTOR_APPOINTMENTS_ROUTE = '/upcoming-appointments';
+export const DOCTOR_DETAPPOINTMENT_ROUTE = '/details-appointment';
 export const DOCTOR_ALLAPPOINTMENTS_ROUTE = '/all-appointments';
 export const DOCTOR_PATIENTS_ROUTE = '/work-patients';
 export const DOCTOR_SERVICES_ROUTE = '/work-services';
