@@ -36,15 +36,15 @@ const PatientServiceDetails = () => {
   if (!service) return null;
 
   const serviceName = service.MedicalServiceInfo?.name || 'Невідома послуга';
-  const serviceDate = service.MedicalServiceSchedulee?.appointment_date
-    ? new Date(service.date).toLocaleDateString('uk-UA')
+  const serviceDate = service.MedicalServiceSchedule?.appointment_date
+    ? new Date(service.MedicalServiceSchedule?.appointment_date).toLocaleDateString('uk-UA')
     : 'Дата не вказана';
 
   const doctorName = service.Doctor
     ? `${service.Doctor.last_name || ''} ${service.Doctor.first_name || ''} ${service.Doctor.middle_name || ''}`.trim()
     : 'Невідомий лікар';
 
-  const hospitalName = service.Hospital?.name || 'Невідомий заклад';
+  const hospitalName = service.Doctor?.Hospital?.name || 'Невідомий заклад';
 
   const resultsText = service.results || 'Результати відсутні';
   const doctorComment = service.notes || 'Коментар відсутній';

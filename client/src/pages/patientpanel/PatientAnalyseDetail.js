@@ -35,7 +35,7 @@ const PatientAnalyseDetail = () => {
   if (error) return <p className={styles.error}>{error}</p>;
   if (!labTest) return null;
 
-  const testName = labTest.LabTestSchedule?.hospital_lab_service?.lab_service?.name || 'Невідомий аналіз';
+  const testName = labTest.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || 'Невідомий аналіз';
   const testDate = labTest.LabTestSchedule?.appointment_date
     ? new Date(labTest.LabTestSchedule.appointment_date).toLocaleDateString('uk-UA')
     : 'Дата не вказана';
