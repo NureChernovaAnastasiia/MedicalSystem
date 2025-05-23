@@ -50,7 +50,7 @@ const DoctorAllAppointments = () => {
             patientFullName: `${app.Patient.last_name} ${app.Patient.first_name} ${app.Patient.middle_name || ''}`.trim(),
             status: app.status.toLowerCase(),
           };
-        });
+        }).sort((a, b) => b.date_time - a.date_time);
 
         setAppointments(formatted);
       } catch (error) {
