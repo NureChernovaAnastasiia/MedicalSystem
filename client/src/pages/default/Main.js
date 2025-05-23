@@ -16,24 +16,36 @@ const InfoCard = ({ icon, title, text }) => (
   </div>
 );
 
-const ReviewCard = ({ img, name, age, stars, quote }) => {
+const ReviewCard = ({ img, name, age, stars, quote, targetType, doctorName, hospitalName }) => {
   const photo = img || noPhoto;
- 
+
+  // Визначаємо, для кого відгук
+  let targetLabel = '';
+  if (targetType === 'Doctor') {
+    targetLabel = doctorName ? `лікаря: ${doctorName}` : 'лікаря';
+  } else if (targetType === 'Hospital') {
+    targetLabel = hospitalName ? `лікарню: "${hospitalName}"` : 'лікарню';
+  }
+
   return (
-  <div className="review">
-    <div className="review-left">
+    <div className="review">
+      <div className="review-left">
         <img src={photo} alt={name} />
-      <div className="author-info">
-        <span className="name">{name}</span>
-        <span className="age">{age} років</span>
+        <div className="author-info">
+          <span className="name">{name}</span>
+          <span className="age">{age} років</span>
+        </div>
+      </div>
+      <div className="review-right">
+        <div className="stars">{'✭'.repeat(stars)}</div>
+        <div className="target">
+          Відгук про  {targetLabel}
+        </div>
+        <p className="quote">"{quote}"</p>
       </div>
     </div>
-    <div className="review-right">
-      <div className="stars">{'⭐'.repeat(stars)}</div>
-      <p className="quote">"{quote}"</p>
-    </div>
-  </div>
-)};
+  );
+};
 
 const Main = () => {
   const [reviews, setReviews] = useState([]);
@@ -100,11 +112,22 @@ const Main = () => {
           <div className="review-wrapper">
             <div className="arrow arrow-left" onClick={prevReview}>‹</div>
             <ReviewCard
-              img={currentReview.reviewer.photo_url}
-              name={currentReview.reviewer.name}
-              age={currentReview.reviewer.age}
+              img={currentReview.reviewer?.photo_url}
+              name={currentReview.reviewer?.name}
+              age={currentReview.reviewer?.age}
               stars={currentReview.rating}
               quote={currentReview.comment}
+              targetType={currentReview.target_type}
+              doctorName={
+                currentReview.target_type === 'Doctor'
+                  ? `${currentReview?.doctor?.last_name ?? ''} ${currentReview?.doctor?.first_name ?? ''}`.trim()
+                  : null
+              }
+              hospitalName={
+                currentReview.target_type === 'Hospital'
+                  ? currentReview.hospital?.name
+                  : null
+              }
             />
             <div className="arrow arrow-right" onClick={nextReview}>›</div>
           </div>

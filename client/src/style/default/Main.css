@@ -223,8 +223,16 @@
 }
 
 .review-right .stars {
-  font-size: 24px;
+  font-size: 36px;
+  font-style: bold;
   margin-bottom: 10px;
+  color: gold;
+}
+
+.review-right .target{
+  font-size: 18px;
+  color: #333333;
+  font-style: italic;
 }
 
 .review-right .quote {
