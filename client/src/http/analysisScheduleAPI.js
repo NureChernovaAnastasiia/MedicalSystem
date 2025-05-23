@@ -10,10 +10,11 @@ export const getAvailableLabTestTimes = async (labId, date) => {
   }
 };
 
-export const bookLabTestScheduleById = async (labTestScheduleId) => {
+export const bookLabTestScheduleById = async (labTestScheduleId, orderId) => {
   try {
-    const { data } = await $authHost.post('api/lab-test-schedules/book', {
+    const { data } = await $authHost.post('api/lab-test-schedules/pay-and-book', {
       lab_test_schedule_id: labTestScheduleId,
+      orderId,
     });
     return data;
   } catch (error) {

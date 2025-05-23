@@ -10,10 +10,11 @@ export const getAvailableMedicalServiceTimes = async (servId, date) => {
   }
 };
 
-export const bookMedicalServiceScheduleById = async (medicalServiceScheduleId) => {
+export const bookMedicalServiceScheduleById = async (medicalServiceScheduleId, orderId) => {
   try {
     const { data } = await $authHost.post('api/medical-service-schedules/book', {
       medical_service_schedule_id: medicalServiceScheduleId,
+      orderId,
     });
     return data;
   } catch (error) {

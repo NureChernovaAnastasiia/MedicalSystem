@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from '../../style/modalstyle/ModalServicesOrdering.module.css';
 import {
   iconAddress,
@@ -15,6 +15,12 @@ import {
   bookMedicalServiceScheduleById,
 } from '../../http/servicesScheduleAPI.js';
 import AlertPopup from '../../components/elements/AlertPopup';
+import {
+  createPaypalOrder,
+  capturePaypalOrder,
+} from '../../http/paypalAPI';
+
+import { loadPaypalScript, renderPaypalButtons } from '../../services/paypalServices';
 
 const InfoRow = ({ icon, label, value }) => (
   <div className={styles.infoRow}>
@@ -41,9 +47,16 @@ const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
   const [selectedTime, setSelectedTime] = useState('');
   const [alert, setAlert] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [paypalReady, setPaypalReady] = useState(false);
+
+  const paypalRef = useRef(null);
 
   const isLabTest = !!analyse?.LabTestInfo;
-  const itemId = isLabTest ? analyse?.id : analyse?.id;
+  const itemId = analyse?.id;
+  const analysisName = analyse?.LabTestInfo?.name || analyse?.MedicalServiceInfo?.name || '—';
+  const price = analyse?.LabTestInfo?.price || analyse?.MedicalServiceInfo?.price || '—';
+  const labName = analyse?.Hospital?.name || hospital?.name || '—';
+  const labAddress = analyse?.Hospital?.address || hospital?.address || '—';
 
   const fetchAvailableDates = useCallback(async () => {
     if (!itemId) return;
@@ -59,13 +72,9 @@ const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
       const results = await Promise.all(
         datesToCheck.map(async (date) => {
           const isoDate = formatDateISO(date);
-
-          let times = [];
-          if (isLabTest) {
-            times = await getAvailableLabTestTimes(itemId, isoDate);
-          } else {
-            times = await getAvailableMedicalServiceTimes(itemId, isoDate);
-          }
+          const times = isLabTest
+            ? await getAvailableLabTestTimes(itemId, isoDate)
+            : await getAvailableMedicalServiceTimes(itemId, isoDate);
 
           const available = times.filter((t) => !t.is_booked);
           if (!available.length) return null;
@@ -73,8 +82,8 @@ const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
         })
       );
       setDateOptions(results.filter(Boolean));
-    } catch (error) {
-      console.error('Помилка при завантаженні доступних дат:', error);
+    } catch {
+      setAlert({ message: 'Помилка при завантаженні доступних дат.', type: 'error' });
     }
   }, [itemId, isLabTest]);
 
@@ -88,50 +97,93 @@ const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
     setSelectedTime('');
   }, [selectedDate, dateOptions]);
 
-  const handlePayment = async () => {
-    if (!selectedDate || !selectedTime) {
-      setAlert({ message: 'Будь ласка, оберіть дату і час', type: 'error' });
-      return;
+  useEffect(() => {
+    loadPaypalScript()
+      .then(() => setPaypalReady(true))
+      .catch(() => setAlert({ message: 'Помилка завантаження PayPal.', type: 'error' }));
+  }, []);
+
+  useEffect(() => {
+    if (
+      paypalReady &&
+      paypalRef.current &&
+      selectedDate &&
+      selectedTime &&
+      price &&
+      availableTimes.length
+    ) {
+      renderPaypalButtons({
+        container: paypalRef.current,
+        createOrder: async () => {
+          if (!selectedDate || !selectedTime) {
+            setAlert({ message: 'Будь ласка, оберіть дату і час', type: 'error' });
+            return;
+          }
+          setIsLoading(true);
+          try {
+            const order = await createPaypalOrder(isLabTest ? 'lab' : 'service', parseInt(price));
+            return order.id;
+          } catch {
+            setAlert({ message: 'Не вдалося створити PayPal-замовлення.', type: 'error' });
+            setIsLoading(false);
+          }
+        },
+        onApprove: async (data) => {
+          try {
+            const captureResult = await capturePaypalOrder(
+              data.orderID,
+              isLabTest ? 'lab' : 'service',
+              hospital?.id || analyse?.Hospital?.id
+            );
+
+            if (captureResult.status === 'COMPLETED') {
+              const schedule = availableTimes.find((t) => t.start_time === selectedTime);
+
+              if (!schedule) {
+                setAlert({ message: 'Вибраний час недоступний', type: 'error' });
+                return;
+              }
+
+              try {
+                if (isLabTest) {
+                  await bookLabTestScheduleById(schedule.id, data.orderID);
+                } else {
+                  await bookMedicalServiceScheduleById(schedule.id, data.orderID);
+                }
+              } catch {
+                setAlert({ message: 'Помилка під час запису.', type: 'error' });
+                return;
+              }
+
+              setAlert({ message: 'Запис успішно створено', type: 'success' });
+              setTimeout(() => {
+                setAlert(null);
+                onClose();
+              }, 1200);
+            } else {
+              setAlert({ message: 'Помилка підтвердження оплати.', type: 'error' });
+            }
+          } catch {
+            setAlert({ message: 'Помилка при підтвердженні оплати.', type: 'error' });
+          } finally {
+            setIsLoading(false);
+          }
+        },
+        onError: () => {
+          setAlert({ message: 'Помилка PayPal оплати.', type: 'error' });
+          setIsLoading(false);
+        },
+        onCancel: () => {
+          setAlert({ message: 'Оплата скасована.', type: 'error' });
+          setIsLoading(false);
+        },
+      });
     }
-
-    setIsLoading(true);
-    try {
-      const schedule = availableTimes.find((t) => t.start_time === selectedTime);
-      if (!schedule) {
-        setAlert({ message: 'Вибраний час недоступний', type: 'error' });
-        return;
-      }
-
-      if (isLabTest) {
-        await bookLabTestScheduleById(schedule.id);
-      } else {
-        await bookMedicalServiceScheduleById(schedule.id);
-      }
-
-      setAlert({ message: 'Запис успішно створено', type: 'success' });
-      setTimeout(() => {
-        setAlert(null);
-        onClose();
-      }, 1200);
-    } catch (error) {
-      console.error(error);
-      setAlert({ message: 'Помилка при бронюванні. Спробуйте пізніше.', type: 'error' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const analysisName = analyse?.LabTestInfo?.name || analyse?.MedicalServiceInfo?.name || '—';
-  const price = analyse?.LabTestInfo?.price || analyse?.MedicalServiceInfo?.price || '—';
-  const labName = analyse?.Hospital?.name || hospital.name || '—';
-  const labAddress = analyse?.Hospital?.address || hospital.address || '—';
+  }, [paypalReady, selectedDate, selectedTime, price, availableTimes, isLabTest, hospital, analyse, onClose]);
 
   return (
     <>
-      {alert && (
-        <AlertPopup message={alert.message} type={alert.type} onClose={() => setAlert(null)} />
-      )}
-
+      {alert && <AlertPopup message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
       <div className={styles.modalOverlay}>
         <div className={styles.modalContainer}>
           <div className={styles.headerBackground}>
@@ -144,9 +196,7 @@ const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
             <InfoRow icon={iconMoney} label="Ціна" value={`${parseInt(price)} грн`} />
           </div>
 
-          <p className={styles.orderTitle}>
-            {isLabTest ? 'Замовлення аналізу' : 'Замовлення послуги'}
-          </p>
+          <p className={styles.orderTitle}>{isLabTest ? 'Замовлення аналізу' : 'Замовлення послуги'}</p>
           <p className={styles.dateInstruction}>Будь ласка, оберіть дату та час.</p>
 
           <div className={styles.dateSelectWrapper}>
@@ -168,33 +218,26 @@ const ModalServicesOrdering = ({ onClose, analyse, hospital }) => {
               className={styles.dateSelector}
               value={selectedTime}
               onChange={(e) => setSelectedTime(e.target.value)}
-              disabled={!availableTimes.length || isLoading}
+              disabled={!selectedDate || isLoading}
             >
               <option value="">Оберіть час</option>
-              {availableTimes.map(({ start_time, end_time }, idx) => (
-                <option key={idx} value={start_time}>
-                  {formatTimeDisplay(start_time)} - {formatTimeDisplay(end_time)}
+              {availableTimes.map((t) => (
+                <option key={t.start_time} value={t.start_time}>
+                  {formatTimeDisplay(t.start_time)}
                 </option>
               ))}
             </select>
           </div>
-
-          <div className={styles.actionButtons}>
-            <div
-              className={`${styles.payButton} ${isLoading ? styles.disabledButton : ''}`}
-              onClick={isLoading ? undefined : handlePayment}
-            >
-              {isLoading ? 'Зачекайте...' : 'Оплатити'}
-            </div>
+          <div className={styles.actionButtons}>       
+            <div className={styles.paypalContainer} ref={paypalRef}></div> 
             <button className={styles.cancelButton} onClick={onClose} disabled={isLoading}>
               <span className={styles.closeIcon}>×</span>
               <span className={styles.closeText}>Скасувати</span>
             </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
+          </div> 
+        </div> 
+      </div> 
+    </> 
+);};
 
 export default ModalServicesOrdering;
