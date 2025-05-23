@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import {
   formatAppointmentDateOnly,
   formatAppointmentTimeOnly,
 } from '../../utils/formatDate';
+import { DOCTOR_DETAPPOINTMENT_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   appointmentItem: {
@@ -45,25 +47,6 @@ const baseStyles = {
     alignItems: 'center',
     top: '6px',
   },
-  viewCardButton: {
-    position: 'relative',
-    left: '0',
-    fontFamily: "'Montserrat', sans-serif",
-    fontStyle: 'italic',
-    fontWeight: 600,
-    fontSize: '18px',
-    lineHeight: '20px',
-    color: '#00C3A1',
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0,
-    textAlign: 'left',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    transition: 'color 0.3s ease',
-  },
   plannedButton: {
     background: 'rgba(0, 195, 161, 0.42)',
     borderRadius: '10px',
@@ -73,13 +56,14 @@ const baseStyles = {
     fontWeight: 600,
     fontSize: '18px',
     textAlign: 'center',
-    padding: '8px 0',
+    padding: '8px 20px',
     margin: '5px 14px',
     cursor: 'pointer',
     border: 'none',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    
   },
   pastCancelledButton: {
     background: '#FFFFFF',
@@ -205,7 +189,9 @@ const AppointmentItem = ({ appointment }) => {
       <span style={combinedStyles.status}>
         {getStatusLabel(appointment.computed_status)}
       </span>
-      {renderButton()}
+      <NavLink to={`${DOCTOR_DETAPPOINTMENT_ROUTE}/${appointment.id}`} style={{ textDecoration: 'none' }}>
+        {renderButton()}
+      </NavLink>
     </div>
   );
 };

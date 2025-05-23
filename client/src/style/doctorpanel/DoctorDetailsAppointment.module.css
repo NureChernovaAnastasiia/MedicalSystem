@@ -1,0 +1,267 @@
+.container {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.title {
+  text-align: left;
+  color: #000;
+  font-weight: 500;
+  font-size: 36px;
+  padding: 30px 60px 10px;
+}
+
+.analysisHeader {
+  background: #E2F6F2;
+  border-left: 10px solid #00C3A1;
+  padding: 5px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.analysisTitle {
+  font-style: italic;
+  font-weight: 550;
+  font-size: 24px;
+}
+
+.analysisDate {
+  font-style: italic;
+  font-weight: 300;
+  font-size: 20px;
+}
+
+
+.topButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 30px 60px 20px;
+  position: relative;
+}
+
+.confirmButton {
+  background: transparent;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 18px;
+  color: #00C37F;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cancelButton,
+.completeButton {
+  background: transparent;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.closeIcon {
+  color: #FF0000;
+  font-size: 45px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.completeIcon {
+  color: #00C37F;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.cancelButton,
+.completeButton {
+  color: #333333;
+  font-weight: 300;
+  font-size: 20px;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto; 
+}
+.cancelButton:hover {
+  color: #666;
+}
+
+.detailsSection {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 300px;
+  padding: 0 60px;
+}
+
+.icon {
+  width: 50px;
+  height: 50px;
+}
+
+.detailText {
+  font-weight: 300;
+  font-size: 20px;
+  font-style: italic;
+  line-height: 30px;
+}
+
+.detailText strong {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.resultsTitle {
+  font-weight: 525;
+  font-size: 26px;
+  margin: 20px 100px;
+}
+
+.resultsBlock {
+  background: #E2F6F2;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  margin: 20px 60px 20px;
+  padding: 20px;
+  border-radius: 1rem;
+  position: relative;
+}
+
+.resultsText {
+  font-weight: 300;
+  font-size: 22px;
+  margin-top: 1rem;
+  line-height: 1.8;
+}
+
+.commentTextarea {
+  width: 87%;
+  min-height: 120px;
+  margin: 10px 60px 20px;
+  font-size: 20px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 12px;
+  border: 1px solid #c9d5d4;
+  border-radius: 12px;
+  resize: none;
+  background-color: #F8FDFD;
+  font-style: italic;
+  font-weight: 300;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: border 0.3s ease;
+}
+
+.commentTextarea:hover,
+.commentTextarea:focus {
+    border-color: #00C3A1;
+    box-shadow: 0 0 20px rgba(0, 195, 163, 0.337);
+    outline: none;
+}
+
+.diagnosisHeader {
+  display: flex;
+  align-items: center;
+  margin: 5px 100px;
+  flex-wrap: wrap;
+}
+
+.commentTitle {
+  font-weight: 525;
+  font-size: 26px;
+  margin-right: 20px;
+}
+
+.addButton {
+  background: rgba(0, 195, 161, 0.42);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.addButton:hover {
+  background: #00C3A1;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: #00C3A1;
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+
+.backButton:hover {
+  text-decoration: none;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 10px 80px;
+}
+
+.noResults{
+    font-size: 18px;
+    font-style: italic;
+}
+
+.footerActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 40px 60px;
+  flex-wrap: wrap;
+}
+
+.saveButton {
+  background: rgba(0, 195, 161, 0.42);
+  border-radius: 10px;
+  border: none;
+  padding: 14px 16px;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 24px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.saveButton:hover {
+  background: #00C3A1;
+}
+
+@media (max-width: 768px) {
+  .commentTextarea {
+  margin: 5px 20px 5px;
+}
+
+.saveButton {
+  padding: 7px 8px;
+  font-size: 20px;
+}
+}

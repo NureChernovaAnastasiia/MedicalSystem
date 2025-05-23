@@ -24,3 +24,18 @@ export const fetchUpcomingAppointmentsByDoctor = async (doctorId) => {
   const { data } = await $authHost.get(`/api/appointments/upcoming/doctor/${doctorId}`);
   return data;
 };
+
+export const fetchAppointmentById = async (appointmentId) => {
+  const { data } = await $authHost.get(`/api/appointments/${appointmentId}`);
+  return data;
+};
+
+export const completeAppointment = async (appointmentId, notes) => {
+  const { data } = await $authHost.patch(`/api/appointments/${appointmentId}/complete`);
+  return data;
+};
+
+export const updateAppointment = async (appointmentId, updatedFields) => {
+  const { data } = await $authHost.put(`/api/appointments/${appointmentId}`, updatedFields);
+  return data;
+};
