@@ -47,7 +47,6 @@ class MedicalServiceInfoController {
         include: [
           {
             model: MedicalServiceInfo,
-            as: 'MedicalServiceInfo' // ✅ Виправлено
           }
         ],
       });

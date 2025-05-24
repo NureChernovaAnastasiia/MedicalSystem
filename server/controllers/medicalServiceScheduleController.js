@@ -20,9 +20,9 @@ class MedicalServiceScheduleController {
         include: {
           model: HospitalMedicalService,
           include: [
-              Hospital,
-            MedicalServiceInfo,
-            Doctor,
+            { model: Hospital },
+            { model: MedicalServiceInfo, as: "MedicalServiceInfo" },
+            { model: Doctor },
           ],
         },
         order: [["appointment_date", "ASC"], ["start_time", "ASC"]],
@@ -55,16 +55,15 @@ class MedicalServiceScheduleController {
     }
   }
 
-  // 🔍 Отримати один розклад
   async getById(req, res, next) {
     try {
       const item = await MedicalServiceSchedule.findByPk(req.params.id, {
         include: {
           model: HospitalMedicalService,
           include: [
-            Hospital,
-            MedicalServiceInfo,
-            Doctor,
+            { model: Hospital },
+            { model: MedicalServiceInfo, as: "MedicalServiceInfo" },
+            { model: Doctor },
           ],
         },
       });
@@ -92,7 +91,7 @@ class MedicalServiceScheduleController {
       return next(ApiError.internal("Помилка отримання розкладу процедури"));
     }
   }
-
+  
   async bookMedicalService(req, res, next) {
     try {
       const { medical_service_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
