@@ -24,3 +24,13 @@ export const fetchPrescriptionPdf = async (prescriptionId) => {
     alert('Не вдалося відкрити PDF документ');
   }
 };
+
+export const createPrescription = async (prescriptionData) => {
+  try {
+    const { data } = await $authHost.post('api/prescriptions', prescriptionData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні рецепту:', error.response?.data || error.message);
+    throw error;
+  }
+};

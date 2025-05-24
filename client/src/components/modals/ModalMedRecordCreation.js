@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import styles from '../../style/modalstyle/ModalMedRecordCreation.module.css';
-import AlertPopup from "../../components/elements/AlertPopup";
-import { createMedicalRecord } from '../../http/medicalRecordAPI'; 
+import AlertPopup from '../../components/elements/AlertPopup';
+import { createMedicalRecord } from '../../http/medicalRecordAPI';
+import ModalPrescriptionCreation from './ModalPrescriptionCreation';
+import { createPrescription } from '../../http/prescriptionAPI';
 
 const ModalMedRecordCreation = ({ patientId, doctorId, onClose, onCreate }) => {
   const [diagnosis, setDiagnosis] = useState('');
   const [treatment, setTreatment] = useState('');
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [prescriptions, setPrescriptions] = useState([]);
 
   const handleCreate = async () => {
     if (!diagnosis.trim() || !treatment.trim()) {
@@ -24,7 +28,20 @@ const ModalMedRecordCreation = ({ patientId, doctorId, onClose, onCreate }) => {
         treatment,
       });
 
-      setAlert({ message: 'Діагноз успішно створено!', type: 'success' });
+      const recordId = response.id;
+
+      await Promise.all(
+        prescriptions.map((prescription) =>
+          createPrescription({
+            ...prescription,
+            doctor_id: doctorId,
+            patient_id: patientId,
+            medical_record_id: recordId,
+          })
+        )
+      );
+
+      setAlert({ message: 'Діагноз і препарати успішно створено!', type: 'success' });
 
       if (onCreate) {
         onCreate(response);
@@ -32,83 +49,96 @@ const ModalMedRecordCreation = ({ patientId, doctorId, onClose, onCreate }) => {
 
       setTimeout(() => {
         setAlert(null);
-        onClose(); 
+        onClose();
       }, 1500);
     } catch (error) {
-      setAlert({ message: 'Помилка при створенні діагнозу.', type: 'error' });
+      console.error(error);
+      setAlert({ message: 'Помилка при створенні діагнозу або препаратів.', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCloseModal = () => {
+    setShowPrescriptionModal(false);
+  };
+
+  const handleAddPrescription = (prescriptionData) => {
+    setPrescriptions((prev) => [...prev, prescriptionData]);
+    handleCloseModal();
+  };
+
   return (
     <>
       {alert && (
-        <AlertPopup
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert(null)}
-        />
+        <AlertPopup message={alert.message} type={alert.type} onClose={() => setAlert(null)} />
       )}
+
       <div className={styles.modalOverlay}>
         <div className={styles.modalContainer}>
-            <div className={styles.header}>
+          <div className={styles.header}>
             <h2 className={styles.title}>Встановлення діагнозу</h2>
-            </div>
+          </div>
 
-            <div className={styles.fieldBlock}>
+          <div className={styles.fieldBlock}>
             <label className={styles.label}>Назва діагнозу:</label>
             <input
-                type="text"
-                className={styles.input}
-                placeholder="Введіть текст"
-                value={diagnosis}
-                onChange={(e) => setDiagnosis(e.target.value)}
+              type="text"
+              className={styles.input}
+              placeholder="Введіть текст"
+              value={diagnosis}
+              onChange={(e) => setDiagnosis(e.target.value)}
             />
-            </div>
+          </div>
 
-            <div className={styles.fieldBlockLarge}>
+          <div className={styles.fieldBlockLarge}>
             <label className={styles.label}>Лікування:</label>
             <textarea
-                className={styles.textarea}
-                placeholder="Введіть текст"
-                value={treatment}
-                onChange={(e) => setTreatment(e.target.value)}
+              className={styles.textarea}
+              placeholder="Введіть текст"
+              value={treatment}
+              onChange={(e) => setTreatment(e.target.value)}
             ></textarea>
-            </div>
+          </div>
 
-            <div className={styles.medsBlock}>
+          <div className={styles.medsBlock}>
             <label className={styles.label}>Препарати:</label>
             <div className={styles.medsList}>
-                <div className={styles.medItem}>Біфрен</div>
-                <div className={styles.medItem}>Панадол</div>
-                <div className={styles.addMed}>
-                <span className={styles.addText}>+ Додати</span>
+              {prescriptions.map((item, index) => (
+                <div key={index} className={styles.medItem}>
+                  {item.medication}
                 </div>
+              ))}
+              <div className={styles.addMed} onClick={() => setShowPrescriptionModal(true)}>
+                <span className={styles.addText}>+ Додати</span>
+              </div>
             </div>
-            </div>
+          </div>
 
-            <div className={styles.actions}>
+          <div className={styles.actions}>
+            <button className={styles.cancelButton} onClick={onClose} disabled={loading}>
+              <span className={styles.closeIcon}>×</span>
+              <span className={styles.closeText}>Скасувати</span>
+            </button>
             <button
-                className={styles.cancelButton}
-                onClick={onClose}
-                disabled={loading}
+              className={styles.createButton}
+              onClick={handleCreate}
+              disabled={loading || !diagnosis.trim() || !treatment.trim()}
             >
-                <span className={styles.closeIcon}>×</span>
-                <span className={styles.closeText}>Скасувати</span>
+              <span className={styles.createIcon}>✓</span>
+              <span className={styles.createText}>
+                {loading ? 'Створення...' : 'Створити'}
+              </span>
             </button>
-            <button
-                className={styles.createButton}
-                onClick={handleCreate}
-                disabled={loading || !diagnosis.trim() || !treatment.trim()}
-                >
-                <span className={styles.createIcon}>✓</span>
-                <span className={styles.createText}>
-                    {loading ? 'Створення...' : 'Створити'}
-                </span>
-            </button>
-            </div>
+          </div>
         </div>
+
+        {showPrescriptionModal && (
+          <ModalPrescriptionCreation
+            onClose={handleCloseModal}
+            onSuccess={handleAddPrescription}
+          />
+        )}
       </div>
     </>
   );
