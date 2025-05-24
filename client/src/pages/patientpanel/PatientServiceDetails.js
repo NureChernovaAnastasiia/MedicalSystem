@@ -44,7 +44,7 @@ const PatientServiceDetails = () => {
     ? `${service.Doctor.last_name || ''} ${service.Doctor.first_name || ''} ${service.Doctor.middle_name || ''}`.trim()
     : 'Невідомий лікар';
 
-  const hospitalName = service.Doctor?.Hospital?.name || 'Невідомий заклад';
+  const hospitalName = service.MedicalServiceSchedule?.HospitalMedicalService?.Hospital?.name || 'Невідомий заклад';
 
   const resultsText = service.results || 'Результати відсутні';
   const doctorComment = service.notes || 'Коментар відсутній';
