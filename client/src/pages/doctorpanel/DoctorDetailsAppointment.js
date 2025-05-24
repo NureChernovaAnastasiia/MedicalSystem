@@ -74,8 +74,8 @@ const DoctorDetailsAppointment = () => {
 
 const handleSaveNotes = async () => {
   try {
-    await updateAppointment(appointment.id, { notes }); // просто оновлюємо
-    const updated = await fetchAppointmentById(appointment.id); // повторно запитуємо повний appointment
+    await updateAppointment(appointment.id, { notes }); 
+    const updated = await fetchAppointmentById(appointment.id); 
     setAppointment(updated);
     setNotes(updated.notes || '');
     alert('Коментар успішно збережено');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Context } from '../../index';
 
@@ -8,6 +8,7 @@ import 'react-date-range/dist/theme/default.css';
 import SearchInput from '../../components/options/SearchInput';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import AppointmentItem from '../../components/appointment/AppointmentItem';
+import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
 
 import styles from '../../style/doctorpanel/DoctorAllAppointments.module.css';
 
@@ -16,16 +17,21 @@ import { fetchAllDoctorAppointments } from '../../http/appointmentAPI';
 
 const DoctorAllAppointments = () => {
   const { user } = useContext(Context);
-
+  const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [dateRange, setDateRange] = useState([
-    { startDate: null, endDate: null, key: 'selection' },
-  ]);
+  const [dateRange, setDateRange] = useState([{ startDate: null, endDate: null, key: 'selection' }]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const loadAppointments = useCallback(async (doctorId) => {
+    const data = await fetchAllDoctorAppointments(doctorId);
+    const formatted = data.map(app => formatAppointment(app)).sort((a, b) => b.date_time - a.date_time);
+    setAppointments(formatted);
+  }, []); 
 
   useEffect(() => {
     if (!user?.user?.id) return;
@@ -35,24 +41,9 @@ const DoctorAllAppointments = () => {
       setError(null);
 
       try {
-        const doctor = await fetchDoctorByUserId(user.user.id);
-        const data = await fetchAllDoctorAppointments(doctor.id);
-
-        const formatted = data.map(app => {
-          const dateStr = app.appointment_date;
-          const timeStr = app.DoctorSchedule?.start_time || '00:00:00';
-          const dateTime = new Date(`${dateStr}T${timeStr}`);
-
-          return {
-            ...app,
-            date_time: dateTime,
-            formattedDate: format(dateTime, 'dd.MM.yyyy HH:mm'),
-            patientFullName: `${app.Patient.last_name} ${app.Patient.first_name} ${app.Patient.middle_name || ''}`.trim(),
-            status: app.status.toLowerCase(),
-          };
-        }).sort((a, b) => b.date_time - a.date_time);
-
-        setAppointments(formatted);
+        const doctorData = await fetchDoctorByUserId(user.user.id);
+        setDoctor(doctorData);
+        await loadAppointments(doctorData.id);
       } catch (error) {
         setError('Помилка при завантаженні прийомів');
       } finally {
@@ -61,7 +52,37 @@ const DoctorAllAppointments = () => {
     };
 
     getDoctorAndAppointments();
-  }, [user?.user?.id]);
+  }, [user?.user?.id, loadAppointments]);
+
+  const formatAppointment = (app) => {
+    const dateStr = app.appointment_date;
+    const timeStr = app.DoctorSchedule?.start_time || '00:00:00';
+    const dateTime = new Date(`${dateStr}T${timeStr}`);
+
+    const patient = app.Patient;
+    const patientFullName = patient
+      ? `${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`.trim()
+      : 'Невідомий пацієнт';
+
+    return {
+      ...app,
+      date_time: dateTime,
+      formattedDate: format(dateTime, 'dd.MM.yyyy HH:mm'),
+      patientFullName,
+      status: app.status?.toLowerCase() || 'невідомо',
+    };
+  };
+
+  const handleCreateAppointment = async () => {
+    if (!doctor?.id) return;
+    try {
+      await loadAppointments(doctor.id);
+    } catch (err) {
+      console.error('Помилка при оновленні прийомів:', err);
+    } finally {
+      setShowCreateModal(false);
+    }
+  };
 
   const { startDate, endDate } = dateRange[0];
 
@@ -69,7 +90,7 @@ const DoctorAllAppointments = () => {
     const fullNameLower = app.patientFullName.toLowerCase();
     const searchLower = searchTerm.toLowerCase();
     const appointmentDate = new Date(app.date_time);
-    const status = app.computed_status?.toLowerCase();
+    const status = app.status;
 
     const matchByName = fullNameLower.includes(searchLower);
     const isInDateRange =
@@ -107,7 +128,12 @@ const DoctorAllAppointments = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Прийоми</h1>
         <div className={styles.orderButtonWrapper}>
-          <button className={styles.orderButton}>Створити прийом</button>
+          <button
+            className={styles.orderButton}
+            onClick={() => setShowCreateModal(true)}
+          >
+            Створити прийом
+          </button>
         </div>
       </div>
 
@@ -174,6 +200,14 @@ const DoctorAllAppointments = () => {
           ))
         }
       </div>
+
+      {showCreateModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <ModalCreateAppointment doctorId={doctor?.id} onClose={() => setShowCreateModal(false)} onCreate={handleCreateAppointment} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

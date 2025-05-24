@@ -39,3 +39,13 @@ export const updateAppointment = async (appointmentId, updatedFields) => {
   const { data } = await $authHost.put(`/api/appointments/${appointmentId}`, updatedFields);
   return data;
 };
+
+export const createAppointment = async (appointmentData) => {
+  try {
+    const { data } = await $authHost.post('api/appointments', appointmentData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні прийому:', error);
+    throw error;
+  }
+};

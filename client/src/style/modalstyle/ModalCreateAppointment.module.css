@@ -1,0 +1,327 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 30px;
+  width: 65%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #e2f6f2;
+  border-radius: 1.25rem 1.25rem 0 0;
+  padding: 1rem 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 1.9rem;
+  color: #00c3a1;
+  margin: 0.5rem 0 0;
+}
+
+.topSection {
+  display: flex;
+  gap: 40px;
+  flex-grow: 1;
+}
+
+.leftSection {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  padding-left: 35px;
+}
+
+.rightSection {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  padding-right: 35px;
+}
+
+.sectionTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333333;
+}
+
+.searchInput {
+  padding: 10px 15px;
+  border: 1px solid #D9D9D9;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-style: italic;
+}
+
+.patientList {
+  max-height: 175px; 
+  overflow-y: auto;
+  padding-right: 4px; 
+}
+
+.patientCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.patientCard:hover {
+  background-color: #f0f0f0;
+}
+
+.selected {
+  background-color: #e9fffb;
+  border-left: 4px solid #00c3a1;
+}
+
+.patientName {
+  font-weight: 600;
+  font-size: 18px;
+  color: #333333;
+}
+
+.patientDate {
+  font-size: 14px;
+  color: #777;
+}
+
+.dateSelector {
+  padding: 10px 15px;
+  font-size: 16px;
+  font-style: italic;
+  border: 1px solid #D9D9D9;
+  border-radius: 5px;
+}
+
+.timeSlotsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.sectionSubtitle{
+    font-size: 16px;
+    font-style: italic;
+    margin-bottom: 10px;
+    color: #333333;
+}
+
+.timeSlot {
+  padding: 8px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.availableSlot {
+  background: rgba(0, 195, 161, 0.42);
+  color: #fff;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.unavailableSlot {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  color: #333;
+  letter-spacing: 0.1em;
+  cursor: not-allowed;
+}
+
+.selectedSlot {
+  background-color: rgba(0, 195, 163, 0.82);
+  color: white;
+}
+
+.noSlotsMessage {
+  color: #999;
+  font-style: italic;
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.bottomSection {
+  margin-top: 30px;
+  gap: 40px;
+}
+
+.selectedInfo {
+  padding: 10px;
+  margin: 0 25px;
+}
+
+.selectedInfo h3 {
+  margin-top: 0;
+  font-weight: 500;
+  font-size: 20px;
+  font-style: italic;
+}
+
+.selectedInfo strong {
+  font-style: normal;
+  color: #333333;
+}
+
+.selectedPatientName,
+.selectedTime {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+.commentSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0 35px;
+}
+
+.commentLabel {
+  font-weight: 500;
+  margin: 0 20px 10px;
+  font-size: 17px;
+  font-style: italic;
+
+}
+
+.commentTextarea {
+  flex-grow: 1;
+  font-size: 16px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 12px;
+  border: 1px solid #c9d5d4;
+  border-radius: 12px;
+  resize: none;
+  background-color: #F8FDFD;
+  font-style: italic;
+  font-weight: 300;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  transition: border 0.3s ease;
+}
+
+.searchInput:hover,
+.searchInput:focus,
+.dateSelector:hover,
+.dateSelector:focus,
+.commentTextarea:hover,
+.commentTextarea:focus {
+    border-color: #00C3A1;
+    box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
+    outline: none;
+}
+
+.footerButtons {
+  margin: 10px 40px;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 20px;
+  align-items: center;
+}
+
+.cancelButton,
+.createButton {
+  background: transparent;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.closeIcon {
+  color: #FF0000;
+  font-size: 45px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.createIcon {
+  color: #00C37F;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.cancelButton,
+.createButton {
+  color: #333333;
+  font-weight: 300;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cancelButton:hover {
+  color: #666;
+}
+
+.createButton:disabled {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .modal {
+    width: 90%;
+    max-width: 800px;
+    margin: 1rem auto;
+  }
+
+  .topSection {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .leftSection,
+  .rightSection {
+    padding-left: 15px;
+    padding-right: 15px;
+    flex: none;
+  }
+
+  .patientList {
+    max-height: 150px;
+  }
+
+  .timeSlotsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    max-height: 220px;
+  }
+}
+

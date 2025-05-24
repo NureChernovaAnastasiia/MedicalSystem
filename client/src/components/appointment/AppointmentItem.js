@@ -107,11 +107,11 @@ const getStatusLabel = (status) => {
 const getStatusColor = (status) => {
   switch (status) {
     case 'Scheduled':
-      return '#00C3A1'; // зелений
+      return '#00C3A1'; 
     case 'Cancelled':
-      return '#FF0000'; // червоний
+      return '#FF0000'; 
     case 'Past':
-      return '#A0A0A0'; // сірий
+      return '#A0A0A0'; 
     default:
       return '#333333';
   }
