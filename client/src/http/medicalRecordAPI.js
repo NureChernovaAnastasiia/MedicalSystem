@@ -19,3 +19,13 @@ export const fetchMedicalRecordById = async (id) => {
     throw error;
   }
 };
+
+export const createMedicalRecord = async (medicalRecordData) => {
+  try {
+    const { data } = await $authHost.post('api/medical-records', medicalRecordData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні медичного запису:', error);
+    throw error;
+  }
+};

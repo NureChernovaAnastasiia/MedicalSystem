@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorDetailsAppointment.module.css';
 import DiagnosisCard from '../../components/medcard/DiagnosisCard';
+import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreation';
 import { formatAppointmentDate } from '../../utils/formatDate';
 import { iconDoctor, iconHospital } from '../../utils/icons';
 import { fetchAppointmentById, completeAppointment, cancelAppointment, updateAppointment } from '../../http/appointmentAPI'; // додано updateAppointment
@@ -15,6 +16,7 @@ const DoctorDetailsAppointment = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notes, setNotes] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   const goBack = () => {
     navigate(-1);
@@ -84,6 +86,26 @@ const handleSaveNotes = async () => {
     alert('Помилка збереження коментаря: ' + (error.response?.data?.message || error.message || 'невідома помилка'));
   }
 };
+
+  const handleOpenModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+
+  const handleCreateRecord = async () => {
+    if (appointment?.Patient?.id) {
+      try {
+        const updatedRecords = await fetchMedicalRecordsByPatientId(appointment.Patient.id);
+        const appointmentDate = new Date(appointment.appointment_date);
+        const filtered = updatedRecords.filter((record) => {
+          const recordDate = new Date(record.record_date);
+          return recordDate.toDateString() === appointmentDate.toDateString();
+        });
+        setDiagnoses(filtered);
+        setShowModal(false);
+      } catch (error) {
+        console.error('Помилка оновлення діагнозів:', error);
+      }
+    }
+  };
 
   if (loading) return <p className={styles.loading}>Завантаження...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
@@ -165,7 +187,7 @@ const handleSaveNotes = async () => {
 
       <div className={styles.diagnosisHeader}>
         <h3 className={styles.commentTitle}>Встановлені діагнози</h3>
-        <button className={styles.addButton}>+ Додати</button>
+        <button className={styles.addButton} onClick={handleOpenModal}>+ Додати</button>
       </div>
 
       <div className={styles.cardsGrid}>
@@ -188,6 +210,15 @@ const handleSaveNotes = async () => {
             Зберегти
           </button>
         )} 
+
+        {showModal && (
+          <ModalMedRecordCreation
+            patientId={appointment.Patient.id}
+            doctorId={appointment.Doctor.id}
+            onClose={handleCloseModal}
+            onCreate={handleCreateRecord}
+          />
+        )}
       </div>
     </div>
   );
