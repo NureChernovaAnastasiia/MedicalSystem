@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { iconMedCard } from '../../utils/icons';
+import { DOCTOR_PATMEDCARD_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   patientItem: {
@@ -133,6 +135,7 @@ const PatientItem = ({ patient }) => {
           {`${patient.last_name} ${patient.first_name} ${patient.middle_name}` || '—'}</span>
         <span style={combinedStyles.birthDate}>{formatDate(patient.birth_date) || '—'}</span>
         <span style={combinedStyles.email}>{patient.email || '—'}</span>
+        <NavLink to={`${DOCTOR_PATMEDCARD_ROUTE}/${patient.id}`}>
         <button
             style={combinedStyles.viewCardButton}
             onMouseEnter={e => (e.currentTarget.style.color = '#00795f')}
@@ -141,6 +144,7 @@ const PatientItem = ({ patient }) => {
             <img src={iconMedCard} alt="Контакти" style={baseStyles.infoIcon} />
             Переглянути медичну картку
         </button>
+        </NavLink>
       </div>
     </>
   );
