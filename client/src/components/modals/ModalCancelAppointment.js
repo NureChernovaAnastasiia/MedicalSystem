@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import styles from "../../style/modalstyle/ModalCancelAppointment.module.css";
 import { cancelAppointment } from "../../http/appointmentAPI";
 import AlertPopup from "../../components/elements/AlertPopup";
 import { formatAppointmentDate } from "../../utils/formatDate"; 
 import { REASONS } from "../../constants/cancellationReasons"; 
+import { Context } from "../../index"; 
 
 const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }) => {
+  const { user } = useContext(Context);
+  const role = user._role;
+
   const [alert, setAlert] = useState(null);
   const [selectedReason, setSelectedReason] = useState("");
 
@@ -33,6 +37,11 @@ const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }
     }
   };
 
+  const personLabel = role === "Patient" ? "Лікар" : "Пацієнт";
+  const personName = role === "Patient"
+    ? `${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`
+    : `${appointment.Patient?.last_name} ${appointment.Patient?.first_name} ${appointment.Patient?.middle_name}`;
+
   return (
     <>
       {alert && <AlertPopup message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
@@ -49,8 +58,8 @@ const ModalCancelAppointment = ({ appointment, onClose, onAppointmentCancelled }
             <p className={styles.infoText}>
               <strong>Дата і час прийому: </strong>
               {formatAppointmentDate(appointment)} <br />
-              <strong>Лікар: </strong>
-              {`${appointment.Doctor?.last_name} ${appointment.Doctor?.first_name} ${appointment.Doctor?.middle_name}`} <br />
+              <strong>{personLabel}: </strong>
+              {personName} <br />
               <strong>Місцезнаходження: </strong>
               {appointment.Doctor?.Hospital?.name || "Невідома лікарня"}, {appointment.Doctor?.Hospital?.address}
             </p>

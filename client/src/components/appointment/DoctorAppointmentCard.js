@@ -1,6 +1,8 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorAppointments.module.css';
 import { formatAppointmentDateOnly, formatAppointmentTimeOnly } from '../../utils/formatDate';
+import { DOCTOR_DETAPPOINTMENT_ROUTE } from '../../utils/consts';
 
 const DoctorAppointmentCard = ({ appointment, onDetailsClick, onCancelClick }) => {
   const patientName = `${appointment.Patient?.last_name || ''} ${appointment.Patient?.first_name || ''} ${appointment.Patient?.middle_name || ''}`;
@@ -23,8 +25,10 @@ const DoctorAppointmentCard = ({ appointment, onDetailsClick, onCancelClick }) =
       </div>
 
       <div className={styles.cardFooter}>
-        <div className={styles.cardDetails} onClick={() => onDetailsClick(appointment)}>
+        <div className={styles.cardDetails} >
+          <NavLink to={`${DOCTOR_DETAPPOINTMENT_ROUTE}/${appointment.id}`} style={{ textDecoration: 'none' }}>
           <button className={styles.detailsText}>Внести дані</button>
+          </NavLink>
         </div>
 
         {canCancel && (
