@@ -92,14 +92,16 @@ const DoctorMedicalDetail = () => {
             <p className={styles.recommendations}>
               Рекомендації:
               <br />
-              {record.treatment.split('.').map((item, index) =>
-                item.trim() ? (
-                  <React.Fragment key={index}>
-                    – {item.trim()}
-                    <br />
-                  </React.Fragment>
-                ) : null
-              )}
+              {record.treatment
+                .split(/\r?\n/)
+                .map((item, index) =>
+                  item.trim() ? (
+                    <React.Fragment key={index}>
+                      – {item.trim()}
+                      <br />
+                    </React.Fragment>
+                  ) : null
+                )}
             </p>
           </div>
         </div>

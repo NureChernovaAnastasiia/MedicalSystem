@@ -124,6 +124,9 @@ const handleSaveNotes = async () => {
     }
   };
 
+  const renderMultilineText = (text) =>
+    (text || 'Відсутні дані').split('\n').map((line, i) => <p key={i}>{line}</p>);
+
   const isEditable = appointment.status === 'Scheduled';
   const formattedDateTime = formatAppointmentDate(appointment);
   const doctor = appointment.Doctor;
@@ -132,7 +135,7 @@ const handleSaveNotes = async () => {
 
   const hospitalName = hospital?.name || 'Невідомий заклад';
   const patientName = patient
-    ? `${patient.last_name} ${patient.first_name} ${patient.middle_name}`.trim()
+    ? `${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}`.trim()
     : 'Невідомий пацієнт';
 
   return (
@@ -180,7 +183,7 @@ const handleSaveNotes = async () => {
             />
         ) : (
           <div className={styles.resultsBlock}>
-            <p className={styles.resultsText}>{notes || 'Коментар відсутній'}</p>
+            <div className={styles.resultsText}>{renderMultilineText(notes)}</div>
           </div>
         )}
       </div>
