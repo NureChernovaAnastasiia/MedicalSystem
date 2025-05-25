@@ -5,7 +5,7 @@ import DiagnosisCard from '../../components/medcard/DiagnosisCard';
 import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreation';
 import { formatAppointmentDate } from '../../utils/formatDate';
 import { iconDoctor, iconHospital } from '../../utils/icons';
-import { fetchAppointmentById, completeAppointment, cancelAppointment, updateAppointment } from '../../http/appointmentAPI'; // додано updateAppointment
+import { fetchAppointmentById, completeAppointment, cancelAppointment, updateAppointment } from '../../http/appointmentAPI';
 import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
 
 const DoctorDetailsAppointment = () => {

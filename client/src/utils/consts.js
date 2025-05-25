@@ -9,6 +9,7 @@ export const DOCTOR_ALLAPPOINTMENTS_ROUTE = '/all-appointments';
 export const DOCTOR_PATIENTS_ROUTE = '/work-patients';
 export const DOCTOR_PATMEDCARD_ROUTE = '/med-card';
 export const DOCTOR_SERVICES_ROUTE = '/work-services';
+export const DOCTOR_SERVICESRESULT_ROUTE = '/work-services-results';
 export const DOCTOR_HOSPITALDETAILS_ROUTE = '/work-hospital';
 export const DOCTOR_MEDDETAIL_ROUTE = '/patient-meddetail';
 export const PATIENT_PANEL_ROUTE = '/patpanel';

@@ -95,6 +95,11 @@
   color: #666;
 }
 
+.completeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .detailsSection {
   display: flex;
   justify-content: space-between;
@@ -146,7 +151,6 @@
   font-weight: 300;
   font-size: 22px;
   margin-top: 1rem;
-  line-height: 1.8;
 }
 
 .commentTextarea {
@@ -201,6 +205,21 @@
 
 .addButton:hover {
   background: #00C3A1;
+}
+
+.commentBlock {
+  background: #F6F6F6;
+  border: 1px solid #D9D9D9;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px 60px 40px;
+}
+  
+.commentText {
+  margin-top: 1rem;
+  font-style: italic;
+  font-weight: 200;
+  font-size: 20px;
 }
 
 .backButton {

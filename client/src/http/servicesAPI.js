@@ -54,3 +54,13 @@ export const fetchMedicalServicesByDoctorId = async (doctorId) => {
     throw error;
   }
 };
+
+export const updateMedicalService = async (serviceId, updatedFields) => {
+  const { data } = await $authHost.put(`api/medical-services/${serviceId}`, updatedFields);
+  return data;
+};
+
+export const markMedicalServiceReady = async (serviceId) => {
+  const { data } = await $authHost.patch(`api/medical-services/mark-ready/${serviceId}`);
+  return data;
+};

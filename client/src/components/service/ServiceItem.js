@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import uk from 'date-fns/locale/uk';
+import { DOCTOR_SERVICESRESULT_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   item: {
@@ -75,6 +77,8 @@ const ServiceItem = ({ service }) => {
 
   const isReady = service.is_ready;
 
+  const serviceType = isLabTest ? 'lab-test' : 'medical-service';
+
   const renderButton = () => {
     if (!isReady) {
       return (
@@ -128,7 +132,12 @@ const ServiceItem = ({ service }) => {
           ? formatTime(startTime)
           : '—'}
       </span>
-      {renderButton()}
+      <NavLink
+        to={`${DOCTOR_SERVICESRESULT_ROUTE}/${serviceType}/${service.id}`}
+        style={{ textDecoration: 'none' }}
+      >
+        {renderButton()}
+      </NavLink>
     </div>
   );
 };

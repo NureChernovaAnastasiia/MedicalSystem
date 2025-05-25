@@ -54,3 +54,13 @@ export const fetchLabTestsByDoctorId = async (doctorId) => {
     throw error;
   }
 };
+
+export const updateLabTest = async (labTestId, updatedFields) => {
+  const { data } = await $authHost.put(`api/lab-tests/${labTestId}`, updatedFields);
+  return data;
+};
+
+export const markLabTestReady = async (labTestId) => {
+  const { data } = await $authHost.patch(`api/lab-tests/mark-ready/${labTestId}`);
+  return data;
+};
