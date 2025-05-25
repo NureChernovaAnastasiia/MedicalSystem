@@ -214,6 +214,13 @@
     line-height: 1;
 }
 
+.noResults{
+    font-size: 28px;
+    font-weight: 500;
+    font-style: italic;
+    color: #333333;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 15px 20px;

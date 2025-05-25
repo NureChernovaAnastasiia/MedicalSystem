@@ -5,11 +5,11 @@ import { fetchDoctorScheduleByIdAndDate } from '../../http/doctorScheduleAPI';
 import { createAppointment } from '../../http/appointmentAPI'; 
 import AlertPopup from "../../components/elements/AlertPopup";
 
-const ModalCreateAppointment = ({ doctorId, onClose, onCreate }) => {
+const ModalCreateAppointment = ({ doctorId, onClose, onCreate, defaultPatient = null }) => {
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(defaultPatient);
   const [comment, setComment] = useState('');
   const [timeSlots, setTimeSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -24,11 +24,14 @@ const ModalCreateAppointment = ({ doctorId, onClose, onCreate }) => {
       try {
         const data = await fetchPatientsByDoctorId(doctorId);
         setPatients(data);
+        if (defaultPatient && !data.find(p => p.id === defaultPatient.id)) {
+          setPatients(prev => [...prev, defaultPatient]);
+        }
       } catch (error) {
         console.error('Не вдалося завантажити пацієнтів', error);
       }
     })();
-  }, [doctorId]);
+  }, [doctorId, defaultPatient]);
 
   useEffect(() => {
     if (!selectedDate || !doctorId) return;
@@ -140,27 +143,28 @@ const ModalCreateAppointment = ({ doctorId, onClose, onCreate }) => {
                 <div className={styles.leftSection}>
                     <label htmlFor="searchPatient" className={styles.sectionTitle}>Оберіть пацієнта</label>
                     <input
-                    id="searchPatient"
-                    type="text"
-                    className={styles.searchInput}
-                    placeholder="Введіть ПІБ пацієнта"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                      id="searchPatient"
+                      type="text"
+                      className={styles.searchInput}
+                      placeholder="Введіть ПІБ пацієнта"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      disabled={!!defaultPatient} 
                     />
                     <div className={styles.patientList}>
                     {filteredPatients.map(p => (
-                        <div
+                      <div
                         key={p.id}
                         className={`${styles.patientCard} ${selectedPatient?.id === p.id ? styles.selected : ''}`}
-                        onClick={() => setSelectedPatient(p)}
-                        >
+                        onClick={() => !defaultPatient && setSelectedPatient(p)} 
+                      >
                         <div className={styles.patientName}>
-                            {`${p.last_name} ${p.first_name} ${p.middle_name || ''}`}
+                          {`${p.last_name} ${p.first_name} ${p.middle_name || ''}`}
                         </div>
                         <div className={styles.patientDate}>
-                            {new Date(p.birth_date).toLocaleDateString()}
+                          {new Date(p.birth_date).toLocaleDateString()}
                         </div>
-                        </div>
+                      </div>
                     ))}
                     </div>
                 </div>

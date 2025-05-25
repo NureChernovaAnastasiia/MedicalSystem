@@ -100,9 +100,9 @@ const DoctorAllAppointments = () => {
     let statusMatch = true;
     if (statusFilter !== 'all') {
       if (statusFilter === 'upcoming') {
-        statusMatch = status === 'upcoming' || status === 'scheduled';
+        statusMatch = status === 'scheduled';
       } else if (statusFilter === 'past') {
-        statusMatch = status === 'past';
+        statusMatch = status === 'completed';
       } else if (statusFilter === 'canceled') {
         statusMatch = status === 'cancelled';
       }

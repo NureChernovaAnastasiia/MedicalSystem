@@ -13,6 +13,7 @@ import PatientCardFull from '../../components/patient/PatientCardFull';
 import DiagnosisCard from '../../components/medcard/DiagnosisCard';
 import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreation';
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo';
+import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
 import SearchInput from '../../components/options/SearchInput';
 import { iconDrugs } from '../../utils/icons';
 
@@ -31,6 +32,7 @@ const DoctorPatientMedCard = () => {
 
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -78,6 +80,13 @@ const DoctorPatientMedCard = () => {
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
   const handleClosePrescriptionModal = () => setSelectedPrescription(null);
+
+  const handleOpenAppointmentModal = () => setShowAppointmentModal(true);
+  const handleCloseAppointmentModal = () => setShowAppointmentModal(false);
+
+  const handleCreate = (newAppointment) => {
+  setShowAppointmentModal(false);
+};
 
   const renderDiagnoses = () => (
     <>
@@ -143,7 +152,7 @@ const DoctorPatientMedCard = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Медична картка</h1>
         <div className={styles.orderButtonWrapper}>
-          <button className={styles.orderButton}>Назначити прийом</button>
+          <button className={styles.orderButton} onClick={handleOpenAppointmentModal}>Назначити прийом</button>
         </div>
       </div>
 
@@ -174,6 +183,15 @@ const DoctorPatientMedCard = () => {
           {activeTab === 'diagnoses' ? renderDiagnoses() : renderPrescriptions()}
         </div>
       </div>
+
+      {showAppointmentModal && (
+        <ModalCreateAppointment
+          doctorId={doctor.id}
+          onClose={handleCloseAppointmentModal}
+          onCreate={handleCreate} 
+          defaultPatient={patient} 
+        />
+      )}
 
       {showModal && (
         <ModalMedRecordCreation

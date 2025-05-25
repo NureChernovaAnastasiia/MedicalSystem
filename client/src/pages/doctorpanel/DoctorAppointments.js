@@ -121,7 +121,7 @@ const DoctorAppointments = () => {
             />
           ))
         ) : (
-          <p className={styles.noResults}>Майбутніх прийомів за запитом не знайдено.</p>
+          <p className={styles.noResults}>Прийомів на сьогодні більше немає.</p>
         )}
       </div>
 
