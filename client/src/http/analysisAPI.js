@@ -44,3 +44,13 @@ export const fetchLabTestPdf = async (labTestId) => {
     alert('Не вдалося відкрити PDF документ аналізу');
   }
 };
+
+export const fetchLabTestsByDoctorId = async (doctorId) => {
+  try {
+    const { data } = await $authHost.get(`api/lab-tests/doctor/${doctorId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні аналізів доктора:", error);
+    throw error;
+  }
+};

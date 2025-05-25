@@ -44,3 +44,13 @@ export const fetchMedicalServicePdf = async (serviceId) => {
     alert('Не вдалося відкрити PDF документ медичної послуги');
   }
 };
+
+export const fetchMedicalServicesByDoctorId = async (doctorId) => {
+  try {
+    const { data } = await $authHost.get(`api/medical-services/by-doctor/${doctorId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні медичних послуг доктора:", error);
+    throw error;
+  }
+};
