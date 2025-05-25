@@ -10,6 +10,7 @@ export const DOCTOR_PATIENTS_ROUTE = '/work-patients';
 export const DOCTOR_PATMEDCARD_ROUTE = '/med-card';
 export const DOCTOR_SERVICES_ROUTE = '/work-services';
 export const DOCTOR_HOSPITALDETAILS_ROUTE = '/work-hospital';
+export const DOCTOR_MEDDETAIL_ROUTE = '/patient-meddetail';
 export const PATIENT_PANEL_ROUTE = '/patpanel';
 export const ADMIN_PANEL_ROUTE = '/adminpanel';
 export const PATIENT_MEDCARD_ROUTE = '/medcard';

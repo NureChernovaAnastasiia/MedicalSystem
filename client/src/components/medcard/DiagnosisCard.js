@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import styles from '../../style/patientpanel/PatientMedicalRecords.module.css';
 import { iconDiagnosis } from '../../utils/icons';
-import { PATIENT_MEDDETAIL_ROUTE } from '../../utils/consts';
+import { PATIENT_MEDDETAIL_ROUTE, DOCTOR_MEDDETAIL_ROUTE } from '../../utils/consts';
+import { Context } from '../../index';
 
 const formatDate = (isoDate) => {
   const date = new Date(isoDate);
@@ -12,17 +13,27 @@ const formatDate = (isoDate) => {
     .padStart(2, '0')}.${date.getFullYear()}`;
 };
 
-const DiagnosisCard = ({ id, diagnosis, record_date }) => (
-  <div className={styles.card}>
-    <div className={styles.cardHeader}>
-      <img src={iconDiagnosis} alt="icon" className={styles.iconDiagnosis} />
-      <p className={styles.date}>Дата встановлення: {formatDate(record_date)}</p>
+const DiagnosisCard = ({ id, diagnosis, record_date }) => {
+  const { user } = useContext(Context);
+  const role = user._role;
+
+  const route =
+    role === 'PATIENT'
+      ? `${PATIENT_MEDDETAIL_ROUTE}/${id}`
+      : `${DOCTOR_MEDDETAIL_ROUTE}/${id}`;
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardHeader}>
+        <img src={iconDiagnosis} alt="icon" className={styles.iconDiagnosis} />
+        <p className={styles.date}>Дата встановлення: {formatDate(record_date)}</p>
+      </div>
+      <h3 className={styles.cardTitle}>{diagnosis}</h3>
+      <NavLink to={route} className={styles.detailsButton}>
+        <span className={styles.cardFooterText}>Деталі хвороби</span>
+      </NavLink>
     </div>
-    <h3 className={styles.cardTitle}>{diagnosis}</h3>
-    <NavLink to={`${PATIENT_MEDDETAIL_ROUTE}/${id}`} className={styles.detailsButton}>
-      <span className={styles.cardFooterText}>Деталі хвороби</span>
-    </NavLink>
-  </div>
-);
+  );
+};
 
 export default DiagnosisCard;
