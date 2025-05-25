@@ -1,5 +1,6 @@
 const sequelize = require("../db");
 const { DataTypes } = require("sequelize");
+const { safeEncrypt, encrypt, decrypt } = require("../utils/encryption");
 
 // User
 const User = sequelize.define("User", {
@@ -119,18 +120,114 @@ const Patient = sequelize.define("Patient", {
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE'
 },
-  first_name: { type: DataTypes.STRING, allowNull: false },
-  last_name: { type: DataTypes.STRING, allowNull: false },
-  middle_name: { type: DataTypes.STRING, allowNull: false },
+   first_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    set(value) {
+      this.setDataValue("first_name", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("first_name"));
+    },
+  },
+
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    set(value) {
+      this.setDataValue("last_name", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("last_name"));
+    },
+  },
+
+  middle_name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    set(value) {
+      this.setDataValue("middle_name", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("middle_name"));
+    },
+  },
+
   birth_date: { type: DataTypes.DATEONLY },
-  gender: { type: DataTypes.ENUM("Male", "Female", "Other") },
-  phone: { type: DataTypes.STRING },
-  email: { type: DataTypes.STRING, unique: true },
-  address: { type: DataTypes.TEXT },
-  photo_url: { type: DataTypes.STRING },
+
+  gender: {
+    type: DataTypes.ENUM("Male", "Female", "Other"),
+  },
+
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    set(value) {
+      this.setDataValue("phone", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("phone"));
+    },
+  },
+
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+    set(value) {
+      this.setDataValue("email", safeEncrypt(value?.trim().toLowerCase()));
+    },
+    get() {
+      return decrypt(this.getDataValue("email"));
+    },
+  },
+
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    set(value) {
+      this.setDataValue("address", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("address"));
+    },
+  },
+
+  photo_url: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    set(value) {
+      this.setDataValue("photo_url", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("photo_url"));
+    },
+  },
+
   blood_type: { type: DataTypes.STRING },
-  chronic_conditions: { type: DataTypes.TEXT },
-  allergies: { type: DataTypes.TEXT },
+
+  chronic_conditions: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    set(value) {
+      this.setDataValue("chronic_conditions", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("chronic_conditions"));
+    },
+  },
+
+  allergies: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    set(value) {
+      this.setDataValue("allergies", safeEncrypt(value));
+    },
+    get() {
+      return decrypt(this.getDataValue("allergies"));
+    },
+  },
+
   user_id: { type: DataTypes.INTEGER, unique: true },
 });
 

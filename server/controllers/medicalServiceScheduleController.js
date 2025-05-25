@@ -268,9 +268,9 @@ class MedicalServiceScheduleController {
         include: {
           model: HospitalMedicalService,
           include: [
-            Hospital,
-            MedicalServiceInfo,
-            Doctor,
+            { model: Hospital },
+            { model: MedicalServiceInfo, as: "MedicalServiceInfo" },
+            { model: Doctor },
           ],
         },
       });

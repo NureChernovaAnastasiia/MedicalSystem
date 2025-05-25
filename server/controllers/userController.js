@@ -103,43 +103,46 @@ class UserController {
   }
 
   async _createPatient(user, username, email, req, doctor_id) {
-    if (
-      !req.user ||
-      (req.user.role !== "Doctor" && req.user.role !== "Admin")
-    ) {
-      throw ApiError.forbidden(
-        "Тільки лікар або адміністратор може створити пацієнта"
-      );
-    }
+  if (
+    !req.user ||
+    (req.user.role !== "Doctor" && req.user.role !== "Admin")
+  ) {
+    throw ApiError.forbidden(
+      "Тільки лікар або адміністратор може створити пацієнта"
+    );
+  }
 
-    let finalDoctorId = doctor_id;
+  let finalDoctorId = doctor_id;
 
-    if (req.user.role === "Doctor") {
-      const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
-      if (!doctor) {
-        throw ApiError.badRequest("Лікаря не знайдено");
-      }
-      finalDoctorId = doctor.id;
-    }
-
-    const doctor = await Doctor.findByPk(finalDoctorId);
+  if (req.user.role === "Doctor") {
+    const doctor = await Doctor.findOne({ where: { user_id: req.user.id } });
     if (!doctor) {
       throw ApiError.badRequest("Лікаря не знайдено");
     }
-
-    // ТУТ ми беремо hospital_id з доктора
-    const hospital_id = doctor.hospital_id;
-
-    await Patient.create({
-      user_id: user.id,
-      doctor_id: finalDoctorId,
-      hospital_id, // автоматично витягуємо hospital_id
-      first_name: username || email,
-      last_name: "",
-      middle_name: "",
-      email,
-    });
+    finalDoctorId = doctor.id;
   }
+
+  const doctor = await Doctor.findByPk(finalDoctorId);
+  if (!doctor) {
+    throw ApiError.badRequest("Лікаря не знайдено");
+  }
+
+  const hospital_id = doctor.hospital_id;
+
+  const first_name = username || email;
+  const last_name = "";       // обов’язкове поле, але може бути порожнє
+  const middle_name = "";     // обов’язкове поле, але може бути порожнє
+
+  await Patient.create({
+    user_id: user.id,
+    doctor_id: finalDoctorId,
+    hospital_id,
+    first_name,
+    last_name,
+    middle_name,
+    email,
+  });
+}
 
   async _createAdmin(user, username, email, hospital_id) {
     if (!hospital_id) {

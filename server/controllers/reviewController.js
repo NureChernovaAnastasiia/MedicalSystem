@@ -9,61 +9,116 @@ const REVIEW_RECEIVER_EMAIL = "anastasiia.chernova@nure.ua";
 
 class ReviewController {
   async getAll(req, res, next) {
-    try {
-      const reviews = await Review.findAll({
-        include: [
-          {
-            model: Patient,
-            attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
-          },
-        ],
-      });
+  try {
+    const reviews = await Review.findAll({
+      include: [
+        {
+          model: Patient,
+          attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
+        },
+      ],
+    });
 
-      const reviewsWithDetails = await Promise.all(reviews.map(async (r) => {
-        const birthDate = new Date(r.Patient?.birth_date);
-        const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
+    const reviewsWithDetails = await Promise.all(reviews.map(async (r) => {
+      const birthDate = new Date(r.Patient?.birth_date);
+      const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
 
-        let targetHospital = null;
+      let targetHospital = null;
+      let doctorInfo = null;
 
-        if (r.target_type === "Hospital") {
-          targetHospital = await Hospital.findByPk(r.target_id);
-        } else if (r.target_type === "Doctor") {
-          const doctor = await Doctor.findByPk(r.target_id, { include: [Hospital] });
-          targetHospital = doctor?.Hospital;
+      if (r.target_type === "Hospital") {
+        targetHospital = await Hospital.findByPk(r.target_id);
+      } else if (r.target_type === "Doctor") {
+        const doctor = await Doctor.findByPk(r.target_id, { include: [Hospital] });
+        if (doctor) {
+          doctorInfo = {
+            first_name: doctor.first_name,
+            last_name: doctor.last_name,
+            photo_url: doctor.photo_url || null,
+            specialization: doctor.specialization || null,
+          };
+          targetHospital = doctor.Hospital;
         }
+      }
 
-        return {
-          ...r.toJSON(),
-          reviewer: {
-            name: `${r.Patient?.first_name || ''} ${r.Patient?.last_name || ''}`.trim(),
-            age,
-            photo_url: r.Patient?.photo_url || null,
-          },
-          hospital: targetHospital ? {
-            name: targetHospital.name,
-            address: targetHospital.address,
-            type: targetHospital.type
-          } : null,
-        };
-      }));
+      return {
+        ...r.toJSON(),
+        reviewer: {
+          name: `${r.Patient?.first_name || ''} ${r.Patient?.last_name || ''}`.trim(),
+          age,
+          photo_url: r.Patient?.photo_url || null,
+        },
+        hospital: targetHospital ? {
+          name: targetHospital.name,
+          address: targetHospital.address,
+          type: targetHospital.type
+        } : null,
+        doctor: doctorInfo,
+      };
+    }));
 
-      return res.json(reviewsWithDetails);
-    } catch (e) {
-      console.error('getAllReviews error:', e);
-      return next(ApiError.internal('Не вдалося отримати відгуки'));
-    }
+    return res.json(reviewsWithDetails);
+  } catch (e) {
+    console.error('getAllReviews error:', e);
+    return next(ApiError.internal('Не вдалося отримати відгуки'));
   }
+}
+
 
   async getById(req, res, next) {
-    try {
-      const review = await Review.findByPk(req.params.id);
-      if (!review) return next(ApiError.notFound('Відгук не знайдено'));
-      return res.json(review);
-    } catch (e) {
-      console.error('❌ getById Review error:', e);
-      return next(ApiError.internal('Помилка отримання відгуку'));
+  try {
+    const review = await Review.findByPk(req.params.id, {
+      include: [
+        {
+          model: Patient,
+          attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
+        },
+      ],
+    });
+
+    if (!review) return next(ApiError.notFound('Відгук не знайдено'));
+
+    const birthDate = new Date(review.Patient?.birth_date);
+    const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
+
+    let targetHospital = null;
+    let doctorInfo = null;
+
+    if (review.target_type === "Hospital") {
+      targetHospital = await Hospital.findByPk(review.target_id);
+    } else if (review.target_type === "Doctor") {
+      const doctor = await Doctor.findByPk(review.target_id, { include: [Hospital] });
+      doctorInfo = {
+        name: `${doctor.first_name} ${doctor.last_name}`.trim(),
+        hospital: doctor.Hospital ? {
+          name: doctor.Hospital.name,
+          address: doctor.Hospital.address,
+          type: doctor.Hospital.type
+        } : null,
+      };
     }
+
+    return res.json({
+      ...review.toJSON(),
+      reviewer: {
+        name: `${review.Patient?.first_name || ''} ${review.Patient?.last_name || ''}`.trim(),
+        age,
+        photo_url: review.Patient?.photo_url || null,
+      },
+      hospital: targetHospital ? {
+        name: targetHospital.name,
+        address: targetHospital.address,
+        type: targetHospital.type
+      } : doctorInfo?.hospital || null,
+      doctor: doctorInfo?.name || null,
+    });
+
+  } catch (e) {
+    console.error('❌ getById Review error:', e);
+    return next(ApiError.internal('Помилка отримання відгуку'));
   }
+}
+
 
   async create(req, res, next) {
     try {
@@ -142,23 +197,66 @@ class ReviewController {
   }
 
   async getByTarget(req, res, next) {
-    try {
-      const { target_type, target_id } = req.params;
+  try {
+    const { target_type, target_id } = req.params;
 
-      if (!target_type || !target_id) {
-        return next(ApiError.badRequest("target_type і target_id обов'язкові"));
+    if (!target_type || !target_id) {
+      return next(ApiError.badRequest("target_type і target_id обов'язкові"));
+    }
+
+    const reviews = await Review.findAll({
+      where: { target_type, target_id },
+      include: [
+        {
+          model: Patient,
+          attributes: ['first_name', 'last_name', 'birth_date', 'photo_url'],
+        },
+      ],
+    });
+
+    const result = await Promise.all(reviews.map(async (r) => {
+      const birthDate = new Date(r.Patient?.birth_date);
+      const age = birthDate ? new Date().getFullYear() - birthDate.getFullYear() : null;
+
+      let targetHospital = null;
+      let doctorInfo = null;
+
+      if (r.target_type === "Hospital") {
+        targetHospital = await Hospital.findByPk(r.target_id);
+      } else if (r.target_type === "Doctor") {
+        const doctor = await Doctor.findByPk(r.target_id, { include: [Hospital] });
+        doctorInfo = {
+          name: `${doctor.first_name} ${doctor.last_name}`.trim(),
+          hospital: doctor.Hospital ? {
+            name: doctor.Hospital.name,
+            address: doctor.Hospital.address,
+            type: doctor.Hospital.type
+          } : null,
+        };
       }
 
-      const reviews = await Review.findAll({
-        where: { target_type, target_id },
-      });
+      return {
+        ...r.toJSON(),
+        reviewer: {
+          name: `${r.Patient?.first_name || ''} ${r.Patient?.last_name || ''}`.trim(),
+          age,
+          photo_url: r.Patient?.photo_url || null,
+        },
+        hospital: targetHospital ? {
+          name: targetHospital.name,
+          address: targetHospital.address,
+          type: targetHospital.type
+        } : doctorInfo?.hospital || null,
+        doctor: doctorInfo?.name || null,
+      };
+    }));
 
-      return res.json(reviews);
-    } catch (e) {
-      console.error('❌ getByTarget Review error:', e);
-      return next(ApiError.internal('Не вдалося отримати відгуки'));
-    }
+    return res.json(result);
+  } catch (e) {
+    console.error('❌ getByTarget Review error:', e);
+    return next(ApiError.internal('Не вдалося отримати відгуки'));
   }
+}
 
   async update(req, res, next) {
     try {
