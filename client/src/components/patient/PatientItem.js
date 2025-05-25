@@ -132,7 +132,7 @@ const PatientItem = ({ patient }) => {
     <>
       <div style={combinedStyles.patientItem}>
         <span style={combinedStyles.fullName}>
-          {`${patient.last_name} ${patient.first_name} ${patient.middle_name}` || '—'}</span>
+          {`${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}` || '—'}</span>
         <span style={combinedStyles.birthDate}>{formatDate(patient.birth_date) || '—'}</span>
         <span style={combinedStyles.email}>{patient.email || '—'}</span>
         <NavLink to={`${DOCTOR_PATMEDCARD_ROUTE}/${patient.id}`}>
