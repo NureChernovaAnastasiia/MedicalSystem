@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorDetailsAppointment.module.css';
 import DiagnosisCard from '../../components/medcard/DiagnosisCard';
 import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreation';
+import AlertPopup from "../../components/elements/AlertPopup";
 import { formatAppointmentDate } from '../../utils/formatDate';
 import { iconDoctor, iconHospital } from '../../utils/icons';
 import { fetchAppointmentById, completeAppointment, cancelAppointment, updateAppointment } from '../../http/appointmentAPI';
@@ -17,6 +18,8 @@ const DoctorDetailsAppointment = () => {
   const [error, setError] = useState(null);
   const [notes, setNotes] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   const goBack = () => {
     navigate(-1);
@@ -52,13 +55,17 @@ const DoctorDetailsAppointment = () => {
 
   const handleComplete = async () => {
     try {
-      await completeAppointment(appointment.id, notes);
+      await updateAppointment(appointment.id, { notes });
+      
+      await completeAppointment(appointment.id);
+
       const updated = await fetchAppointmentById(id);
       setAppointment(updated);
       setNotes(updated.notes || '');
+      setAlert({ message: 'Прийом завершено успішно', type: 'success' });
     } catch (error) {
       console.error(error);
-      alert('Помилка завершення прийому');
+      setAlert({ message: 'Помилка завершення прийому', type: 'error' });
     }
   };
 
@@ -68,9 +75,10 @@ const DoctorDetailsAppointment = () => {
       const updated = await fetchAppointmentById(id);
       setAppointment(updated);
       setNotes(updated.notes || '');
+      setAlert({ message: 'Запис успішно скасовано', type: 'success' });
     } catch (error) {
       console.error(error);
-      alert('Помилка скасування прийому');
+      setAlert({ message: 'Помилка скасування прийому', type: 'error' });
     }
   };
 
@@ -80,10 +88,15 @@ const handleSaveNotes = async () => {
     const updated = await fetchAppointmentById(appointment.id); 
     setAppointment(updated);
     setNotes(updated.notes || '');
-    alert('Коментар успішно збережено');
+    setIsEditing(false); 
+    setAlert({ message: 'Коментар успішно збережено', type: 'success' });
   } catch (error) {
     console.error('Помилка збереження:', error.response?.data || error.message || error);
-    alert('Помилка збереження коментаря: ' + (error.response?.data?.message || error.message || 'невідома помилка'));
+    setAlert({
+      message: 'Помилка збереження коментаря: ' +
+        (error.response?.data?.message || error.message || 'невідома помилка'),
+      type: 'error',
+    });
   }
 };
 
@@ -140,6 +153,13 @@ const handleSaveNotes = async () => {
 
   return (
     <div className={styles.container}>
+      {alert && (
+        <AlertPopup
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
       <h1 className={styles.title}>Деталі прийому</h1>
 
       <div className={styles.analysisHeader}>
@@ -174,7 +194,7 @@ const handleSaveNotes = async () => {
 
       <h3 className={styles.resultsTitle}>Коментар до прийому</h3>
       <div>
-        {isEditable ? (
+        {(isEditable || isEditing) ? (
             <textarea
               className={styles.commentTextarea}
               value={notes}
@@ -190,7 +210,9 @@ const handleSaveNotes = async () => {
 
       <div className={styles.diagnosisHeader}>
         <h3 className={styles.commentTitle}>Встановлені діагнози</h3>
-        <button className={styles.addButton} onClick={handleOpenModal}>+ Додати</button>
+        {(appointment.status !== 'Completed' || isEditing) && (
+          <button className={styles.addButton} onClick={handleOpenModal}>+ Додати</button>
+        )}
       </div>
 
       <div className={styles.cardsGrid}>
@@ -208,11 +230,23 @@ const handleSaveNotes = async () => {
           ‹ Повернутися назад
         </button>
        
-        {isEditable && (
-          <button onClick={handleSaveNotes} className={styles.saveButton}>
+        {(isEditing && !isEditable) && (
+          <button
+            onClick={handleSaveNotes}
+            className={styles.saveButton}
+          >
             Зберегти
           </button>
-        )} 
+        )}
+
+        {!isEditable && appointment.status === 'Completed' && !isEditing && (
+          <button
+            onClick={() => setIsEditing(true)}
+            className={styles.saveButton}
+          >
+            Внести дані
+          </button>
+        )}
 
         {showModal && (
           <ModalMedRecordCreation
