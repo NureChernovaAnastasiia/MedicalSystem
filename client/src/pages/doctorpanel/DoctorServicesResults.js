@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorDetailsAppointment.module.css';
+import AlertPopup from '../../components/elements/AlertPopup';
 import { formatAppointmentDate } from '../../utils/formatDate';
 import { iconDoctor, iconHospital } from '../../utils/icons';
 import { fetchLabTestById, updateLabTest, markLabTestReady, } from '../../http/analysisAPI';
@@ -9,14 +10,18 @@ import { fetchMedicalServiceById, updateMedicalService, markMedicalServiceReady,
 const DoctorServicesResults = () => {
   const navigate = useNavigate();
   const { serviceType, id } = useParams();
-
   const [data, setData] = useState(null);
   const [results, setResults] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [alert, setAlert] = useState(null);
 
-  const isEditable = data?.is_ready === false;
+  const isReady = data?.is_ready === true;
+
+  const isEditable = !isReady || isEditing;
+
   const formattedDateTime = data ? formatAppointmentDate(data) : '';
   const serviceName =
     data?.MedicalServiceInfo?.name ||
@@ -54,6 +59,7 @@ const DoctorServicesResults = () => {
       setData(fetched);
       setResults(fetched.results || '');
       setNotes(fetched.notes || '');
+      setIsEditing(false); 
     } catch (err) {
       console.error(err);
       setError('Не вдалося завантажити деталі послуги');
@@ -64,15 +70,22 @@ const DoctorServicesResults = () => {
 
   const handleComplete = async () => {
     try {
+      const payload = { results, notes };
+
       if (serviceType === 'lab-test') {
+        await updateLabTest(id, payload);
         await markLabTestReady(id);
       } else if (serviceType === 'medical-service') {
+        await updateMedicalService(id, payload);
         await markMedicalServiceReady(id);
       }
+
+      setAlert({ message: 'Дані збережені та позначені як готові', type: 'success' });
       await loadData();
+      setIsEditing(false); 
     } catch (error) {
       console.error(error);
-      alert('Помилка позначення готовності');
+      setAlert({ message: 'Помилка при збереженні та позначенні готовності', type: 'error' });
     }
   };
 
@@ -86,15 +99,22 @@ const DoctorServicesResults = () => {
         await updateMedicalService(id, payload);
       }
 
-      alert('Дані успішно збережені');
+      setAlert({ message: 'Дані успішно збережені', type: 'success' });
       await loadData();
+      setIsEditing(false);
     } catch (error) {
       console.error(error);
-      alert(
-        'Помилка збереження: ' +
-          (error.response?.data?.message || error.message || 'невідома помилка')
-      );
+      setAlert({
+        message:
+          'Помилка збереження: ' +
+          (error.response?.data?.message || error.message || 'невідома помилка'),
+        type: 'error',
+      });
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
   useEffect(() => {
@@ -110,6 +130,13 @@ const DoctorServicesResults = () => {
 
   return (
     <div className={styles.container}>
+      {alert && (
+        <AlertPopup
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
       <h1 className={styles.title}>Деталі послуги: {serviceName}</h1>
 
       <div className={styles.analysisHeader}>
@@ -117,8 +144,8 @@ const DoctorServicesResults = () => {
           Дата та час: {formattedDateTime} | Статус: {translateStatus(data.is_ready)}
         </p>
 
-        {isEditable && (
-          <div className={styles.statusActions}>
+        <div className={styles.statusActions}>
+          {!isReady && (
             <button
               className={styles.completeButton}
               onClick={handleComplete}
@@ -127,8 +154,9 @@ const DoctorServicesResults = () => {
               <span className={styles.completeIcon}>✓</span>
               <span className={styles.completeText}>Позначити готовим</span>
             </button>
-          </div>
-        )}
+          )}
+
+        </div>
       </div>
 
       <div className={styles.detailsSection}>
@@ -182,9 +210,16 @@ const DoctorServicesResults = () => {
         <button onClick={goBack} className={styles.backButton}>
           ‹ Повернутися назад
         </button>
-        {isEditable && (
+
+        {(isEditing) && results.trim() && (
           <button onClick={handleSaveNotes} className={styles.saveButton}>
             Зберегти
+          </button>
+        )}
+        
+        {isReady && !isEditing && (
+          <button className={styles.saveButton} onClick={handleEdit}>
+            Внести зміни
           </button>
         )}
       </div>
