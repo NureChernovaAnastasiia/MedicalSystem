@@ -30,7 +30,7 @@ const DoctorServicesResults = () => {
 
   const patient = data?.Patient;
   const patientName = patient
-    ? `${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`.trim()
+    ? `${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}`.trim()
     : 'Невідомий пацієнт';
 
   const translateStatus = (ready) => (ready ? 'Готово' : 'В роботі');
