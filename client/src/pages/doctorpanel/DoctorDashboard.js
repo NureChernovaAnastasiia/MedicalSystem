@@ -8,20 +8,12 @@ import InfoCard from "../../components/elements/InfoCard";
 import DoctorCard from "../../components/doctor/DoctorCardWork";
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
 import DoctorScheduleTable from "../../components/doctor/DoctorScheduleTable";
+import ModalRegisterPatient from "../../components/modals/ModalRegisterPatient";
+import ModalCreateAppointment from "../../components/modals/ModalCreateAppointment";
 
-import {
-  iconInspection,
-  iconAnalysis,
-  iconPrescription,
-  iconDiagnosis,
-} from "../../utils/icons";
+import { iconMedCard, iconSchedule, iconDuration, } from "../../utils/icons";
 
-import {
-  PATIENT_ANALYSEORDER_ROUTE,
-  PATIENT_MEDRECORDS_ROUTE,
-  PATIENT_PRESCRIPTIONS_ROUTE,
-  PATIENT_SERVICEORDER_ROUTE,
-} from "../../utils/consts";
+import { DOCTOR_ALLAPPOINTMENTS_ROUTE, } from "../../utils/consts";
 
 const DoctorDashboard = () => {
   const { user } = useContext(Context);
@@ -31,6 +23,8 @@ const DoctorDashboard = () => {
   const [weekDates, setWeekDates] = useState([]);
   const [workingHours, setWorkingHours] = useState({});
   const [doctors, setDoctors] = useState([]);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
 
   useEffect(() => {
     const getWeekDates = () => {
@@ -104,11 +98,24 @@ const DoctorDashboard = () => {
       <h1 className={styles.welcomeMessage}>Вітаємо, {fullName}!</h1>
 
       <div className={styles.cardsContainer}>
-        <InfoCard icon={iconInspection} title="Замовити послугу" to={PATIENT_SERVICEORDER_ROUTE} />
-        <InfoCard icon={iconAnalysis} title="Замовити аналізи" to={PATIENT_ANALYSEORDER_ROUTE} />
-        <InfoCard icon={iconPrescription} title="Мої рецепти" to={PATIENT_PRESCRIPTIONS_ROUTE} />
-        <InfoCard icon={iconDiagnosis} title="Мої діагнози" to={PATIENT_MEDRECORDS_ROUTE} />
+        <InfoCard icon={iconMedCard} title="Зареєструвати пацієнта" onClick={() => setIsRegisterModalOpen(true)} />
+        <InfoCard icon={iconSchedule} title="Всі прийоми" to={DOCTOR_ALLAPPOINTMENTS_ROUTE} />
+        <InfoCard icon={iconDuration} title="Назначити прийом" onClick={() => setIsAppointmentModalOpen(true)} />
       </div>
+
+      {isRegisterModalOpen && doctor && (
+        <ModalRegisterPatient
+          doctor={doctor}
+          onClose={() => setIsRegisterModalOpen(false)}
+        />
+      )}
+
+      {isAppointmentModalOpen && doctor && (
+        <ModalCreateAppointment
+          doctorId={doctor.id}
+          onClose={() => setIsAppointmentModalOpen(false)}
+        />
+      )}
 
       {doctor && <DoctorCard doctor={doctor} onOpenModal={handleOpenModal} />}
 
