@@ -120,6 +120,9 @@ const PatientItem = ({ patient }) => {
     },
     email: {
       ...baseStyles.email,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
       ...(isSmallScreen ? { fontSize: '16px', width: '100%' } : {}),
     },
     viewCardButton: {
