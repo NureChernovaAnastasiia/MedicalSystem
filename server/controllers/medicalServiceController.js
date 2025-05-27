@@ -35,9 +35,12 @@ class MedicalServiceController {
           );
 
           const hospitalMedicalService = schedule?.HospitalMedicalService;
-          const medicalServiceInfo = hospitalMedicalService?.medical_service_info_id
-            ? await MedicalServiceInfo.findByPk(hospitalMedicalService.medical_service_info_id)
-            : null;
+          const medicalServiceInfo =
+            hospitalMedicalService?.medical_service_info_id
+              ? await MedicalServiceInfo.findByPk(
+                  hospitalMedicalService.medical_service_info_id
+                )
+              : null;
 
           const patient = await Patient.findByPk(service.patient_id, {
             attributes: ["id", "first_name", "last_name", "email"],
@@ -73,7 +76,8 @@ class MedicalServiceController {
   // 🧍‍♂️ Послуги пацієнта
   async getByPatient(req, res, next) {
     try {
-      const patient_id = req.params.patientId || req.query.patient_id || req.body.patient_id;
+      const patient_id =
+        req.params.patientId || req.query.patient_id || req.body.patient_id;
 
       if (!patient_id) {
         return next(ApiError.badRequest("Не вказано ID пацієнта"));
@@ -86,22 +90,34 @@ class MedicalServiceController {
 
       const results = await Promise.all(
         services.map(async (service) => {
-          const schedule = await MedicalServiceSchedule.findByPk(service.medical_service_schedule_id, {
-            include: [
-              {
-                model: HospitalMedicalService,
-                include: [{ model: Hospital, attributes: ["id", "name"] }],
-              },
-            ],
-          });
+          const schedule = await MedicalServiceSchedule.findByPk(
+            service.medical_service_schedule_id,
+            {
+              include: [
+                {
+                  model: HospitalMedicalService,
+                  include: [{ model: Hospital, attributes: ["id", "name"] }],
+                },
+              ],
+            }
+          );
 
           const hospitalMedicalService = schedule?.HospitalMedicalService;
-          const medicalServiceInfo = hospitalMedicalService?.medical_service_info_id
-            ? await MedicalServiceInfo.findByPk(hospitalMedicalService.medical_service_info_id)
-            : null;
+          const medicalServiceInfo =
+            hospitalMedicalService?.medical_service_info_id
+              ? await MedicalServiceInfo.findByPk(
+                  hospitalMedicalService.medical_service_info_id
+                )
+              : null;
 
           const doctor = await Doctor.findByPk(service.doctor_id, {
-            attributes: ["id", "first_name", "last_name", "specialization", "email"],
+            attributes: [
+              "id",
+              "first_name",
+              "last_name",
+              "specialization",
+              "email",
+            ],
           });
 
           return {
@@ -129,7 +145,8 @@ class MedicalServiceController {
   // 👨‍⚕️ Послуги лікаря
   async getByDoctor(req, res, next) {
     try {
-      const doctor_id = req.params.doctorId || req.query.doctor_id || req.body.doctor_id;
+      const doctor_id =
+        req.params.doctorId || req.query.doctor_id || req.body.doctor_id;
 
       if (!doctor_id) {
         return next(ApiError.badRequest("Не вказано ID лікаря"));
@@ -142,19 +159,25 @@ class MedicalServiceController {
 
       const results = await Promise.all(
         services.map(async (service) => {
-          const schedule = await MedicalServiceSchedule.findByPk(service.medical_service_schedule_id, {
-            include: [
-              {
-                model: HospitalMedicalService,
-                include: [{ model: Hospital, attributes: ["id", "name"] }],
-              },
-            ],
-          });
+          const schedule = await MedicalServiceSchedule.findByPk(
+            service.medical_service_schedule_id,
+            {
+              include: [
+                {
+                  model: HospitalMedicalService,
+                  include: [{ model: Hospital, attributes: ["id", "name"] }],
+                },
+              ],
+            }
+          );
 
           const hospitalMedicalService = schedule?.HospitalMedicalService;
-          const medicalServiceInfo = hospitalMedicalService?.medical_service_info_id
-            ? await MedicalServiceInfo.findByPk(hospitalMedicalService.medical_service_info_id)
-            : null;
+          const medicalServiceInfo =
+            hospitalMedicalService?.medical_service_info_id
+              ? await MedicalServiceInfo.findByPk(
+                  hospitalMedicalService.medical_service_info_id
+                )
+              : null;
 
           const patient = await Patient.findByPk(service.patient_id, {
             attributes: ["id", "first_name", "last_name", "email"],
@@ -188,7 +211,8 @@ class MedicalServiceController {
       const { id } = req.params;
 
       const service = await MedicalService.findByPk(id);
-      if (!service) return next(ApiError.notFound("Медична послуга не знайдена"));
+      if (!service)
+        return next(ApiError.notFound("Медична послуга не знайдена"));
 
       const patient = await Patient.findByPk(service.patient_id, {
         attributes: ["id", "first_name", "last_name", "email"],
@@ -198,18 +222,23 @@ class MedicalServiceController {
         attributes: ["id", "first_name", "last_name", "specialization"],
       });
 
-      const schedule = await MedicalServiceSchedule.findByPk(service.medical_service_schedule_id, {
-        include: [
-          {
-            model: HospitalMedicalService,
-            include: [{ model: Hospital, attributes: ["id", "name"] }],
-          },
-        ],
-      });
+      const schedule = await MedicalServiceSchedule.findByPk(
+        service.medical_service_schedule_id,
+        {
+          include: [
+            {
+              model: HospitalMedicalService,
+              include: [{ model: Hospital, attributes: ["id", "name"] }],
+            },
+          ],
+        }
+      );
 
       const hospitalMedicalService = schedule?.HospitalMedicalService;
       const medicalServiceInfo = hospitalMedicalService?.medical_service_info_id
-        ? await MedicalServiceInfo.findByPk(hospitalMedicalService.medical_service_info_id)
+        ? await MedicalServiceInfo.findByPk(
+            hospitalMedicalService.medical_service_info_id
+          )
         : null;
 
       return res.json({
@@ -297,7 +326,9 @@ class MedicalServiceController {
       if (!service) return next(ApiError.notFound("Процедуру не знайдено"));
 
       if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!patient || patient.id !== service.patient_id) {
           return next(ApiError.forbidden("Немає доступу до цієї процедури"));
         }
@@ -324,6 +355,82 @@ class MedicalServiceController {
     } catch (e) {
       console.error("markReadyStatus error:", e);
       return next(ApiError.internal("Не вдалося оновити статус процедури"));
+    }
+  }
+  async getByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+
+      if (!["Admin", "Doctor"].includes(req.user.role)) {
+        return next(
+          ApiError.forbidden("Недостатньо прав для перегляду послуг")
+        );
+      }
+
+      const services = await MedicalService.findAll({
+        include: [
+          {
+            model: MedicalServiceSchedule,
+            include: [
+              {
+                model: HospitalMedicalService,
+                required: true,
+                include: [
+                  {
+                    model: Hospital,
+                    attributes: ["id", "name"],
+                    where: { id: hospitalId },
+                    required: true,
+                  },
+                ],
+              },
+            ],
+            required: true,
+          },
+        ],
+        order: [["id", "DESC"]],
+      });
+
+      const results = await Promise.all(
+        services.map(async (service) => {
+          const schedule = service.MedicalServiceSchedule;
+          const hospitalMedicalService = schedule?.HospitalMedicalService;
+
+          const patient = await Patient.findByPk(service.patient_id, {
+            attributes: ["id", "first_name", "last_name", "email"],
+          });
+
+          const doctor = await Doctor.findByPk(service.doctor_id, {
+            attributes: ["id", "first_name", "last_name", "specialization"],
+          });
+
+          const medicalServiceInfo =
+            hospitalMedicalService?.medical_service_info_id
+              ? await MedicalServiceInfo.findByPk(
+                  hospitalMedicalService.medical_service_info_id
+                )
+              : null;
+
+          return {
+            ...service.toJSON(),
+            Patient: patient,
+            Doctor: doctor,
+            MedicalServiceSchedule: {
+              ...schedule?.toJSON(),
+              HospitalMedicalService: {
+                ...hospitalMedicalService?.toJSON(),
+                Hospital: hospitalMedicalService?.Hospital || null,
+              },
+            },
+            MedicalServiceInfo: medicalServiceInfo,
+          };
+        })
+      );
+
+      return res.json(results);
+    } catch (e) {
+      console.error("getByHospital error:", e);
+      return next(ApiError.internal("Не вдалося отримати послуги для лікарні"));
     }
   }
 }
