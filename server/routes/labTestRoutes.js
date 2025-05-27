@@ -6,12 +6,18 @@ const roleMiddleware = require("../middleware/checkRoleMiddleware");
 
 router.use(authMiddleware);
 
+// Get lab tests by hospital ID (Admin, Doctor only)
+router.get(
+  "/by-hospital/:hospitalId",
+  roleMiddleware("Admin", "Doctor"),
+  labTestController.getByHospital
+);
 router.patch(
   "/mark-ready/:id",
-  roleMiddleware ("Admin", "Doctor"),
+  roleMiddleware("Admin", "Doctor"),
   labTestController.markReadyStatus
 );
-router.get('/doctor/:doctorId', labTestController.getByDoctor);
+router.get("/doctor/:doctorId", labTestController.getByDoctor);
 
 router.get("/", labTestController.getAll);
 router.get("/:id", labTestController.getById);
