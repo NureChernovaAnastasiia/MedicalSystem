@@ -196,7 +196,7 @@ const DoctorCard = ({ doctor, onOpenModal }) => {
         </div>
         <div style={mergedStyles.infoItem}>
           <img src={iconEmail} alt="Email" style={baseStyles.infoIcon} />
-          <p style={{ margin: '10px 0' }}><strong>Email::</strong> {doctor.email || 'Немає даних'}</p>
+          <p style={{ margin: '10px 0' }}><strong>Email:</strong> {doctor.email || 'Немає даних'}</p>
         </div>
         <div style={mergedStyles.infoItem}>
           <img src={iconTelephone} alt="Телефон" style={baseStyles.infoIcon} />
