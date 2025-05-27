@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientEditPersonalInfo.module.css';
 
 import { genderMap } from '../../constants/gender';
@@ -56,51 +56,56 @@ const InfoBlock = ({ icon, title, children }) => (
 const DoctorFillPatientsData = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
+
+  const userType = location.state?.userType || 'user';
+  const patientFromState = location.state?.patient;
 
   const [patient, setPatient] = useState(null);
-  const [formData, setFormData] = useState({
-    lastName: '',
-    firstName: '',
-    middleName: '',
-    birthDate: '',
-    gender: '',
-    email: '',
-    phone: '',
-    address: '',
-    photo_url: '',
-    bloodType: '',
-    chronicConditions: '',
-    allergies: '',
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [formData, setFormData] = useState({
+    lastName: '', firstName: '', middleName: '', birthDate: '',
+    gender: '', email: '', phone: '', address: '', photo_url: '',
+    bloodType: '', chronicConditions: '', allergies: ''
+  });
+
   useEffect(() => {
-    if (!id) return;
-    const fetchPatient = async () => {
-      try {
-        const fetchedPatient = await fetchPatientByUserId(id);
-        setPatient(fetchedPatient);
-        setFormData({
-          lastName: fetchedPatient.last_name || '',
-          firstName: fetchedPatient.first_name || '',
-          middleName: fetchedPatient.middle_name || '',
-          birthDate: fetchedPatient.birth_date || '',
-          gender: fetchedPatient.gender || '',
-          email: fetchedPatient.email || '',
-          phone: fetchedPatient.phone || '',
-          address: fetchedPatient.address || '',
-          photo_url: fetchedPatient.photo_url || '',
-          bloodType: fetchedPatient.blood_type || '',
-          chronicConditions: fetchedPatient.chronic_conditions || '',
-          allergies: fetchedPatient.allergies || '',
-        });
-      } catch (e) {
-        setError('Не вдалося завантажити дані пацієнта');
+    const loadPatient = async () => {
+      if (userType === 'patient' && patientFromState) {
+        setPatient(patientFromState);
+        fillFormData(patientFromState);
+      } else if (userType === 'user' && id) {
+        try {
+          const fetchedPatient = await fetchPatientByUserId(id);
+          setPatient(fetchedPatient);
+          fillFormData(fetchedPatient);
+        } catch {
+          setError('Не вдалося завантажити дані пацієнта');
+        }
       }
     };
-    fetchPatient();
-  }, [id]);
+
+    const fillFormData = (data) => {
+      setFormData({
+        lastName: data.last_name || '',
+        firstName: data.first_name || '',
+        middleName: data.middle_name || '',
+        birthDate: data.birth_date || '',
+        gender: data.gender || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        address: data.address || '',
+        photo_url: data.photo_url || '',
+        bloodType: data.blood_type || '',
+        chronicConditions: data.chronic_conditions || '',
+        allergies: data.allergies || '',
+      });
+    };
+
+    loadPatient();
+  }, [id, userType, patientFromState]);
 
   const handleChange = ({ target: { name, value } }) =>
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -108,13 +113,15 @@ const DoctorFillPatientsData = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!patient?.id) return;
+
     setLoading(true);
     setError(null);
+
     try {
       const updatedData = Object.fromEntries(
-        Object.entries(formData).map(([k, v]) => [
-          k.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`),
-          v || null,
+        Object.entries(formData).map(([key, val]) => [
+          key.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`),
+          val || null
         ])
       );
       await updatePatientData(patient.id, updatedData);
