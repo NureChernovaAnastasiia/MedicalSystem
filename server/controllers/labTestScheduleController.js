@@ -10,8 +10,7 @@ const {
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const moment = require("moment");
-const paypalService = require('../services/paypalService');
-
+const paypalService = require("../services/paypalService");
 
 class LabTestScheduleController {
   // 🔍 Get all schedules (All authenticated users)
@@ -175,7 +174,11 @@ class LabTestScheduleController {
 
   async payAndBookLabTest(req, res, next) {
     try {
-      const { lab_test_schedule_id, patient_id: bodyPatientId, orderId } = req.body;
+      const {
+        lab_test_schedule_id,
+        patient_id: bodyPatientId,
+        orderId,
+      } = req.body;
       const userId = req.user.id;
 
       const payment = await paypalService.captureOrder(orderId);
@@ -189,16 +192,22 @@ class LabTestScheduleController {
 
       let patientId;
       if (req.user.role === "Patient") {
-        const patient = await Patient.findOne({ where: { user_id: req.user.id } });
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
         if (!patient) return next(ApiError.badRequest("Пацієнта не знайдено"));
         patientId = patient.id;
       } else {
-        if (!bodyPatientId) return next(ApiError.badRequest("Не вказано patient_id"));
+        if (!bodyPatientId)
+          return next(ApiError.badRequest("Не вказано patient_id"));
         patientId = bodyPatientId;
       }
 
-      const labService = await HospitalLabService.findByPk(schedule.hospital_lab_service_id);
-      if (!labService) return next(ApiError.badRequest("Послугу лабораторії не знайдено"));
+      const labService = await HospitalLabService.findByPk(
+        schedule.hospital_lab_service_id
+      );
+      if (!labService)
+        return next(ApiError.badRequest("Послугу лабораторії не знайдено"));
 
       const doctor_id = labService.doctor_id;
       const hospital_id = labService.hospital_id;
@@ -230,7 +239,11 @@ class LabTestScheduleController {
       });
     } catch (e) {
       console.error("payAndBookLabTest error:", e);
-      return next(ApiError.internal(e.message || "Не вдалося оплатити та забронювати аналіз"));
+      return next(
+        ApiError.internal(
+          e.message || "Не вдалося оплатити та забронювати аналіз"
+        )
+      );
     }
   }
 
@@ -331,6 +344,49 @@ class LabTestScheduleController {
     } catch (e) {
       console.error("getWorkingHoursByDate (LabTest) error:", e);
       return next(ApiError.internal("Не вдалося отримати час для аналізів"));
+    }
+  }
+  // 🔍 Get all lab test schedules by hospital
+  async getByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+
+      if (!["Admin", "Doctor"].includes(req.user.role)) {
+        return next(ApiError.forbidden("Недостатньо прав"));
+      }
+
+      const schedules = await LabTestSchedule.findAll({
+        include: {
+          model: HospitalLabService,
+          include: [Hospital, LabTestInfo, Doctor],
+          where: { hospital_id: hospitalId },
+        },
+      });
+
+      const formatted = schedules.map((schedule) => {
+        const service = schedule.HospitalLabService;
+        const hospital = service?.Hospital;
+        const isPrivate = hospital?.type === "Приватна";
+
+        return {
+          id: schedule.id,
+          date: schedule.appointment_date,
+          start_time: schedule.start_time,
+          end_time: schedule.end_time,
+          is_booked: schedule.is_booked,
+          hospital: hospital?.name,
+          test_name: service?.LabTestInfo?.name,
+          doctor: `${service?.Doctor?.first_name || ""} ${
+            service?.Doctor?.last_name || ""
+          }`,
+          ...(isPrivate && { test_price: service?.LabTestInfo?.price }),
+        };
+      });
+
+      return res.json(formatted);
+    } catch (e) {
+      console.error("getByHospital error:", e);
+      return next(ApiError.internal("Не вдалося отримати розклад за лікарнею"));
     }
   }
 }

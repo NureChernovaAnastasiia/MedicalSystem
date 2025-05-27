@@ -33,49 +33,50 @@ class LabTestController {
     }
   }
 
- async getById(req, res, next) {
-  try {
-    const item = await LabTest.findByPk(req.params.id, {
-      include: [
-        { model: Patient, include: [Hospital] },
-        { model: Doctor, include: [Hospital] },
-        {
-          model: LabTestSchedule,
-          include: [
-            {
-              model: HospitalLabService,
-              include: [LabTestInfo],
-            },
-          ],
-        },
-      ],
-    });
-
-    if (!item) return next(ApiError.notFound("Аналіз не знайдено"));
-
-    // Перевірка доступу
-    if (req.user.role === "Patient") {
-      const patient = await Patient.findOne({
-        where: { user_id: req.user.id },
+  async getById(req, res, next) {
+    try {
+      const item = await LabTest.findByPk(req.params.id, {
+        include: [
+          { model: Patient, include: [Hospital] },
+          { model: Doctor, include: [Hospital] },
+          {
+            model: LabTestSchedule,
+            include: [
+              {
+                model: HospitalLabService,
+                include: [LabTestInfo],
+              },
+            ],
+          },
+        ],
       });
-      if (!patient || patient.id !== item.patient_id) {
-        return next(ApiError.forbidden("Немає доступу до цього аналізу"));
+
+      if (!item) return next(ApiError.notFound("Аналіз не знайдено"));
+
+      // Перевірка доступу
+      if (req.user.role === "Patient") {
+        const patient = await Patient.findOne({
+          where: { user_id: req.user.id },
+        });
+        if (!patient || patient.id !== item.patient_id) {
+          return next(ApiError.forbidden("Немає доступу до цього аналізу"));
+        }
       }
+
+      const testName =
+        item.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || null;
+
+      return res.json({
+        ...item.toJSON(),
+        test_name: testName,
+        results: item.results || null,
+        notes: item.notes || null,
+      });
+    } catch (e) {
+      console.error("getById error:", e);
+      return next(ApiError.internal("Помилка отримання аналізу"));
     }
-
-    const testName = item.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name || null;
-
-    return res.json({
-      ...item.toJSON(),
-      test_name: testName,
-      results: item.results || null,
-      notes: item.notes || null,
-    });
-  } catch (e) {
-    console.error("getById error:", e);
-    return next(ApiError.internal("Помилка отримання аналізу"));
   }
-}
 
   async getByPatient(req, res, next) {
     try {
@@ -92,23 +93,23 @@ class LabTestController {
       }
 
       const items = await LabTest.findAll({
-  where: { patient_id: patientId },
-  include: [
-    {
-      model: Doctor,
-      include: [Hospital],
-    },
-    {
-      model: LabTestSchedule,
-      include: [
-        {
-          model: HospitalLabService,
-          include: [LabTestInfo],
-        },
-      ],
-    },
-  ],
-});
+        where: { patient_id: patientId },
+        include: [
+          {
+            model: Doctor,
+            include: [Hospital],
+          },
+          {
+            model: LabTestSchedule,
+            include: [
+              {
+                model: HospitalLabService,
+                include: [LabTestInfo],
+              },
+            ],
+          },
+        ],
+      });
 
       return res.json(items);
     } catch (e) {
@@ -139,14 +140,14 @@ class LabTestController {
                 include: [
                   {
                     model: LabTestInfo,
-                    attributes: ["name"]
-                  }
-                ]
-              }
-            ]
-          }
+                    attributes: ["name"],
+                  },
+                ],
+              },
+            ],
+          },
         ],
-        order: [["createdAt", "DESC"]]
+        order: [["createdAt", "DESC"]],
       });
 
       const result = labTests.map((test) => {
@@ -301,6 +302,65 @@ class LabTestController {
     } catch (e) {
       console.error("markReady error:", e);
       return next(ApiError.internal("Failed to mark lab test as ready"));
+    }
+  }
+  async getByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+
+      if (!["Admin", "Doctor"].includes(req.user.role)) {
+        return next(ApiError.forbidden("Недостатньо прав"));
+      }
+
+      const labTests = await LabTest.findAll({
+        include: [
+          {
+            model: Patient,
+            include: [{ model: Hospital }],
+          },
+          {
+            model: LabTestSchedule,
+            include: [
+              {
+                model: HospitalLabService,
+                include: [LabTestInfo],
+              },
+            ],
+          },
+          {
+            model: Doctor,
+          },
+        ],
+        where: {
+          "$Patient.Hospital.id$": hospitalId,
+        },
+      });
+
+      const result = labTests.map((test) => {
+        const schedule = test.LabTestSchedule;
+        const service = schedule?.HospitalLabService;
+        const testName = service?.LabTestInfo?.name;
+
+        return {
+          id: test.id,
+          patient_name: `${test.Patient?.first_name || ""} ${
+            test.Patient?.last_name || ""
+          }`.trim(),
+          doctor_name: `${test.Doctor?.first_name || ""} ${
+            test.Doctor?.last_name || ""
+          }`.trim(),
+          test_name: testName || null,
+          appointment_date: schedule?.appointment_date,
+          start_time: schedule?.start_time,
+          end_time: schedule?.end_time,
+          is_ready: test.is_ready,
+        };
+      });
+
+      return res.json(result);
+    } catch (e) {
+      console.error("getByHospital error:", e);
+      return next(ApiError.internal("Не вдалося отримати аналізи по лікарні"));
     }
   }
 }
