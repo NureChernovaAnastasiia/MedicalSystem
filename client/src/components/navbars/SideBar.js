@@ -8,7 +8,7 @@ import logo from "../../img/Logo.png";
 import avatar from '../../img/icons/people.png';  
 import logoutIcon from '../../img/icons/exit.png';
 
-import { DOCTOR_APPOINTMENTS_ROUTE, DOCTOR_HOSPITALDETAILS_ROUTE, DOCTOR_PANEL_ROUTE, DOCTOR_PATIENTS_ROUTE, DOCTOR_SERVICES_ROUTE, PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_SERVICE_ROUTE } from "../../utils/consts";
+import { ADMIN_ANALYTICS_ROUTE, ADMIN_DOCTORS_ROUTE, ADMIN_HOSPITAL_ROUTE, ADMIN_PANEL_ROUTE, ADMIN_PATIENTS_ROUTE, ADMIN_SCHEDULES_ROUTE, ADMIN_SERVICES_ROUTE, DOCTOR_APPOINTMENTS_ROUTE, DOCTOR_HOSPITALDETAILS_ROUTE, DOCTOR_PANEL_ROUTE, DOCTOR_PATIENTS_ROUTE, DOCTOR_SERVICES_ROUTE, PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_SERVICE_ROUTE } from "../../utils/consts";
 
 const Sidebar = ({ userRole, fullName }) => {
   const { user, ui } = useContext(Context);
@@ -17,7 +17,7 @@ const Sidebar = ({ userRole, fullName }) => {
   const handleLogoClick = () => {
     switch (userRole) {
       case "Admin":
-        navigate("/admin/dashboard"); 
+        navigate(ADMIN_PANEL_ROUTE); 
         break;
       case "Doctor":
         navigate(DOCTOR_PANEL_ROUTE); 
@@ -30,7 +30,14 @@ const Sidebar = ({ userRole, fullName }) => {
   };
 
   const menuItems = {
-    Admin: [],
+    Admin: [
+      { label: 'Лікарі', path: ADMIN_DOCTORS_ROUTE },
+      { label: 'Пацієнти', path: ADMIN_PATIENTS_ROUTE },
+      { label: 'Послуги', path: ADMIN_SERVICES_ROUTE },
+      { label: 'Розклад', path: ADMIN_SCHEDULES_ROUTE },
+      { label: 'Аналітика', path: ADMIN_ANALYTICS_ROUTE },
+      { label: 'Лікарня', path: ADMIN_HOSPITAL_ROUTE },
+    ],
     Doctor: [
       { label: 'Пацієнти', path: DOCTOR_PATIENTS_ROUTE },
       { label: 'Прийоми', path: DOCTOR_APPOINTMENTS_ROUTE },
