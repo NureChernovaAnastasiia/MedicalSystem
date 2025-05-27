@@ -37,3 +37,4 @@ export const ADMIN_SERVICES_ROUTE = '/admin-services';
 export const ADMIN_SCHEDULES_ROUTE = '/admin-schedules';
 export const ADMIN_ANALYTICS_ROUTE = '/admin-analytics';
 export const ADMIN_HOSPITAL_ROUTE = '/admin-hospital';
+export const ADMIN_APPOINTMENTS_ROUTE = '/admin-appointments';
