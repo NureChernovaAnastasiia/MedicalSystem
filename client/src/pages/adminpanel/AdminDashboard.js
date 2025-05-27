@@ -1,23 +1,23 @@
 import React, { useEffect, useState, useContext } from "react";
 import styles from "../../style/doctorpanel/DoctorDashboard.module.css";
 import { Context } from "../../index";
-import { fetchDoctorByUserId, fetchDoctorById } from "../../http/doctorAPI";
+import { fetchHospitalStaffByUserId } from "../../http/hospitalStaffAPI"; 
 
 import InfoCard from "../../components/elements/InfoCard";
-import DoctorCard from "../../components/doctor/DoctorCardWork";
+import AdminCard from "../../components/hospitalstaff/AdminCard"; 
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
 import ModalRegisterPatient from "../../components/modals/ModalRegisterPatient";
 import ModalCreateAppointment from "../../components/modals/ModalCreateAppointment";
 
-import { iconMedCard, iconSchedule, iconDuration, } from "../../utils/icons";
+import { iconMedCard, iconSchedule, iconDuration } from "../../utils/icons";
 
-import { DOCTOR_ALLAPPOINTMENTS_ROUTE, } from "../../utils/consts";
+import { DOCTOR_ALLAPPOINTMENTS_ROUTE } from "../../utils/consts";
 
 const AdminDashboard = () => {
-  const { user } = useContext(Context);
-  const [doctor, setDoctor] = useState(null);
+  const { user, hospital } = useContext(Context);
+  const [staff, setStaff] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedStaff, setSelectedStaff] = useState(null);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
 
@@ -26,30 +26,33 @@ const AdminDashboard = () => {
       if (!user.user.id) return;
 
       try {
-        const { id: doctorId } = await fetchDoctorByUserId(user.user.id);
-        const doctorData = await fetchDoctorById(doctorId);
-        setDoctor(doctorData);
+        const staffData = await fetchHospitalStaffByUserId(user.user.id);
+        setStaff(staffData);
 
+        if (staffData.Hospital) {
+          hospital.setHospital(staffData.Hospital);
+          localStorage.setItem('hospital', JSON.stringify(staffData.Hospital));
+        }
       } catch (error) {
-        console.error("Помилка при завантаженні даних лікаря або розкладу:", error);
+        console.error("Помилка при завантаженні даних hospital staff:", error);
       }
     };
 
     fetchData();
-  }, [user.user.id]);
+  }, [user.user.id, hospital]);
 
-  const fullName = doctor
-    ? `${doctor.last_name || ""} ${doctor.first_name || ""}`.trim()
+  const fullName = staff
+    ? `${staff.last_name || ""} ${staff.first_name || ""}`.trim()
     : "";
 
-  const handleOpenModal = (doctorData) => {
-    setSelectedDoctor(doctorData);
+  const handleOpenModal = (staffData) => {
+    setSelectedStaff(staffData);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedDoctor(null);
+    setSelectedStaff(null);
   };
 
   return (
@@ -62,26 +65,25 @@ const AdminDashboard = () => {
         <InfoCard icon={iconDuration} title="Назначити прийом" onClick={() => setIsAppointmentModalOpen(true)} />
       </div>
 
-      {isRegisterModalOpen && doctor && (
+      {isRegisterModalOpen && staff && (
         <ModalRegisterPatient
-          doctor={doctor}
+          doctor={staff} 
           onClose={() => setIsRegisterModalOpen(false)}
         />
       )}
 
-      {isAppointmentModalOpen && doctor && (
+      {isAppointmentModalOpen && staff && (
         <ModalCreateAppointment
-          doctorId={doctor.id}
+          doctorId={staff.id}
           onClose={() => setIsAppointmentModalOpen(false)}
         />
       )}
 
-      {doctor && <DoctorCard doctor={doctor} onOpenModal={handleOpenModal} />}
+      {staff && <AdminCard admin={staff} onOpenModal={handleOpenModal} />}
 
-      {isModalOpen && selectedDoctor && (
-        <ModalDocInformation doctor={selectedDoctor} onClose={handleCloseModal} />
+      {isModalOpen && selectedStaff && (
+        <ModalDocInformation doctor={selectedStaff} onClose={handleCloseModal} />
       )}
-
     </div>
   );
 };
