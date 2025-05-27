@@ -8,6 +8,7 @@ import 'react-date-range/dist/theme/default.css';
 import SearchInput from '../../components/options/SearchInput';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import PatientItem from '../../components/patient/PatientItem'; 
+import ModalRegisterPatient from '../../components/modals/ModalRegisterPatient';
 
 import styles from '../../style/doctorpanel/DoctorPatients.module.css';
 
@@ -23,6 +24,7 @@ const DoctorPatients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadDoctor = useCallback(async () => {
     if (!user?.user?.id) return;
@@ -96,7 +98,12 @@ const DoctorPatients = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Пацієнти</h1>
         <div className={styles.orderButtonWrapper}>
-            <button className={styles.orderButton}>Зарєеструвати пацієнта</button>
+          <button
+            className={styles.orderButton}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Зареєструвати пацієнта
+          </button>
         </div>
       </div>
       <p className={styles.subtitle}>
@@ -148,6 +155,13 @@ const DoctorPatients = () => {
           ))
         ) : (
           <p className={styles.noResults}>Пацієнтів не знайдено</p>
+        )}
+
+        {isModalOpen && (
+          <ModalRegisterPatient
+            doctor={doctor}
+            onClose={() => setIsModalOpen(false)}
+          />
         )}
       </div>
     </div>

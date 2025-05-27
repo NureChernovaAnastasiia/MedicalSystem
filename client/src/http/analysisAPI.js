@@ -44,3 +44,23 @@ export const fetchLabTestPdf = async (labTestId) => {
     alert('Не вдалося відкрити PDF документ аналізу');
   }
 };
+
+export const fetchLabTestsByDoctorId = async (doctorId) => {
+  try {
+    const { data } = await $authHost.get(`api/lab-tests/doctor/${doctorId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні аналізів доктора:", error);
+    throw error;
+  }
+};
+
+export const updateLabTest = async (labTestId, updatedFields) => {
+  const { data } = await $authHost.put(`api/lab-tests/${labTestId}`, updatedFields);
+  return data;
+};
+
+export const markLabTestReady = async (labTestId) => {
+  const { data } = await $authHost.patch(`api/lab-tests/mark-ready/${labTestId}`);
+  return data;
+};

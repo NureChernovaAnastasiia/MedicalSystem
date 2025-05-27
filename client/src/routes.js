@@ -1,9 +1,8 @@
-import { ABOUTUS_ROUTE, ADMIN_PANEL_ROUTE, DOCTOR_ALLAPPOINTMENTS_ROUTE, DOCTOR_APPOINTMENTS_ROUTE, DOCTOR_DETAPPOINTMENT_ROUTE, DOCTOR_HOSPITALDETAILS_ROUTE, DOCTOR_MEDDETAIL_ROUTE, DOCTOR_PANEL_ROUTE, DOCTOR_PATIENTS_ROUTE, DOCTOR_PATMEDCARD_ROUTE, DOCTOR_SERVICES_ROUTE, LOGIN_ROUTE, MAIN_ROUTE, PATIENT_ANALYSEDETAIL_ROUTE, PATIENT_ANALYSEORDER_ROUTE, PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_DOCSCHEDULE_ROUTE, PATIENT_EDITPERSONALINFO_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_HOSPITALSCHEDULE_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_MEDDETAIL_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE, PATIENT_SERVICE_ROUTE, PATIENT_SERVICEDETAILS_ROUTE, PATIENT_SERVICEORDER_ROUTE, SERVICES_ROUTE } from "./utils/consts";
+import { ABOUTUS_ROUTE, ADMIN_ANALYTICS_ROUTE, ADMIN_APPOINTMENTS_ROUTE, ADMIN_DOCTORS_ROUTE, ADMIN_HOSPITAL_ROUTE, ADMIN_PANEL_ROUTE, ADMIN_PATIENTS_ROUTE, ADMIN_SCHEDULES_ROUTE, ADMIN_SERVICES_ROUTE, DOCTOR_ALLAPPOINTMENTS_ROUTE, DOCTOR_APPOINTMENTS_ROUTE, DOCTOR_DETAPPOINTMENT_ROUTE, DOCTOR_FILLPATDATA_ROUTE, DOCTOR_HOSPITALDETAILS_ROUTE, DOCTOR_MEDDETAIL_ROUTE, DOCTOR_PANEL_ROUTE, DOCTOR_PATIENTS_ROUTE, DOCTOR_PATMEDCARD_ROUTE, DOCTOR_SERVICES_ROUTE, DOCTOR_SERVICESRESULT_ROUTE, LOGIN_ROUTE, MAIN_ROUTE, PATIENT_ANALYSEDETAIL_ROUTE, PATIENT_ANALYSEORDER_ROUTE, PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_DOCSCHEDULE_ROUTE, PATIENT_EDITPERSONALINFO_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_HOSPITALSCHEDULE_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_MEDDETAIL_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE, PATIENT_SERVICE_ROUTE, PATIENT_SERVICEDETAILS_ROUTE, PATIENT_SERVICEORDER_ROUTE, SERVICES_ROUTE } from "./utils/consts";
 import Main from "./pages/default/Main";
 import AboutUs from "./pages/default/AboutUs";
 import Services from "./pages/default/Services";
 import LogIn from "./pages/default/LogIn";
-import AdminPanel from "./pages/adminpanel/AdminPanel";
 import PatientDashboard from "./pages/patientpanel/PatientDashboard";
 import PatientMedCard from "./pages/patientpanel/PatientMedCard";
 import PatientEditPersonalInfo from "./pages/patientpanel/PatientEditPersonalInfo";
@@ -30,6 +29,16 @@ import DoctorAllAppointment from "./pages/doctorpanel/DoctorAllAppointment";
 import DoctorDetailsAppointment from "./pages/doctorpanel/DoctorDetailsAppointment";
 import DoctorPatientMedCard from "./pages/doctorpanel/DoctorPatientMedCard";
 import DoctorMedicalDetail from "./pages/doctorpanel/DoctorMedicalDetail";
+import DoctorServicesResults from "./pages/doctorpanel/DoctorServicesResults";
+import DoctorFillPatientsData from "./pages/doctorpanel/DoctorFillPatientsData";
+import AdminDashboard from "./pages/adminpanel/AdminDashboard";
+import AdminAnalytics from "./pages/adminpanel/AdminAnalytics.js";
+import AdminDoctors from "./pages/adminpanel/AdminDoctors.js";
+import AdminHospital from "./pages/adminpanel/AdminHospital.js";
+import AdminPatients from "./pages/adminpanel/AdminPatients.js";
+import AdminSchedules from "./pages/adminpanel/AdminSchedules.js";
+import AdminServices from "./pages/adminpanel/AdminPatients.js";
+import AdminAppointments from "./pages/adminpanel/AdminAppointments.js";
 
 export const publicRoutes = [
     { path: MAIN_ROUTE, Component: Main },
@@ -39,7 +48,14 @@ export const publicRoutes = [
 ]; 
 
 export const adminRoutes = [
-    { path: ADMIN_PANEL_ROUTE, Component: AdminPanel },
+    { path: ADMIN_PANEL_ROUTE, Component: AdminDashboard },
+    { path: ADMIN_PATIENTS_ROUTE, Component: AdminPatients },
+    { path: ADMIN_DOCTORS_ROUTE, Component: AdminDoctors },
+    { path: ADMIN_SERVICES_ROUTE, Component: AdminServices },
+    { path: ADMIN_SCHEDULES_ROUTE, Component: AdminSchedules },
+    { path: ADMIN_ANALYTICS_ROUTE, Component: AdminAnalytics },
+    { path: ADMIN_HOSPITAL_ROUTE, Component: AdminHospital },
+    { path: ADMIN_APPOINTMENTS_ROUTE, Component: AdminAppointments },
   ];
   
   export const patientRoutes = [
@@ -48,18 +64,18 @@ export const adminRoutes = [
     { path: PATIENT_EDITPERSONALINFO_ROUTE, Component: PatientEditPersonalInfo },
     { path: PATIENT_MEDRECORDS_ROUTE, Component: PatientMedicalRecords },
     { path: PATIENT_PRESCRIPTIONS_ROUTE, Component: PatientPrescriptions },
-    { path: PATIENT_ANALYSEDETAIL_ROUTE + '/:id', Component: PatientAnalyseDetail },
+    { path: `${PATIENT_ANALYSEDETAIL_ROUTE}/:id`, Component: PatientAnalyseDetail },
     { path: PATIENT_ANALYSEORDER_ROUTE, Component: PatientAnalyseOrder },
     { path: PATIENT_ANALYSIS_ROUTE, Component: PatientAnalysis },
     { path: PATIENT_APPOINTMENTS_ROUTE, Component: PatientAppointments },
     { path: PATIENT_DOCAPPOINTMENT_ROUTE, Component: PatientDoctorAppointment },
-    { path: PATIENT_DOCSCHEDULE_ROUTE + '/:id', Component: PatientDoctorSchedule },
+    { path: `${PATIENT_DOCSCHEDULE_ROUTE}/:id`, Component: PatientDoctorSchedule },
     { path: PATIENT_HOSPITALDETAIL_ROUTE, Component: PatientHospitalDetails },
-    { path: PATIENT_HOSPITALSCHEDULE_ROUTE + '/:id', Component: PatientHospitalSchedule },
-    { path: PATIENT_MEDDETAIL_ROUTE + '/:id', Component: PatientMedicalDetail },
+    { path: `${PATIENT_HOSPITALSCHEDULE_ROUTE}/:id`, Component: PatientHospitalSchedule },
+    { path: `${PATIENT_MEDDETAIL_ROUTE}/:id`, Component: PatientMedicalDetail },
     { path: PATIENT_SERVICEORDER_ROUTE, Component: PatientServiceOrder },
     { path: PATIENT_SERVICE_ROUTE, Component: PatientServices },
-    { path: PATIENT_SERVICEDETAILS_ROUTE + '/:id', Component: PatientServiceDetails },
+    { path: `${PATIENT_SERVICEDETAILS_ROUTE}/:id`, Component: PatientServiceDetails },
   ];
   
   export const doctorRoutes = [
@@ -69,7 +85,9 @@ export const adminRoutes = [
     { path: DOCTOR_APPOINTMENTS_ROUTE, Component: DoctorAppointments },
     { path: DOCTOR_HOSPITALDETAILS_ROUTE, Component: DoctorHospitalDetails },
     { path: DOCTOR_ALLAPPOINTMENTS_ROUTE, Component: DoctorAllAppointment },
-    { path: DOCTOR_DETAPPOINTMENT_ROUTE + '/:id', Component: DoctorDetailsAppointment },
-    { path: DOCTOR_PATMEDCARD_ROUTE + '/:id', Component: DoctorPatientMedCard },
-    { path: DOCTOR_MEDDETAIL_ROUTE + '/:id', Component: DoctorMedicalDetail },
+    { path: `${DOCTOR_DETAPPOINTMENT_ROUTE}/:id`, Component: DoctorDetailsAppointment },
+    { path: `${DOCTOR_PATMEDCARD_ROUTE}/:id`, Component: DoctorPatientMedCard },
+    { path: `${DOCTOR_MEDDETAIL_ROUTE}/:id`, Component: DoctorMedicalDetail },
+    { path: `${DOCTOR_SERVICESRESULT_ROUTE}/:serviceType/:id`, Component: DoctorServicesResults },
+    { path: `${DOCTOR_FILLPATDATA_ROUTE}/:id`, Component: DoctorFillPatientsData },
   ];

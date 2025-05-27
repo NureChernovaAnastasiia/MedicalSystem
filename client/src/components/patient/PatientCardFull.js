@@ -1,15 +1,9 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorPatientMedCard.module.css';
-import {
-  iconDate,
-  iconGender,
-  iconTelephone,
-  iconEmail,
-  iconAddress,
-  iconHospital,
-  iconHealth,
-} from '../../utils/icons';
+import { iconDate, iconGender, iconTelephone, iconEmail, iconAddress, iconHospital, iconHealth, } from '../../utils/icons';
 import { genderMap } from '../../constants/gender';
+import { DOCTOR_FILLPATDATA_ROUTE } from '../../utils/consts';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return 'Немає даних';
@@ -46,7 +40,7 @@ const PatientCardFull = ({ patient }) => {
 
   const healthInfo = [
     { label: 'Група крові', value: patient.blood_type },
-    { label: 'Алергії', value: patient.allergie },
+    { label: 'Алергії', value: patient.allergies },
     { label: 'Хронічні захворювання', value: patient.chronic_conditions },
   ];
 
@@ -67,7 +61,17 @@ const PatientCardFull = ({ patient }) => {
           </div>
 
           <div className={styles.rightSide}>
-            <h2 className={styles.name}>{fullName}</h2>
+            <div className={styles.headerRow}>
+              <h2 className={styles.name}>{fullName}</h2>
+              <NavLink
+                to={`${DOCTOR_FILLPATDATA_ROUTE}/${patient.id}`}
+                state={{ patient, userType: 'patient' }}
+                className={styles.editWarning}
+              >
+                <span className={styles.exclamation}>!</span>
+                <span className={styles.editText}>Редагувати дані</span>
+              </NavLink>
+            </div>
             {basicInfo.map(({ icon, label, value }) => (
               <InfoRow key={label} icon={icon} label={label} value={value} />
             ))}

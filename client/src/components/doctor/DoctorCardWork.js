@@ -3,7 +3,8 @@ import {
   iconSpecialisation,
   iconHospital,
   iconLocation,
-  iconContacts
+  iconEmail,
+  iconTelephone
 } from '../../utils/icons';
 
 const baseStyles = {
@@ -193,12 +194,13 @@ const DoctorCard = ({ doctor, onOpenModal }) => {
           <img src={iconLocation} alt="Місто" style={baseStyles.infoIcon} />
           <p style={{ margin: '10px 0' }}><strong>Місто:</strong> {doctor.Hospital?.address}</p>
         </div>
-        <div style={{ ...mergedStyles.infoItem, alignItems: 'flex-start' }}>
-            <img src={iconContacts} alt="Контакти" style={baseStyles.infoIcon} />
-            <div>
-                <p style={{ margin: '10px 0' }}><strong>Email:</strong> {doctor.email || 'Немає даних'}</p>
-                <p style={{ ...mergedStyles.infoItem, margin: '20px 0' }}><strong>Телефон:</strong> {doctor.phone || 'Немає даних'}</p>
-            </div>
+        <div style={mergedStyles.infoItem}>
+          <img src={iconEmail} alt="Email" style={baseStyles.infoIcon} />
+          <p style={{ margin: '10px 0' }}><strong>Email::</strong> {doctor.email || 'Немає даних'}</p>
+        </div>
+        <div style={mergedStyles.infoItem}>
+          <img src={iconTelephone} alt="Телефон" style={baseStyles.infoIcon} />
+          <p style={{ margin: '10px 0' }}><strong>Телефон:</strong> {doctor.phone || 'Немає даних'}</p>
         </div>
       </div>
     </div>

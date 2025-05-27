@@ -10,17 +10,17 @@ const baseStyles = {
     borderStyle: 'solid',
     borderColor: 'rgba(0, 195, 161, 0.42)',
     display: 'grid',
-    gridTemplateColumns: '2.8fr 1.7fr 2fr 1.5fr',
+    gridTemplateColumns: '3fr 1fr 2.8fr 1.5fr',
     alignItems: 'center',
-    padding: '0 1rem',
+    padding: '8px 1rem',
     gap: '1rem',
     boxSizing: 'border-box',
     fontFamily: "'Montserrat', sans-serif",
   },
   fullName: {
     fontStyle: 'italic',
-    fontWeight: 600,
-    fontSize: '18px',
+    fontWeight: 500,
+    fontSize: '20px',
     lineHeight: '28px',
     color: '#333333',
     position: 'relative',
@@ -120,6 +120,9 @@ const PatientItem = ({ patient }) => {
     },
     email: {
       ...baseStyles.email,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
       ...(isSmallScreen ? { fontSize: '16px', width: '100%' } : {}),
     },
     viewCardButton: {
@@ -132,7 +135,7 @@ const PatientItem = ({ patient }) => {
     <>
       <div style={combinedStyles.patientItem}>
         <span style={combinedStyles.fullName}>
-          {`${patient.last_name} ${patient.first_name} ${patient.middle_name}` || '—'}</span>
+          {`${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}` || '—'}</span>
         <span style={combinedStyles.birthDate}>{formatDate(patient.birth_date) || '—'}</span>
         <span style={combinedStyles.email}>{patient.email || '—'}</span>
         <NavLink to={`${DOCTOR_PATMEDCARD_ROUTE}/${patient.id}`}>

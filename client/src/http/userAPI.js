@@ -44,3 +44,8 @@ export const changePassword = async (oldPassword, newPassword) => {
   });
   return data;
 };
+
+export const registerPatient = async (patientData) => {
+  const { data } = await $authHost.post("api/users/registration", patientData);
+  return data;
+};

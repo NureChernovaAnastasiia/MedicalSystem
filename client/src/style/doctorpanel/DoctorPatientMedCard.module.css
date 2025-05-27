@@ -108,6 +108,35 @@
   justify-content: center;
 }
 
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.editWarning {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none; 
+}
+
+.exclamation {
+  color: #FBDA03;
+  font-weight: 700;
+  font-size: 24px;
+  margin-right: 5px;
+}
+
+.editText {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 16px;
+  color: #333;
+}
+
 .name {
   font-weight: 700;
   font-size: 24px;
