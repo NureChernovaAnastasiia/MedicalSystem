@@ -16,7 +16,7 @@ import { iconMedCard, iconSchedule, iconDuration, } from "../../utils/icons";
 import { DOCTOR_ALLAPPOINTMENTS_ROUTE, } from "../../utils/consts";
 
 const DoctorDashboard = () => {
-  const { user } = useContext(Context);
+  const { user, hospital } = useContext(Context);
   const [doctor, setDoctor] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -53,6 +53,11 @@ const DoctorDashboard = () => {
         setDoctor(doctorData);
         setDoctors([doctorData]);
 
+        if (doctorData.Hospital) {
+          hospital.setHospital(doctorData.Hospital); 
+          localStorage.setItem('hospital', JSON.stringify(doctorData.Hospital)); 
+        }
+
         const weekDatesData = getWeekDates();
         setWeekDates(weekDatesData);
 
@@ -77,7 +82,7 @@ const DoctorDashboard = () => {
     };
 
     fetchData();
-  }, [user.user.id]);
+  }, [user.user.id, hospital]);
 
   const fullName = doctor
     ? `${doctor.last_name || ""} ${doctor.first_name || ""}`.trim()

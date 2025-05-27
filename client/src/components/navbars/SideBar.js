@@ -58,6 +58,7 @@ const Sidebar = ({ userRole, fullName }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem('hospital');
 
     user.setIsAuth(false);
     user.setUser({});

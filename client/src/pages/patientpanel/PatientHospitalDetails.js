@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientHospitalDetails.module.css';
 
 import { Context } from '../../index';
-import { fetchPatientByUserId } from '../../http/patientAPI';
 import { fetchHospitalById } from '../../http/hospitalAPI';
 import { getHospitalLabServicesByHospitalId } from '../../http/analysisAPI';
 import { getHospitalMedicalServicesByHospitalId } from '../../http/servicesAPI';
@@ -19,8 +18,8 @@ import ServiceList from '../../components/service/ServiceList';
 import { PATIENT_HOSPITALSCHEDULE_ROUTE } from '../../utils/consts';
 
 const PatientHospitalDetails = () => {
-  const { user } = useContext(Context);
-  const [hospital, setHospital] = useState(null);
+  const { hospital } = useContext(Context);
+  const [hospitalData, setHospitalData] = useState(null);
   const [analyses, setAnalyses] = useState([]);
   const [services, setServices] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -51,36 +50,33 @@ const PatientHospitalDetails = () => {
   };
 
   useEffect(() => {
-    const fetchHospital = async () => {
-      if (!user?.user?.id) return;
+    const fetchHospitalData = async () => {
+      if (!hospital?.hospitalId) return;
+
       try {
-        const patientData = await fetchPatientByUserId(user.user.id);
+        const hospitalInfo = await fetchHospitalById(hospital.hospital.id);
+        setHospitalData(hospitalInfo);
 
-        if (patientData?.hospital_id) {
-          const hospitalData = await fetchHospitalById(patientData.hospital_id);
-          setHospital(hospitalData);
+        const [labData, medicalData, doctorData] = await Promise.all([
+          getHospitalLabServicesByHospitalId(hospital.hospitalId),
+          getHospitalMedicalServicesByHospitalId(hospital.hospitalId),
+          fetchDoctorsByHospitalId(hospital.hospitalId),
+        ]);
 
-          const [labData, medicalData, doctorData] = await Promise.all([
-            getHospitalLabServicesByHospitalId(patientData.hospital_id),
-            getHospitalMedicalServicesByHospitalId(patientData.hospital_id),
-            fetchDoctorsByHospitalId(patientData.hospital_id)
-          ]);
-
-          setAnalyses(labData);
-          setServices(medicalData);
-          setDoctors(doctorData);
-        }
+        setAnalyses(labData);
+        setServices(medicalData);
+        setDoctors(doctorData);
       } catch (error) {
         console.error('Помилка при завантаженні даних:', error);
       }
     };
 
-    fetchHospital();
-  }, [user]);
+    fetchHospitalData();
+  }, [hospital]);
 
   return (
     <div className={styles.container}>
-      {hospital && <HospitalHeader hospital={hospital} />}
+      {hospital && <HospitalHeader hospital={hospitalData} />}
 
       <h2 className={styles.servicesTitle}>Наші послуги</h2>
       <div className={styles.servicesContainer}>
@@ -99,7 +95,7 @@ const PatientHospitalDetails = () => {
       <div className={styles.doctorTitle}>
         <h2 className={styles.sectionTitle}>Наші лікарі</h2>
         {hospital && (
-          <NavLink to={`${PATIENT_HOSPITALSCHEDULE_ROUTE}/${hospital.id}`} className={styles.scheduleLink}>
+          <NavLink to={`${PATIENT_HOSPITALSCHEDULE_ROUTE}/${hospital.hospitalId}`} className={styles.scheduleLink}>
             Розклад прийому лікарів
           </NavLink>
         )}

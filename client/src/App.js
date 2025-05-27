@@ -11,11 +11,21 @@ import "./style/Loader.css";
 import "./style/App.css";
 
 const App = observer(() => {
-  const { user, ui } = useContext(Context);
+  const { user, ui, hospital } = useContext(Context);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const storedHospital = localStorage.getItem("hospital");
+
+    if (storedHospital) {
+      try {
+        hospital.setHospital(JSON.parse(storedHospital));
+      } catch (err) {
+        console.error("Помилка при розборі hospital з localStorage", err);
+      }
+    }
+
     if (token) {
       check()
         .then(data => {
@@ -29,7 +39,7 @@ const App = observer(() => {
       user.setIsAuth(false);
       setLoading(false);
     }
-  }, [user]);
+  }, [user, hospital]);
 
   if (loading) {
     return (

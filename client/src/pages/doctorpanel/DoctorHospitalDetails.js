@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import styles from '../../style/patientpanel/PatientHospitalDetails.module.css';
 
 import { Context } from '../../index';
-import { fetchDoctorByUserId } from '../../http/doctorAPI'; 
 import { fetchHospitalById } from '../../http/hospitalAPI';
 import { getHospitalLabServicesByHospitalId } from '../../http/analysisAPI';
 import { getHospitalMedicalServicesByHospitalId } from '../../http/servicesAPI';
 import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
+
 import ModalAnalysInfo from '../../components/modals/ModalAnalysInfo';
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
 
@@ -15,8 +15,8 @@ import DoctorCard from '../../components/doctor/DoctorCardBrief';
 import ServiceList from '../../components/service/ServiceList';
 
 const PatientHospitalDetails = () => {
-  const { user } = useContext(Context);
-  const [hospital, setHospital] = useState(null);
+  const { hospital } = useContext(Context); 
+  const [hospitalData, setHospitalData] = useState(null);
   const [analyses, setAnalyses] = useState([]);
   const [services, setServices] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -41,47 +41,38 @@ const PatientHospitalDetails = () => {
   };
 
   useEffect(() => {
-    const fetchHospital = async () => {
-      if (!user?.user?.id) return;
+    const fetchHospitalData = async () => {
+      if (!hospital?.hospital?.id) return;
+
       try {
-        const patientData = await fetchDoctorByUserId(user.user.id);
+        const hospitalInfo = await fetchHospitalById(hospital.hospital.id);
+        setHospitalData(hospitalInfo);
 
-        if (patientData?.hospital_id) {
-          const hospitalData = await fetchHospitalById(patientData.hospital_id);
-          setHospital(hospitalData);
+        const [labData, medicalData, doctorData] = await Promise.all([
+          getHospitalLabServicesByHospitalId(hospital.hospital.id),
+          getHospitalMedicalServicesByHospitalId(hospital.hospital.id),
+          fetchDoctorsByHospitalId(hospital.hospital.id)
+        ]);
 
-          const [labData, medicalData, doctorData] = await Promise.all([
-            getHospitalLabServicesByHospitalId(patientData.hospital_id),
-            getHospitalMedicalServicesByHospitalId(patientData.hospital_id),
-            fetchDoctorsByHospitalId(patientData.hospital_id)
-          ]);
-
-          setAnalyses(labData);
-          setServices(medicalData);
-          setDoctors(doctorData);
-        }
+        setAnalyses(labData);
+        setServices(medicalData);
+        setDoctors(doctorData);
       } catch (error) {
-        console.error('Помилка при завантаженні даних:', error);
+        console.error('Помилка при завантаженні даних лікарні:', error);
       }
     };
 
-    fetchHospital();
-  }, [user]);
+    fetchHospitalData();
+  }, [hospital]);
 
   return (
     <div className={styles.container}>
-      {hospital && <HospitalHeader hospital={hospital} />}
+      {hospitalData && <HospitalHeader hospital={hospitalData} />}
 
       <h2 className={styles.servicesTitle}>Наші послуги</h2>
       <div className={styles.servicesContainer}>
-        <ServiceList
-          items={analyses}
-          onInfoClick={handleOpenModal}
-        />
-        <ServiceList
-          items={services}
-          onInfoClick={handleOpenModal}
-        />
+        <ServiceList items={analyses} onInfoClick={handleOpenModal} />
+        <ServiceList items={services} onInfoClick={handleOpenModal} />
       </div>
 
       <div className={styles.doctorTitle}>
@@ -89,17 +80,15 @@ const PatientHospitalDetails = () => {
       </div>
 
       <div className={styles.doctorGrid}>
-        <div className={styles.doctorGrid}>
-          {doctors.map(doctor => (
-            <DoctorCard
-              key={doctor.id}
-              doctor={doctor}
-              onDetailsClick={() => handleOpenDoctorModal(doctor)}
-            />
-          ))}
-        </div>
-
+        {doctors.map(doctor => (
+          <DoctorCard
+            key={doctor.id}
+            doctor={doctor}
+            onDetailsClick={() => handleOpenDoctorModal(doctor)}
+          />
+        ))}
       </div>
+
       {isModalOpen && selectedAnalyse && (
         <ModalAnalysInfo onClose={() => setIsModalOpen(false)} analyse={selectedAnalyse} />
       )}
