@@ -1,11 +1,12 @@
-const { HospitalStaff, User, Doctor } = require("../models/models");
+const { HospitalStaff, User, Doctor, Hospital } = require("../models/models");
 const ApiError = require("../error/ApiError");
+const { Op } = require("sequelize");
 
 class HospitalStaffController {
-  // Отримати весь персонал
+  // Отримати весь персонал з лікарнею
   async getAll(req, res, next) {
     try {
-      const staff = await HospitalStaff.findAll();
+      const staff = await HospitalStaff.findAll({ include: Hospital });
       return res.json(staff);
     } catch (e) {
       console.error("getAll error:", e);
@@ -20,6 +21,7 @@ class HospitalStaffController {
     try {
       const doctors = await HospitalStaff.findAll({
         where: { position: "Doctor" },
+        include: Hospital,
       });
       return res.json(doctors);
     } catch (e) {
@@ -33,6 +35,7 @@ class HospitalStaffController {
     try {
       const staff = await HospitalStaff.findAll({
         where: { position: "Staff" },
+        include: Hospital,
       });
       return res.json(staff);
     } catch (e) {
@@ -41,10 +44,12 @@ class HospitalStaffController {
     }
   }
 
-  // Отримати одного
+  // Отримати одного працівника
   async getById(req, res, next) {
     try {
-      const item = await HospitalStaff.findByPk(req.params.id);
+      const item = await HospitalStaff.findByPk(req.params.id, {
+        include: Hospital,
+      });
       if (!item) return next(ApiError.notFound("Працівника не знайдено"));
       return res.json(item);
     } catch (e) {
@@ -53,7 +58,7 @@ class HospitalStaffController {
     }
   }
 
-  // Створити нового (тільки Staff, Doctor — автоматично)
+  // Створити нового працівника (тільки Staff)
   async create(req, res, next) {
     try {
       const {
@@ -94,6 +99,7 @@ class HospitalStaffController {
     }
   }
 
+  // Оновити працівника
   async update(req, res, next) {
     try {
       const item = await HospitalStaff.findByPk(req.params.id);
@@ -106,6 +112,7 @@ class HospitalStaffController {
     }
   }
 
+  // Видалити працівника
   async delete(req, res, next) {
     try {
       const item = await HospitalStaff.findByPk(req.params.id);
@@ -117,11 +124,16 @@ class HospitalStaffController {
       return next(ApiError.internal("Помилка видалення працівника"));
     }
   }
+
+  // Отримати по user_id
   async getByUserId(req, res, next) {
     try {
       const { userId } = req.params;
 
-      const staff = await HospitalStaff.findOne({ where: { user_id: userId } });
+      const staff = await HospitalStaff.findOne({
+        where: { user_id: userId },
+        include: Hospital,
+      });
 
       if (!staff) {
         return next(
@@ -135,6 +147,8 @@ class HospitalStaffController {
       return next(ApiError.internal("Помилка отримання співробітника"));
     }
   }
+
+  // Отримати всіх non-doctor співробітників лікарні
   async getNonDoctorsByHospital(req, res, next) {
     try {
       const { hospitalId } = req.params;
@@ -142,8 +156,9 @@ class HospitalStaffController {
       const nonDoctors = await HospitalStaff.findAll({
         where: {
           hospital_id: hospitalId,
-          position: { [require("sequelize").Op.ne]: "Doctor" },
+          position: { [Op.ne]: "Doctor" },
         },
+        include: Hospital,
       });
 
       return res.json(nonDoctors);
