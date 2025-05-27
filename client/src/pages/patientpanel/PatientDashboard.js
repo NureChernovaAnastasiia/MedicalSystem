@@ -17,7 +17,7 @@ import {
   PATIENT_ANALYSEORDER_ROUTE, PATIENT_MEDRECORDS_ROUTE, PATIENT_PRESCRIPTIONS_ROUTE, PATIENT_SERVICEORDER_ROUTE } from "../../utils/consts";
 
 const PatientDashboard = () => {
-  const { user } = useContext(Context);
+  const { user, hospital } = useContext(Context);
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -29,6 +29,11 @@ const PatientDashboard = () => {
       try {
         const patientData = await fetchPatientByUserId(user.user.id);
         setPatient(patientData);
+
+        if (patientData.Hospital) {
+        hospital.setHospital(patientData.Hospital);
+        localStorage.setItem('hospital', JSON.stringify(patientData.Hospital));
+      }
 
         const upcomingAppointments = await fetchUpcomingAppointments(patientData.id);
 
@@ -44,7 +49,7 @@ const PatientDashboard = () => {
     };
 
     getPatientAndAppointments();
-  }, [user.user.id]);
+  }, [user.user.id, hospital]);
 
   const fullName = patient ? `${patient.first_name || ""} ${patient.last_name || ""}`.trim() : "";
   const handleOpenAppointmentModal = (appointment) => setSelectedAppointment(appointment);
