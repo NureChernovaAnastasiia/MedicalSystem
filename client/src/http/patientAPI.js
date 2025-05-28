@@ -48,3 +48,13 @@ export const fetchPatientsByDoctorId = async (doctorId) => {
     throw error;
   }
 };
+
+export const fetchPatientsByHospitalId = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`api/patients/by-hospital/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error(`Помилка при отриманні пацієнтів для лікарні з ID ${hospitalId}:`, error);
+    throw error;
+  }
+};
