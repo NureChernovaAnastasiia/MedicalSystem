@@ -37,7 +37,7 @@ import AdminDoctors from "./pages/adminpanel/AdminDoctors.js";
 import AdminHospital from "./pages/adminpanel/AdminHospital.js";
 import AdminPatients from "./pages/adminpanel/AdminPatients.js";
 import AdminSchedules from "./pages/adminpanel/AdminSchedules.js";
-import AdminServices from "./pages/adminpanel/AdminPatients.js";
+import AdminServices from "./pages/adminpanel/AdminServices.js";
 import AdminAppointments from "./pages/adminpanel/AdminAppointments.js";
 
 export const publicRoutes = [

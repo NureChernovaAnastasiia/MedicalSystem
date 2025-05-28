@@ -23,21 +23,23 @@ const LogIn = () => {
     return emailRegex.test(value) || phoneRegex.test(value);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+
     const newErrors = {};
-  
+
     if (!email) {
       newErrors.email = 'Це поле є обов’язковим';
     } else if (!validateEmailOrPhone(email)) {
       newErrors.email = 'Невірний формат email або номеру телефону';
     }
-  
+
     if (!password) {
       newErrors.password = 'Це поле є обов’язковим';
     }
-  
+
     setErrors(newErrors);
-  
+
     if (Object.keys(newErrors).length === 0) {
       try {
         await login(email, password);
@@ -86,7 +88,7 @@ const LogIn = () => {
         </div>
       </div>
 
-      <div className="login-right">
+      <form className="login-right" onSubmit={handleSubmit}>
         <label className="login-label">E-mail</label>
         <input
           type="text"
@@ -119,10 +121,10 @@ const LogIn = () => {
         </div>
         {errors.password && <span className="error-text">{errors.password}</span>}
 
-        <button className="login-button" onClick={handleSubmit}>
+        <button className="login-button" type="submit">
           Увійти в систему
         </button>
-      </div>
+      </form>
     </div>
   );
 };
