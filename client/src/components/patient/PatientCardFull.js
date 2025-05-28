@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Context } from '../../index'; 
 import styles from '../../style/doctorpanel/DoctorPatientMedCard.module.css';
 import { iconDate, iconGender, iconTelephone, iconEmail, iconAddress, iconHospital, iconHealth, } from '../../utils/icons';
 import { genderMap } from '../../constants/gender';
-import { DOCTOR_FILLPATDATA_ROUTE } from '../../utils/consts';
+import { ADMIN_EDITPATDATA_ROUTE, DOCTOR_FILLPATDATA_ROUTE } from '../../utils/consts';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return 'Немає даних';
@@ -26,8 +27,18 @@ const InfoRow = ({ icon, label, value }) => (
 );
 
 const PatientCardFull = ({ patient }) => {
+  const { user } = useContext(Context); 
+  const role = user._role;
+
   const gender = genderMap[patient.gender] || 'Немає даних';
   const fullName = `${patient.last_name} ${patient.first_name} ${patient.middle_name || ''}`.trim();
+
+  const route =
+    role === 'Doctor'
+      ? `${DOCTOR_FILLPATDATA_ROUTE}/${patient.user_id}`
+      : role === 'Admin'
+      ? `${ADMIN_EDITPATDATA_ROUTE}/${patient.user_id}`
+      : '#';
 
   const basicInfo = [
     { icon: iconDate, label: 'Дата народження', value: formatDate(patient.birth_date) },
@@ -63,10 +74,7 @@ const PatientCardFull = ({ patient }) => {
           <div className={styles.rightSide}>
             <div className={styles.headerRow}>
               <h2 className={styles.name}>{fullName}</h2>
-              <NavLink
-                to={`${DOCTOR_FILLPATDATA_ROUTE}/${patient.user_id}`}
-                className={styles.editWarning}
-              >
+              <NavLink to={route} className={styles.editWarning} >
                 <span className={styles.exclamation}>!</span>
                 <span className={styles.editText}>Редагувати дані</span>
               </NavLink>

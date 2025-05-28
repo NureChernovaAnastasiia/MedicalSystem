@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import styles from '../../style/modalstyle/ModalRegisterPatient.module.css';
-import { DOCTOR_FILLPATDATA_ROUTE } from '../../utils/consts';
+import { ADMIN_EDITPATDATA_ROUTE, DOCTOR_FILLPATDATA_ROUTE } from '../../utils/consts';
 import { registerUser } from '../../http/userAPI';
 import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
 import AlertPopup from '../../components/elements/AlertPopup';
@@ -10,7 +10,8 @@ import { Context } from '../../index';
 
 const ModalRegisterPatient = ({ doctor, onClose }) => {
   const navigate = useNavigate();
-  const { hospital } = useContext(Context);
+  const { hospital, user } = useContext(Context);
+  const role = user?._role;
   const hospitalId = hospital?.hospitalId;
 
   const [formData, setFormData] = useState({
@@ -109,12 +110,21 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
 
   useEffect(() => {
     if (registeredUserId) {
+      const route =
+        role === 'Doctor'
+          ? `${DOCTOR_FILLPATDATA_ROUTE}/${registeredUserId}`
+          : role === 'Admin'
+          ? `${ADMIN_EDITPATDATA_ROUTE}/${registeredUserId}`
+          : '#';
+
       const timer = setTimeout(() => {
-        navigate(`${DOCTOR_FILLPATDATA_ROUTE}/${registeredUserId}`);
+        navigate(route);
       }, 1500);
+
       return () => clearTimeout(timer);
     }
-  }, [registeredUserId, navigate]);
+  }, [registeredUserId, navigate, role]);
+
 
   const formFields = [
     { label: 'ПІБ', name: 'username', type: 'text', placeholder: 'Введіть ПІБ пацієнта', },
