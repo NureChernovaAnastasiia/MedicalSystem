@@ -29,3 +29,23 @@ export const fetchNonDoctorsByHospitalId = async (hospitalId) => {
     throw error;
   }
 };
+
+export const updateStaffData = async (id, updatedData) => {
+  try {
+    const { data } = await $authHost.put(`api/hospital-staff/${id}`, updatedData);
+    return data;
+  } catch (error) {
+    console.error("Помилка при оновленні даних персоналу", error);
+    throw error;
+  }
+};
+
+export const deleteStaffById = async (id) => {
+  try {
+    const { data } = await $authHost.delete(`api/hospital-staff/${id}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при видаленні працівника лікарні", error);
+    throw error;
+  }
+};

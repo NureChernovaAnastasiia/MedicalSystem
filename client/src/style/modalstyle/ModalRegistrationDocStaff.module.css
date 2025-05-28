@@ -1,0 +1,237 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background-color: #fff;
+  border-radius: 30px;
+  max-width: 70%;
+  width: 50%;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  background: #e2f6f2;
+  border-radius: 30px 30px 0 0;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 1.9rem;
+  color: #00c3a1;
+  margin: 0.5rem 0 0;
+}
+
+.form {
+  margin: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 22px;
+  color: #333333;
+  margin: 10px 0;
+}
+
+.form input,
+.form select {
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 18px;
+  padding: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  border-radius: 10px;
+  color: #333333;
+}
+
+.form input:hover,
+.form input:focus,
+.form select:hover,
+.form select:focus {
+    border-color: #00C3A1;
+    box-shadow: 0 0 5px rgba(0, 195, 161, 0.5);
+    outline: none;
+}
+
+.errorText {
+    color: red;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+  }
+
+.submitButton {
+    background: rgba(0, 195, 161, 0.42);
+    border-radius: 10px;
+    border: none;
+    padding: 0.7rem 1.6rem;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 20px;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.submitButton:hover {
+    background: #00C3A1;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.closeButton {
+  justify-content: center;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.cancelButton {
+  background: transparent;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-style: italic;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.closeIcon {
+  color: #FF0000;
+  font-size: 45px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.cancelButton {
+  color: #333333;
+  font-weight: 300;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cancelButton:hover {
+  color: #666;
+}
+
+@media (max-width: 1024px) {
+  .modal {
+    width: 70%;
+    max-width: 90%;
+  }
+
+  .form {
+    margin: 20px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal {
+    width: 85%;
+    max-width: 95%;
+    border-radius: 20px;
+  }
+
+  .header {
+    padding: 0.8rem 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .form {
+    margin: 15px 15px;
+  }
+
+  .form label {
+    font-size: 18px;
+  }
+
+  .form input {
+    font-size: 16px;
+    padding: 0.6rem;
+  }
+
+  .submitButton {
+    font-size: 18px;
+    padding: 0.6rem 1.2rem;
+  }
+
+  .cancelButton {
+    font-size: 18px;
+  }
+
+  .closeIcon {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    width: 95%;
+    max-height: 90%;
+    border-radius: 16px;
+  }
+
+  .header {
+    padding: 0.6rem 1rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .form {
+    margin: 10px 10px;
+    gap: 0.4rem;
+  }
+
+  .form label {
+    font-size: 16px;
+  }
+
+  .form input {
+    font-size: 14px;
+    padding: 0.5rem;
+  }
+
+  .submitButton {
+    font-size: 16px;
+    padding: 0.5rem 1rem;
+  }
+
+  .cancelButton {
+    font-size: 16px;
+  }
+
+  .closeIcon {
+    font-size: 30px;
+  }
+}

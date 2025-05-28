@@ -49,3 +49,23 @@ export const fetchDoctorsByHospitalId = async (hospitalId) => {
     throw error;
   }
 };
+
+export const updateDoctorData = async (id, updatedData) => {
+  try {
+    const { data } = await $authHost.put(`api/doctors/${id}`, updatedData);
+    return data;
+  } catch (error) {
+    console.error("Помилка при оновленні даних лікаря", error);
+    throw error;
+  }
+};
+
+export const deleteDoctorById = async (id) => {
+  try {
+    const { data } = await $authHost.delete(`api/doctors/${id}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при видаленні лікаря", error);
+    throw error;
+  }
+};

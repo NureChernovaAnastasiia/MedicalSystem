@@ -5,7 +5,7 @@ import SearchInput from '../../components/options/SearchInput';
 import SearchBySpecialization from '../../components/options/SearchBySpecialization';
 import DoctorItem from '../../components/doctor/DoctorItem';
 import StaffItem from '../../components/hospitalstaff/StaffItem';
-import ModalRegisterPatient from '../../components/modals/ModalRegisterPatient';
+import ModalRegistrationDocStaff from '../../components/modals/ModalRegistrationDocStaff';
 
 import styles from '../../style/adminpanel/AdminDoctors.module.css';
 
@@ -171,8 +171,14 @@ const AdminDoctors = () => {
       )}
 
       {isModalOpen && (
-        <ModalRegisterPatient doctor={null} onClose={() => setIsModalOpen(false)} />
+        <ModalRegistrationDocStaff
+          onClose={() => setIsModalOpen(false)}
+          onRegister={(data) => {
+            setIsModalOpen(false);
+          }}
+        />
       )}
+
     </div>
   );
 };
