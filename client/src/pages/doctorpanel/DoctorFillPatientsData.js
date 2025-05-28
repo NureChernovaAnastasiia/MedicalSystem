@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientEditPersonalInfo.module.css';
 
 import { genderMap } from '../../constants/gender';
@@ -56,10 +56,6 @@ const InfoBlock = ({ icon, title, children }) => (
 const DoctorFillPatientsData = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const location = useLocation();
-
-  const userType = location.state?.userType || 'user';
-  const patientFromState = location.state?.patient;
 
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -73,39 +69,31 @@ const DoctorFillPatientsData = () => {
 
   useEffect(() => {
     const loadPatient = async () => {
-      if (userType === 'patient' && patientFromState) {
-        setPatient(patientFromState);
-        fillFormData(patientFromState);
-      } else if (userType === 'user' && id) {
-        try {
-          const fetchedPatient = await fetchPatientByUserId(id);
-          setPatient(fetchedPatient);
-          fillFormData(fetchedPatient);
-        } catch {
-          setError('Не вдалося завантажити дані пацієнта');
-        }
+      if (!id) return;
+      try {
+        const fetchedPatient = await fetchPatientByUserId(id);
+        setPatient(fetchedPatient);
+        setFormData({
+          lastName: fetchedPatient.last_name || '',
+          firstName: fetchedPatient.first_name || '',
+          middleName: fetchedPatient.middle_name || '',
+          birthDate: fetchedPatient.birth_date || '',
+          gender: fetchedPatient.gender || '',
+          email: fetchedPatient.email || '',
+          phone: fetchedPatient.phone || '',
+          address: fetchedPatient.address || '',
+          photo_url: fetchedPatient.photo_url || '',
+          bloodType: fetchedPatient.blood_type || '',
+          chronicConditions: fetchedPatient.chronic_conditions || '',
+          allergies: fetchedPatient.allergies || '',
+        });
+      } catch {
+        setError('Не вдалося завантажити дані пацієнта');
       }
     };
 
-    const fillFormData = (data) => {
-      setFormData({
-        lastName: data.last_name || '',
-        firstName: data.first_name || '',
-        middleName: data.middle_name || '',
-        birthDate: data.birth_date || '',
-        gender: data.gender || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        address: data.address || '',
-        photo_url: data.photo_url || '',
-        bloodType: data.blood_type || '',
-        chronicConditions: data.chronic_conditions || '',
-        allergies: data.allergies || '',
-      });
-    };
-
     loadPatient();
-  }, [id, userType, patientFromState]);
+  }, [id]);
 
   const handleChange = ({ target: { name, value } }) =>
     setFormData((prev) => ({ ...prev, [name]: value }));

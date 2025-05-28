@@ -64,8 +64,7 @@ const PatientCardFull = ({ patient }) => {
             <div className={styles.headerRow}>
               <h2 className={styles.name}>{fullName}</h2>
               <NavLink
-                to={`${DOCTOR_FILLPATDATA_ROUTE}/${patient.id}`}
-                state={{ patient, userType: 'patient' }}
+                to={`${DOCTOR_FILLPATDATA_ROUTE}/${patient.user_id}`}
                 className={styles.editWarning}
               >
                 <span className={styles.exclamation}>!</span>

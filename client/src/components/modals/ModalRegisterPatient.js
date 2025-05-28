@@ -110,9 +110,7 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
   useEffect(() => {
     if (registeredUserId) {
       const timer = setTimeout(() => {
-        navigate(`${DOCTOR_FILLPATDATA_ROUTE}/${registeredUserId}`, {
-          state: { userType: 'user' },
-        });
+        navigate(`${DOCTOR_FILLPATDATA_ROUTE}/${registeredUserId}`);
       }, 1500);
       return () => clearTimeout(timer);
     }
