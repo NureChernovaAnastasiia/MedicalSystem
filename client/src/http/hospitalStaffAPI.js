@@ -19,3 +19,13 @@ export const updateHospitalStaffData = async (id, updatedData) => {
     throw error;
   }
 };
+
+export const fetchNonDoctorsByHospitalId = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`api/hospital-staff/non-doctors/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error(`Помилка при отриманні медичного персоналу для лікарні з ID ${hospitalId}:`, error);
+    throw error;
+  }
+};

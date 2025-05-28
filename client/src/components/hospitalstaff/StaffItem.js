@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import ModalDocInformation from '../modals/ModalDocInformation';
-import { iconInstructions } from '../../utils/icons'; 
+import { iconInstructions } from '../../utils/icons';
 
 const baseStyles = {
-  doctorItem: {
+  staffItem: {
     background: '#FFFFFF',
     borderWidth: '0 0 1px 0',
     borderStyle: 'solid',
@@ -23,9 +22,8 @@ const baseStyles = {
     lineHeight: '28px',
     color: '#333333',
     position: 'relative',
-    cursor: 'pointer',
   },
-  specialization: {
+  position: {
     fontStyle: 'italic',
     fontWeight: 400,
     fontSize: '18px',
@@ -65,9 +63,8 @@ const baseStyles = {
   },
 };
 
-const DoctorItem = ({ doctor }) => {
+const StaffItem = ({ person }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => setIsSmallScreen(window.innerWidth <= 767);
@@ -77,8 +74,8 @@ const DoctorItem = ({ doctor }) => {
   }, []);
 
   const combinedStyles = {
-    doctorItem: {
-      ...baseStyles.doctorItem,
+    staffItem: {
+      ...baseStyles.staffItem,
       ...(isSmallScreen
         ? {
             gridTemplateColumns: '1fr',
@@ -91,8 +88,8 @@ const DoctorItem = ({ doctor }) => {
       ...baseStyles.fullName,
       ...(isSmallScreen ? { fontSize: '16px', lineHeight: '22px' } : {}),
     },
-    specialization: {
-      ...baseStyles.specialization,
+    position: {
+      ...baseStyles.position,
       ...(isSmallScreen ? { fontSize: '16px' } : {}),
     },
     email: {
@@ -105,29 +102,22 @@ const DoctorItem = ({ doctor }) => {
     },
   };
 
-  const fullName = `${doctor.last_name || ''} ${doctor.first_name || ''} ${doctor.middle_name || ''}`.trim() || '—';
+  const fullName = `${person.last_name || ''} ${person.first_name || ''} ${person.middle_name || ''}`.trim() || '—';
 
   return (
     <>
-      <div style={combinedStyles.doctorItem}>
-        <span style={combinedStyles.fullName}
-          onClick={() => setModalOpen(true)}
-          onMouseEnter={e => (e.currentTarget.style.color = '#00795f')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#00C3A1')}
-          type="button">
-            {fullName}
-        </span>
-        <span style={combinedStyles.specialization}>{doctor.specialization || '—'}</span>
-        <span style={combinedStyles.email}>{doctor.email || '—'}</span>
+      <div style={combinedStyles.staffItem}>
+        <span style={combinedStyles.fullName}>{fullName}</span>
+        <span style={combinedStyles.position}>{person.position || '—'}</span>
+        <span style={combinedStyles.email}>{person.email || '—'}</span>
         <button style={combinedStyles.editButton}>
           <img src={iconInstructions} alt="Редагувати" style={baseStyles.editIcon} />
           Редагувати дані
         </button>
       </div>
 
-      {modalOpen && <ModalDocInformation doctor={doctor} onClose={() => setModalOpen(false)} />}
     </>
   );
 };
 
-export default DoctorItem;
+export default StaffItem;
