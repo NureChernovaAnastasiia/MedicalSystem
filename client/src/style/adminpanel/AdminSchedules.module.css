@@ -1,0 +1,148 @@
+.container {
+  padding: 30px 60px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.title {
+  text-align: left;
+  color: #000;
+  font-weight: 500;
+  font-size: 36px;
+}
+
+.orderButtonWrapper {
+  display: flex;
+}
+
+.orderButton {
+  background: rgba(0, 195, 161, 0.42);
+  border-radius: 10px;
+  border: none;
+  padding: 1rem 2rem;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 24px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.orderButton:hover {
+  background: #00C3A1;
+}
+
+.scheduleContainer {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+ .subtitle {
+    margin-left: 30px;
+    font-style: italic;
+    font-weight: 100;
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+.scheduleWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.scheduleWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scheduleWrapper::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.dayHeader {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, minmax(100px, 1fr));
+  background: rgba(0, 195, 161, 0.15);
+  padding: 10px 20px;
+  border-radius: 10px;
+  gap: 5px;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.dayItem {
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #333;
+  padding: 10px 0;
+}
+
+.scheduleTable {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyCell {
+  min-width: 100px; 
+}
+
+.scheduleRow {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, minmax(100px, 1fr));
+  align-items: center;
+  background: #f6f6f6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.doctorName {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #333;
+  text-align: center;
+}
+
+.scheduleCell {
+  text-align: center;
+  font-weight: 500;
+  font-size: 18px;
+  color: #00C37F;
+}
+
+.docAppointment {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .dayItem,
+  .doctorName,
+  .scheduleCell {
+    font-size: 14px;
+  }
+
+  .dayHeader,
+  .scheduleRow {
+    min-width: 850px; 
+  }
+}
+
