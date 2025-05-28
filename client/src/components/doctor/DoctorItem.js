@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ModalDocInformation from '../modals/ModalDocInformation';
 import { iconInstructions } from '../../utils/icons'; 
+import { ADMIN_EDITDOCSTAFFDATA_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   doctorItem: {
@@ -66,6 +68,7 @@ const baseStyles = {
 };
 
 const DoctorItem = ({ doctor }) => {
+  const navigate = useNavigate();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -107,19 +110,21 @@ const DoctorItem = ({ doctor }) => {
 
   const fullName = `${doctor.last_name || ''} ${doctor.first_name || ''} ${doctor.middle_name || ''}`.trim() || '—';
 
+  const handleEditClick = () => {
+    navigate(`${ADMIN_EDITDOCSTAFFDATA_ROUTE}/${doctor.user_id}`, { state: { userType: 'Doctor' } });
+  };
+
   return (
     <>
       <div style={combinedStyles.doctorItem}>
         <span style={combinedStyles.fullName}
           onClick={() => setModalOpen(true)}
-          onMouseEnter={e => (e.currentTarget.style.color = '#00795f')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#00C3A1')}
           type="button">
             {fullName}
         </span>
         <span style={combinedStyles.specialization}>{doctor.specialization || '—'}</span>
         <span style={combinedStyles.email}>{doctor.email || '—'}</span>
-        <button style={combinedStyles.editButton}>
+        <button style={combinedStyles.editButton} onClick={handleEditClick}>
           <img src={iconInstructions} alt="Редагувати" style={baseStyles.editIcon} />
           Редагувати дані
         </button>

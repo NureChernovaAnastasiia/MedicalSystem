@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
-import styles from '../../style/modalstyle/ModalRegisterPatient.module.css';
-import { DOCTOR_FILLPATDATA_ROUTE } from '../../utils/consts';
+import styles from '../../style/modalstyle/ModalRegistrationDocStaff.module.css';
+import { Context } from '../../index';
 import { registerUser } from '../../http/userAPI';
 import AlertPopup from '../../components/elements/AlertPopup';
+import { ADMIN_EDITDOCSTAFFDATA_ROUTE } from '../../utils/consts';
 
-const ModalRegisterPatient = ({ doctor, onClose }) => {
+const ModalRegistrationDocStaff = ({ onClose }) => {
   const navigate = useNavigate();
+  const { hospital } = useContext(Context);
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     username: '',
-    hospital_id: doctor.hospital_id,
-    doctor_id: doctor.id,
-    role: 'Patient',
+    role: 'Doctor',
+    hospital_id: hospital?.hospitalId,
   });
 
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [registeredUserId, setRegisteredUserId] = useState(null);
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username.trim()) newErrors.username = 'Це поле є обов’язковим';
     if (!formData.email.trim()) newErrors.email = 'Це поле є обов’язковим';
-    else if (!validateEmail(formData.email)) newErrors.email = 'Невірний формат email';
+    else if (!isValidEmail(formData.email)) newErrors.email = 'Невірний формат email';
     if (!formData.password.trim()) newErrors.password = 'Це поле є обов’язковим';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -40,6 +40,11 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
+  const handleTypeChange = (e) => {
+    const selectedRole = e.target.value;
+    setFormData((prev) => ({ ...prev, role: selectedRole }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -47,15 +52,13 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
     try {
       const createdUser = await registerUser(formData);
       const userData = jwtDecode(createdUser.token);
-
-      setAlert({ message: 'Пацієнта успішно зареєстровано', type: 'success' });
+      setAlert({ message: 'Користувача успішно зареєстровано', type: 'success' });
       setRegisteredUserId(userData.id);
     } catch (error) {
-      console.error('Помилка при реєстрації пацієнта:', error);
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.error ||
-        'Не вдалося зареєструвати пацієнта. Спробуйте ще раз.';
+        'Не вдалося зареєструвати користувача. Спробуйте ще раз.';
       setAlert({ message: errorMessage, type: 'error' });
     }
   };
@@ -63,60 +66,50 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
   useEffect(() => {
     if (registeredUserId) {
       const timer = setTimeout(() => {
-        navigate(`${DOCTOR_FILLPATDATA_ROUTE}/${registeredUserId}`, {
-          state: { userType: 'user' },
+        navigate(`${ADMIN_EDITDOCSTAFFDATA_ROUTE}/${registeredUserId}`, {
+          state: { userType: formData.role },
         });
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [registeredUserId, navigate]);
+  }, [registeredUserId, navigate, formData.role]);
 
   return (
     <div className={styles.overlay}>
       {alert && (
-        <AlertPopup message={alert.message} type={alert.type} onClose={() => setAlert(null)} />
+        <AlertPopup
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
       )}
 
       <div className={styles.modal}>
         <header className={styles.header}>
-          <h2 className={styles.title}>Реєстрація пацієнта</h2>
+          <h2 className={styles.title}>Реєстрація працівника</h2>
         </header>
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          <label>
-            ПІБ:
-            <input
-              type="text"
-              name="username"
-              placeholder="Введіть ПІБ пацієнта"
-              value={formData.username}
-              onChange={handleChange}
-            />
-            {errors.username && <span className={styles.errorText}>{errors.username}</span>}
-          </label>
+          {[
+            { label: 'ПІБ:', name: 'username', type: 'text', placeholder: 'Введіть ПІБ', },
+            { label: 'Email:', name: 'email', type: 'email', placeholder: 'Введіть email', },
+            { label: 'Пароль:', name: 'password', type: 'password', placeholder: 'Введіть пароль', },
+          ].map(({ label, name, type, placeholder }) => (
+            <label key={name}>
+              {label}
+              <input type={type} name={name} placeholder={placeholder} value={formData[name]}
+                onChange={handleChange}
+              />
+              {errors[name] && <span className={styles.errorText}>{errors[name]}</span>}
+            </label>
+          ))}
 
           <label>
-            Email:
-            <input
-              type="email"
-              name="email"
-              placeholder="Введіть email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            {errors.email && <span className={styles.errorText}>{errors.email}</span>}
-          </label>
-
-          <label>
-            Пароль:
-            <input
-              type="password"
-              name="password"
-              placeholder="Введіть пароль"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+            Тип користувача:
+            <select value={formData.role} onChange={handleTypeChange} className={styles.select}>
+              <option value="Doctor">Лікар</option>
+              <option value="Staff">Персонал</option>
+            </select>
           </label>
 
           <div className={styles.actions}>
@@ -124,6 +117,7 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
               <span className={styles.closeIcon}>×</span>
               <span className={styles.closeText}>Скасувати</span>
             </button>
+
             <button type="submit" className={styles.submitButton}>
               Зареєструвати
             </button>
@@ -134,4 +128,4 @@ const ModalRegisterPatient = ({ doctor, onClose }) => {
   );
 };
 
-export default ModalRegisterPatient;
+export default ModalRegistrationDocStaff;

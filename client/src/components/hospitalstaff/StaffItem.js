@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { iconInstructions } from '../../utils/icons';
+import { ADMIN_EDITDOCSTAFFDATA_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   staffItem: {
@@ -8,7 +10,7 @@ const baseStyles = {
     borderStyle: 'solid',
     borderColor: 'rgba(0, 195, 161, 0.42)',
     display: 'grid',
-    gridTemplateColumns: '4fr 1.5fr 2.5fr 2fr',
+    gridTemplateColumns: '3.5fr 2fr 2.5fr 2fr',
     alignItems: 'center',
     padding: '8px 1rem',
     gap: '1rem',
@@ -64,6 +66,7 @@ const baseStyles = {
 };
 
 const StaffItem = ({ person }) => {
+  const navigate = useNavigate();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
@@ -104,13 +107,19 @@ const StaffItem = ({ person }) => {
 
   const fullName = `${person.last_name || ''} ${person.first_name || ''} ${person.middle_name || ''}`.trim() || '—';
 
+  const handleEditClick = () => {
+    navigate(`${ADMIN_EDITDOCSTAFFDATA_ROUTE}/${person.user_id}`, {
+      state: { userType: 'Staff' }
+    });
+  };
+
   return (
     <>
       <div style={combinedStyles.staffItem}>
         <span style={combinedStyles.fullName}>{fullName}</span>
         <span style={combinedStyles.position}>{person.position || '—'}</span>
         <span style={combinedStyles.email}>{person.email || '—'}</span>
-        <button style={combinedStyles.editButton}>
+        <button style={combinedStyles.editButton} onClick={handleEditClick}>
           <img src={iconInstructions} alt="Редагувати" style={baseStyles.editIcon} />
           Редагувати дані
         </button>
