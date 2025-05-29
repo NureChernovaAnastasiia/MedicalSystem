@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {useParams} from 'react-router-dom'
+import React, { useEffect, useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import styles from "../../style/patientpanel/PatientDoctorSchedule.module.css";
 import ModalConfirmAppointment from "../../components/modals/ModalConfirmAppointment";
 import { daysOfWeekShort } from '../../constants/daysOfWeek';
@@ -12,26 +12,27 @@ const PatientDoctorSchedule = () => {
   const [timeSlots, setTimeSlots] = useState([]);
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  
+
   const { id } = useParams();
   const doctorId = Number(id);
 
-  useEffect(() => {
-  const loadTimeSlots = async (apiDate) => {
+  const loadTimeSlots = useCallback(async (apiDate) => {
     try {
       const slots = await fetchDoctorScheduleByIdAndDate(doctorId, apiDate);
-      const formattedSlots = slots.map(slot => ({
-        time: `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`,
-        active: !slot.is_booked,
-        id: slot.id,
-      }));
+      const formattedSlots = slots
+        .sort((a, b) => a.start_time.localeCompare(b.start_time))
+        .map(slot => ({
+          time: `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`,
+          active: !slot.is_booked,
+          id: slot.id,
+        }));
       setTimeSlots(formattedSlots);
     } catch (error) {
       console.error("Помилка при завантаженні слотів:", error);
     }
-  };
+  }, [doctorId]);
 
-  const initializeSchedule = async () => {
+  const initializeSchedule = useCallback(async () => {
     try {
       const doctor = await fetchDoctorById(doctorId);
       setDoctorInfo(doctor);
@@ -76,47 +77,32 @@ const PatientDoctorSchedule = () => {
       setSelectedDateIndex(0);
       await loadTimeSlots(dates[0].apiDate);
     }
-  };
+  }, [doctorId, loadTimeSlots]);
 
-  initializeSchedule();
-}, [doctorId]);
-  
-  const selectDate = async (index, apiDate) => {
-    setSelectedDateIndex(index);
-    await loadTimeSlots(apiDate);
-  };
+  useEffect(() => {
+    initializeSchedule();
+  }, [initializeSchedule]);
 
-  const loadTimeSlots = async (apiDate) => {
-    try {
-      const slots = await fetchDoctorScheduleByIdAndDate(doctorId, apiDate);
-      const formattedSlots = slots.map(slot => ({
-        time: `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`,
-        active: !slot.is_booked,
-        id: slot.id,
-      }));
-      setTimeSlots(formattedSlots);
-    } catch (error) {
-      console.error("Помилка при завантаженні слотів:", error);
-    }
-  };
-
-  const handleDateClick = (index) => {
+  const handleDateClick = async (index) => {
     const selectedDate = weekDates[index].apiDate;
-    selectDate(index, selectedDate);
+    setSelectedDateIndex(index);
+    await loadTimeSlots(selectedDate);
   };
 
   const handleSlotClick = (slot) => {
-    setSelectedSlot(slot);
+    if (slot.active) {
+      setSelectedSlot(slot);
+    }
   };
 
   return (
     <div className={styles.scheduleContainer}>
       <h1 className={styles.title}>Розклад прийомів</h1>
-      <h4 className={styles.subtitle}>
+      <p className={styles.subtitle}>
         {doctorInfo
           ? `${doctorInfo.last_name} ${doctorInfo.first_name} | ${doctorInfo.specialization} | ${doctorInfo.Hospital?.name}`
           : "Завантаження інформації..."}
-      </h4>
+      </p>
 
       <div className={styles.calendarWrapper}>
         <div className={styles.calendarContainer}>
@@ -142,7 +128,7 @@ const PatientDoctorSchedule = () => {
               <div
                 key={idx}
                 className={`${styles.timeSlot} ${slot.active ? styles.availableSlot : styles.unavailableSlot}`}
-                onClick={slot.active ? () => handleSlotClick(slot) : undefined}
+                onClick={() => handleSlotClick(slot)}
               >
                 {slot.time}
               </div>
