@@ -454,6 +454,81 @@ class AppointmentController {
       );
     }
   }
+  async getByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+
+      if (!hospitalId) {
+        return next(ApiError.badRequest("Не вказано hospitalId"));
+      }
+
+      const appointments = await Appointment.findAll({
+        include: [
+          {
+            model: Doctor,
+            where: { hospital_id: hospitalId },
+            include: [Hospital],
+          },
+          Patient,
+          DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
+        ],
+        order: [["appointment_date", "DESC"]],
+      });
+
+      return res.json(AppointmentController._mapStatus(appointments));
+    } catch (e) {
+      console.error("getByHospital error:", e);
+      return next(ApiError.internal("Не вдалося отримати прийоми по лікарні"));
+    }
+  }
+  async getByHospitalAndDate(req, res, next) {
+    try {
+      const { hospitalId } = req.params;
+      const { date } = req.query;
+
+      if (!date) {
+        return next(ApiError.badRequest("Необхідно вказати параметр 'date'"));
+      }
+
+      if (!["Admin", "Doctor"].includes(req.user.role)) {
+        return next(ApiError.forbidden("Немає доступу"));
+      }
+
+      const startDate = new Date(date);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+
+      const appointments = await Appointment.findAll({
+        where: {
+          appointment_date: {
+            [Op.between]: [startDate, endDate],
+          },
+        },
+        include: [
+          {
+            model: Doctor,
+            required: true,
+            include: [Hospital],
+            where: {
+              hospital_id: hospitalId,
+            },
+          },
+          Patient,
+          DoctorSchedule,
+          LabTestSchedule,
+          MedicalServiceSchedule,
+        ],
+        order: [["appointment_date", "ASC"]],
+      });
+
+      return res.json(AppointmentController._mapStatus(appointments));
+    } catch (e) {
+      console.error("getByHospitalAndDate error:", e);
+      return next(ApiError.internal("Не вдалося отримати прийоми за датою"));
+    }
+  }
 }
 
 module.exports = new AppointmentController();

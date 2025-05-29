@@ -8,6 +8,22 @@ const checkRole = require('../middleware/checkRoleMiddleware');
 router.use(authMiddleware);
 
 /**
+ * @route   GET /api/appointments/by-hospital/:hospitalId/by-date?date=YYYY-MM-DD
+ * @desc    Отримати всі прийоми лікарні за конкретною датою (Doctor/Admin)
+ */
+router.get(
+  '/by-hospital/:hospitalId/by-date',
+  checkRole('Admin', 'Doctor'),
+  appointmentController.getByHospitalAndDate
+);
+
+/**
+ * @route   PATCH /api/appointments/by-hospital/:hospitalId
+ * @desc    Прийоми в конкретнйі лікарні(Doctor/Admin)
+ */
+router.get('/by-hospital/:hospitalId', checkRole('Admin', 'Doctor'), appointmentController.getByHospital);
+
+/**
  * @route   GET /api/appointments/upcoming/doctor/:doctorId
  * @desc    Отримати майбутні прийоми лікаря
  *          (лікар — лише свої, адмін — будь-які)
