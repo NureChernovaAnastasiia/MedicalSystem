@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Context } from '../../index';
 import { iconMedCard } from '../../utils/icons';
-import { DOCTOR_PATMEDCARD_ROUTE } from '../../utils/consts';
+import { ADMIN_PATMEDCARD_ROUTE, DOCTOR_PATMEDCARD_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   patientItem: {
@@ -82,6 +83,9 @@ const formatDate = (dateString) => {
 };
 
 const PatientItem = ({ patient }) => {
+  const { user } = useContext(Context);
+  const role = user.role;
+
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
@@ -93,6 +97,11 @@ const PatientItem = ({ patient }) => {
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+  
+  const route =
+    role === 'Admin'
+      ? `${ADMIN_PATMEDCARD_ROUTE}/${patient.id}`
+      : `${DOCTOR_PATMEDCARD_ROUTE}/${patient.id}`;
 
   const combinedStyles = {
     patientItem: {
@@ -138,7 +147,7 @@ const PatientItem = ({ patient }) => {
           {`${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}` || '—'}</span>
         <span style={combinedStyles.birthDate}>{formatDate(patient.birth_date) || '—'}</span>
         <span style={combinedStyles.email}>{patient.email || '—'}</span>
-        <NavLink to={`${DOCTOR_PATMEDCARD_ROUTE}/${patient.id}`}>
+        <NavLink to={route}>
         <button
             style={combinedStyles.viewCardButton}
             onMouseEnter={e => (e.currentTarget.style.color = '#00795f')}

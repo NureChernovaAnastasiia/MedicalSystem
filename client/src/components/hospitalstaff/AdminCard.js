@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-  iconSpecialisation,
-  iconHospital,
-  iconLocation,
-  iconEmail,
-  iconTelephone
-} from '../../utils/icons';
+import ModalEditAdmin from '../modals/ModalEditAdmin';
+import { iconHospital, iconLocation, iconEmail, iconTelephone } from '../../utils/icons';
 
 const baseStyles = {
-  doctorCard: {
+  adminCard: {
     width: '100%',
     maxWidth: '1276px',
     margin: '20px auto',
@@ -48,15 +43,6 @@ const baseStyles = {
     lineHeight: 1,
     color: '#FBDA03',
   },
-  doctorImage: {
-    flexShrink: 0,
-    width: '20%',
-    maxWidth: '280px',
-    aspectRatio: '1/1',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-  },
   noPhotoCircle: {
     flexShrink: 0,
     width: '20%',
@@ -75,24 +61,30 @@ const baseStyles = {
     margin: '0 auto',
     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
   },
-  doctorInfo: {
+  adminInfo: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
   },
-  doctorName: {
+  adminName: {
     margin: '10px 0',
     fontFamily: 'Montserrat, sans-serif',
     fontWeight: 500,
     fontSize: '26px',
     color: '#333333',
   },
+  positionText: {
+    fontFamily: 'Montserrat, sans-serif',
+    fontStyle: 'italic',
+    fontWeight: 300,
+    fontSize: '18px',
+    color: '#555555',
+  },
   infoItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
     fontFamily: 'Montserrat, sans-serif',
-    fontStyle: 'italic',
     fontWeight: 200,
     fontSize: '20px',
     color: '#333333',
@@ -104,16 +96,11 @@ const baseStyles = {
 };
 
 const smallScreenStyles = {
-  doctorCard: {
+  adminCard: {
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: '20px',
     padding: '20px',
-  },
-  doctorImage: {
-    width: '50%',
-    maxWidth: '200px',
-    alignSelf: 'center',
   },
   noPhotoCircle: {
     width: '50%',
@@ -121,17 +108,26 @@ const smallScreenStyles = {
     alignSelf: 'center',
     fontSize: '14px',
   },
-  doctorName: {
+  adminName: {
     textAlign: 'center',
     fontSize: '24px',
   },
   infoItem: {
     fontSize: '16px',
   },
+  positionText: {
+    textAlign: 'center',
+  },
 };
 
-const DoctorCard = ({ doctor, onOpenModal }) => {
+const AdminCard = ({ admin }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [adminData, setAdminData] = useState(admin);
+
+  useEffect(() => {
+    setAdminData(admin); 
+  }, [admin]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -144,67 +140,88 @@ const DoctorCard = ({ doctor, onOpenModal }) => {
   }, []);
 
   const mergedStyles = {
-    doctorCard: {
-      ...baseStyles.doctorCard,
-      ...(isSmallScreen ? smallScreenStyles.doctorCard : {}),
-    },
-    doctorImage: {
-      ...baseStyles.doctorImage,
-      ...(isSmallScreen ? smallScreenStyles.doctorImage : {}),
+    adminCard: {
+      ...baseStyles.adminCard,
+      ...(isSmallScreen ? smallScreenStyles.adminCard : {}),
     },
     noPhotoCircle: {
       ...baseStyles.noPhotoCircle,
       ...(isSmallScreen ? smallScreenStyles.noPhotoCircle : {}),
     },
-    doctorName: {
-      ...baseStyles.doctorName,
-      ...(isSmallScreen ? smallScreenStyles.doctorName : {}),
+    adminName: {
+      ...baseStyles.adminName,
+      ...(isSmallScreen ? smallScreenStyles.adminName : {}),
     },
     infoItem: {
       ...baseStyles.infoItem,
       ...(isSmallScreen ? smallScreenStyles.infoItem : {}),
     },
+    positionText: {
+      ...baseStyles.positionText,
+      ...(isSmallScreen ? smallScreenStyles.positionText : {}),
+    },
   };
 
+  const positionTranslations = {
+  'admin': 'Адміністратор',
+  'doctor': 'Лікар',
+  'nurse': 'Медсестра',
+};
+
+   const handleSave = (updatedData) => {
+    setAdminData(prev => ({
+      ...prev,
+      ...updatedData,
+    }));
+    setIsModalOpen(false);
+  };
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
   return (
-    <div style={mergedStyles.doctorCard}>
+    <div style={mergedStyles.adminCard}>
       <div style={baseStyles.cardHeader}>
-        <button style={baseStyles.detailsButton} onClick={() => onOpenModal(doctor)}>
-          <span style={baseStyles.detailsIcon}>?</span> Детальніше
+        <button style={baseStyles.detailsButton} onClick={handleOpenModal}>
+            <span style={baseStyles.detailsIcon}>!</span> Редагувати дані
         </button>
       </div>
-      {doctor.photo_url ? (
-        <img src={doctor.photo_url} alt="Doctor" style={mergedStyles.doctorImage} />
-      ) : (
-        <div style={mergedStyles.noPhotoCircle}>Немає фото</div>
-      )}
-      <div style={baseStyles.doctorInfo}>
-        <h2 style={mergedStyles.doctorName}>
-          {`${doctor.last_name} ${doctor.first_name} ${doctor.middle_name}`}
+      <div style={mergedStyles.noPhotoCircle}>АДМІН</div>
+      <div style={baseStyles.adminInfo}>
+        <h2 style={mergedStyles.adminName}>
+          {`${adminData.last_name || ""} ${adminData.first_name || ""} ${adminData.middle_name || ""}` || 'Адміністратор'}
         </h2>
-        <div style={mergedStyles.infoItem}>
-          <img src={iconSpecialisation} alt="Спеціальність" style={baseStyles.infoIcon} />
-          <p style={{ margin: '10px 0' }}><strong>Спеціальність:</strong> {doctor.specialization}</p>
-        </div>
+        <p style={mergedStyles.positionText}>
+            {positionTranslations[adminData.position?.toLowerCase()] || adminData.position || 'Посада не вказана'}
+        </p>
         <div style={mergedStyles.infoItem}>
           <img src={iconHospital} alt="Лікарня" style={baseStyles.infoIcon} />
-          <p style={{ margin: '10px 0' }}><strong>Лікарня:</strong> {doctor.Hospital?.name}</p>
+          <p style={{ margin: '10px 0' }}><strong>Лікарня:</strong> {adminData.Hospital?.name}</p>
         </div>
         <div style={mergedStyles.infoItem}>
-          <img src={iconLocation} alt="Місто" style={baseStyles.infoIcon} />
-          <p style={{ margin: '10px 0' }}><strong>Місто:</strong> {doctor.Hospital?.address}</p>
+          <img src={iconLocation} alt="Адреса" style={baseStyles.infoIcon} />
+          <p style={{ margin: '10px 0' }}><strong>Адреса:</strong> {adminData.Hospital?.address}</p>
         </div>
         <div style={mergedStyles.infoItem}>
           <img src={iconEmail} alt="Email" style={baseStyles.infoIcon} />
-          <p style={{ margin: '10px 0' }}><strong>Email:</strong> {doctor.email || 'Немає даних'}</p>
+          <p style={{ margin: '10px 0' }}><strong>Email:</strong> {adminData.email || 'Немає даних'}</p>
         </div>
         <div style={mergedStyles.infoItem}>
           <img src={iconTelephone} alt="Телефон" style={baseStyles.infoIcon} />
-          <p style={{ margin: '10px 0' }}><strong>Телефон:</strong> {doctor.phone || 'Немає даних'}</p>
+          <p style={{ margin: '10px 0' }}><strong>Телефон:</strong> {adminData.phone || 'Немає даних'}</p>
         </div>
       </div>
+
+      {isModalOpen && (
+        <ModalEditAdmin
+          admin={adminData}
+          onClose={handleCloseModal}
+          onSave={handleSave}  
+        />
+      )}
+
     </div>
   );
 };
 
-export default DoctorCard;
+export default AdminCard;

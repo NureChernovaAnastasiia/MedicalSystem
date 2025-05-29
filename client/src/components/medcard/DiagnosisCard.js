@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 import styles from '../../style/patientpanel/PatientMedicalRecords.module.css';
 import { iconDiagnosis } from '../../utils/icons';
-import { PATIENT_MEDDETAIL_ROUTE, DOCTOR_MEDDETAIL_ROUTE } from '../../utils/consts';
+import { PATIENT_MEDDETAIL_ROUTE, DOCTOR_MEDDETAIL_ROUTE, ADMIN_MEDDETAIL_ROUTE } from '../../utils/consts';
 import { Context } from '../../index';
 
 const formatDate = (isoDate) => {
@@ -18,9 +18,13 @@ const DiagnosisCard = ({ id, diagnosis, record_date }) => {
   const role = user._role;
 
   const route =
-    role === 'PATIENT'
+    role === 'Patient'
       ? `${PATIENT_MEDDETAIL_ROUTE}/${id}`
-      : `${DOCTOR_MEDDETAIL_ROUTE}/${id}`;
+      : role === 'Doctor'
+      ? `${DOCTOR_MEDDETAIL_ROUTE}/${id}`
+      : role === 'Admin'
+      ? `${ADMIN_MEDDETAIL_ROUTE}/${id}`
+      : '#';
 
   return (
     <div className={styles.card}>

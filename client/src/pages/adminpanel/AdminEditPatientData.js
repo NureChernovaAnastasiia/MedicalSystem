@@ -3,11 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientEditPersonalInfo.module.css';
 
 import { genderMap } from '../../constants/gender';
-import { BLOOD_GROUPS } from '../../constants/bloodType';
-import { iconContacts, iconHealth } from '../../utils/icons';
+import { iconContacts } from '../../utils/icons';
 
 import { updatePatientData, fetchPatientByUserId } from '../../http/patientAPI';
-import { DOCTOR_PATIENTS_ROUTE } from '../../utils/consts';
+import { ADMIN_PATIENTS_ROUTE } from '../../utils/consts';
 
 const Field = ({ label, name, value, onChange, type = 'text' }) => (
   <div className={styles.fieldGroup}>
@@ -53,7 +52,7 @@ const InfoBlock = ({ icon, title, children }) => (
   </div>
 );
 
-const DoctorFillPatientsData = () => {
+const AdminEditPatientData = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -113,7 +112,7 @@ const DoctorFillPatientsData = () => {
         ])
       );
       await updatePatientData(patient.id, updatedData);
-      navigate(DOCTOR_PATIENTS_ROUTE);
+      navigate(ADMIN_PATIENTS_ROUTE);
     } catch (err) {
       console.error(err);
       setError('Не вдалося оновити дані пацієнта. Спробуйте пізніше.');
@@ -150,17 +149,6 @@ const DoctorFillPatientsData = () => {
           <Field label="Адреса проживання" name="address" value={formData.address} onChange={handleChange} />
         </InfoBlock>
 
-        <InfoBlock icon={iconHealth} title="Інформація про здоров’я">
-          <SelectField
-            label="Група крові"
-            name="bloodType"
-            value={formData.bloodType}
-            onChange={handleChange}
-            options={BLOOD_GROUPS}
-          />
-          <Field label="Хронічні захворювання" name="chronicConditions" value={formData.chronicConditions} onChange={handleChange} />
-          <Field label="Алергії" name="allergies" value={formData.allergies} onChange={handleChange} />
-        </InfoBlock>
       </div>
 
       <div className={styles.buttonGroup}>
@@ -172,4 +160,4 @@ const DoctorFillPatientsData = () => {
   );
 };
 
-export default DoctorFillPatientsData;
+export default AdminEditPatientData;

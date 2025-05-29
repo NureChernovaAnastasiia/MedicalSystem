@@ -29,3 +29,13 @@ export const fetchDoctorWorkingHoursByIdAndDate = async (doctorId, date) => {
     throw error;
   }
 };
+
+export const createDoctorSchedule = async (scheduleData) => {
+  try {
+    const { data } = await $authHost.post('api/doctor-schedules', scheduleData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні розкладу лікаря:', error);
+    throw error;
+  }
+};

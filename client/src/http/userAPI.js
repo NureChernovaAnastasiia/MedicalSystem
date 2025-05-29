@@ -45,7 +45,7 @@ export const changePassword = async (oldPassword, newPassword) => {
   return data;
 };
 
-export const registerPatient = async (patientData) => {
-  const { data } = await $authHost.post("api/users/registration", patientData);
+export const registerUser = async (userData) => {
+  const { data } = await $authHost.post("api/users/registration", userData);
   return data;
 };
