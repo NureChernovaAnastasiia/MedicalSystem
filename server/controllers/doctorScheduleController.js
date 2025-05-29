@@ -3,6 +3,7 @@ const {
   Appointment,
   Doctor,
   Patient,
+  Hospital
 } = require("../models/models");
 const ApiError = require("../error/ApiError");
 const { Op } = require("sequelize");
@@ -241,40 +242,67 @@ class DoctorScheduleController {
     }
   }
   async getWorkingHoursByDate(req, res, next) {
-  try {
-    const { doctorId, date } = req.params;
+    try {
+      const { doctorId, date } = req.params;
 
-    if (!doctorId || !date) {
-      return next(ApiError.badRequest('Потрібні doctorId і date'));
-    }
+      if (!doctorId || !date) {
+        return next(ApiError.badRequest("Потрібні doctorId і date"));
+      }
 
-    const slots = await DoctorSchedule.findAll({
-      where: {
-        doctor_id: doctorId,
-        appointment_date: date
-      },
-      order: [['start_time', 'ASC']]
-    });
+      const slots = await DoctorSchedule.findAll({
+        where: {
+          doctor_id: doctorId,
+          appointment_date: date,
+        },
+        order: [["start_time", "ASC"]],
+      });
 
-    if (slots.length === 0) {
+      if (slots.length === 0) {
+        return res.json({
+          doctor_id: doctorId,
+          date,
+          message: "На цей день немає розкладу",
+        });
+      }
+
       return res.json({
         doctor_id: doctorId,
         date,
-        message: 'На цей день немає розкладу'
+        start_time: slots[0].start_time,
+        end_time: slots[slots.length - 1].end_time,
       });
+    } catch (e) {
+      console.error("getWorkingHoursByDate error:", e);
+      return next(ApiError.internal("Не вдалося отримати час прийому лікаря"));
     }
-
-    return res.json({
-      doctor_id: doctorId,
-      date,
-      start_time: slots[0].start_time,
-      end_time: slots[slots.length - 1].end_time
-    });
-  } catch (e) {
-    console.error('getWorkingHoursByDate error:', e);
-    return next(ApiError.internal('Не вдалося отримати час прийому лікаря'));
   }
-}
+  async getById(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const schedule = await DoctorSchedule.findByPk(id, {
+        include: [
+          {
+            model: Doctor,
+            include: [Hospital],
+          },
+          {
+            model: Appointment,
+            include: [Patient],
+          },
+        ],
+      });
+
+      if (!schedule) {
+        return next(ApiError.notFound("Розклад не знайдено"));
+      }
+
+      return res.json(schedule);
+    } catch (e) {
+      console.error("getById error:", e);
+      return next(ApiError.internal("Не вдалося отримати розклад"));
+    }
+  }
 }
 
 module.exports = new DoctorScheduleController();
