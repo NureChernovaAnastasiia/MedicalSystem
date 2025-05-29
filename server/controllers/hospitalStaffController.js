@@ -167,6 +167,27 @@ class HospitalStaffController {
       return next(ApiError.internal("Не вдалося отримати non-doctor персонал"));
     }
   }
+  async getUniquePositions(req, res, next) {
+    try {
+      const positions = await HospitalStaff.findAll({
+        attributes: [
+          [
+            require("sequelize").fn(
+              "DISTINCT",
+              require("sequelize").col("position")
+            ),
+            "position",
+          ],
+        ],
+        where: { position: { [Op.ne]: "Doctor" } },
+      });
+
+      return res.json(positions.map((p) => p.position));
+    } catch (e) {
+      console.error("getUniquePositions error:", e);
+      return next(ApiError.internal("Не вдалося отримати список посад"));
+    }
+  }
 }
 
 module.exports = new HospitalStaffController();
