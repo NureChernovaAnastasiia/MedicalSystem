@@ -115,7 +115,7 @@
   border: 1px solid rgba(0, 0, 0, 0.24);
   color: #333;
   letter-spacing: 0.1em;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .noSlotsMessage {
@@ -131,17 +131,34 @@
   font-weight: 100;
 }
 
-@media (max-width: 1470px) {
-  .calendarContainer {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+@media (max-width: 768px) {
+  .calendarWrapper {
+    flex-direction: column;
     gap: 20px;
   }
 
+  .calendarContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
   .card {
-    flex: 0 0 140px;
-    min-width: 140px;
-    max-width: 140px;
+    width: 100%;
+    height: auto;
+    padding: 10px 0;
+  }
+
+  .timeSlotsGrid {
+    gap: 15px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .timeSlot {
+    width: calc(30% - 7.5px); 
+    font-size: 16px;
+    height: 50px;
   }
 }
