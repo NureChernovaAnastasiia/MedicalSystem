@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { NavLink } from 'react-router-dom';
 import styles from '../../style/patientpanel/PatientHospitalSchedule.module.css';
 import { daysUa } from '../../constants/daysOfWeek';
+import { Context } from '../../index';
+import { ADMIN_DOCSCHEDULE_ROUTE } from '../../utils/consts';
 
 const DoctorScheduleTable = ({ doctors, weekDates, workingHours }) => {
+  const { user } = useContext(Context);
+  const role = user?._role;
+
   return (
     <div className={styles.scheduleWrapper}>
       <div className={styles.dayHeader}>
@@ -18,7 +24,16 @@ const DoctorScheduleTable = ({ doctors, weekDates, workingHours }) => {
         {doctors.map((doctor) => (
           <div key={doctor.id} className={styles.scheduleRow}>
             <div className={styles.doctorName}>
-              {doctor.last_name} {doctor.first_name?.charAt(0)}.{doctor.middle_name?.charAt(0)}.
+              {role === 'Admin' ? (
+                <NavLink
+                  to={`${ADMIN_DOCSCHEDULE_ROUTE}/${doctor.id}`}
+                  className={styles.clickableName}
+                >
+                  {doctor.last_name} {doctor.first_name?.charAt(0)}.{doctor.middle_name?.charAt(0)}.
+                </NavLink>
+              ) : (
+                `${doctor.last_name} ${doctor.first_name?.charAt(0)}.${doctor.middle_name?.charAt(0)}.`
+              )}
             </div>
             {weekDates.map((date) => {
               const time = workingHours[doctor.id]?.[date];

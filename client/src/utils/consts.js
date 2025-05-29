@@ -42,3 +42,4 @@ export const ADMIN_EDITDOCSTAFFDATA_ROUTE = '/admin-edit-doc-data';
 export const ADMIN_PATMEDCARD_ROUTE = '/admin-patient-med-card';
 export const ADMIN_MEDDETAIL_ROUTE = '/admin-patient-med-detail';
 export const ADMIN_EDITPATDATA_ROUTE = '/admin-edit-patient-data';
+export const ADMIN_DOCSCHEDULE_ROUTE = '/admin-doc-schedule';
