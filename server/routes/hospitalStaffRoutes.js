@@ -7,7 +7,7 @@ const checkRoleMiddleware = require("../middleware/checkRoleMiddleware");
 // 🔐 Усі маршрути вимагають авторизації
 router.use(authMiddleware);
 
-// 🟢 Публічні для авторизованих
+router.get("/positions/unique", hospitalStaffController.getUniquePositions);
 router.get("/by-user/:userId", hospitalStaffController.getByUserId);
 router.get(
   "/non-doctors/:hospitalId",
