@@ -7,7 +7,7 @@ import SearchInput from "../../components/options/SearchInput";
 import { Context } from '../../index';
 import { fetchAppointmentsByHospitalAndDate } from '../../http/appointmentAPI'; 
 import { formatAppointmentDate } from '../../utils/formatDate';
-import { DOCTOR_ALLAPPOINTMENTS_ROUTE } from '../../utils/consts';
+import { ADMIN_ALLAPPOINTMENTS_ROUTE, } from '../../utils/consts';
 
 const AdminAppointments = () => {
   const { hospital } = useContext(Context);
@@ -94,7 +94,7 @@ const AdminAppointments = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Прийоми на сьогодні</h1>
         <div className={styles.orderButtonWrapper}>
-          <NavLink to={DOCTOR_ALLAPPOINTMENTS_ROUTE}>
+          <NavLink to={ADMIN_ALLAPPOINTMENTS_ROUTE}>
             <button className={styles.orderButton}>Всі прийоми</button>
           </NavLink>
         </div>
