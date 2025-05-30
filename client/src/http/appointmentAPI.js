@@ -49,3 +49,15 @@ export const createAppointment = async (appointmentData) => {
     throw error;
   }
 };
+
+export const fetchAppointmentsByHospitalAndDate = async (hospitalId, date) => {
+  const { data } = await $authHost.get(`/api/appointments/by-hospital/${hospitalId}/by-date`, {
+    params: { date }
+  });
+  return data;
+};
+
+export const fetchAppointmentsByHospital = async (hospitalId) => {
+  const { data } = await $authHost.get(`/api/appointments/by-hospital/${hospitalId}`);
+  return data;
+};
