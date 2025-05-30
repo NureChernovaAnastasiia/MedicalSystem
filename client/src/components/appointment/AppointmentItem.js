@@ -25,8 +25,11 @@ const baseStyles = {
     color: '#333333',
     position: 'relative',
     top: '6px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
-  appointmentDate: {
+    appointmentDate: {
     fontStyle: 'italic',
     fontWeight: 500,
     fontSize: '18px',
@@ -197,11 +200,23 @@ const AppointmentItem = ({ appointment, onDetailsClick }) => {
         {formatAppointmentTimeOnly(appointment)}
       </span>
       {role === 'Admin' && (
-        <span style={combinedStyles.patientName}>
+        <span
+          style={{
+            ...combinedStyles.patientName,
+            maxWidth: isSmallScreen ? '100%' : '100%',
+            display: 'inline-block',
+          }}
+        >
           {`${doctor.last_name || ''} ${doctor.first_name || ''} ${doctor.middle_name || ''}`.trim() || '—'}
         </span>
       )}
-      <span style={combinedStyles.patientName}>
+      <span
+          style={{
+            ...combinedStyles.patientName,
+            maxWidth: isSmallScreen ? '100%' : '100%',
+            display: 'inline-block',
+          }}
+        >
         {`${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}`.trim() || '—'}
       </span>
       <span style={combinedStyles.status}>

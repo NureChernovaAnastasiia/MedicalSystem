@@ -6,12 +6,13 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
 import SearchInput from '../../components/options/SearchInput';
+import SearchByDoctor from '../../components/options/SearchByDoctor';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import AppointmentItem from '../../components/appointment/AppointmentItem';
 import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
 import ModalAppointmentDetails from '../../components/modals/ModalAppointmentDetails';
 
-import styles from '../../style/doctorpanel/DoctorAllAppointments.module.css';
+import styles from '../../style/adminpanel/AdminAllAppointments.module.css';
 
 import { fetchAppointmentsByHospital } from '../../http/appointmentAPI';
 
@@ -24,6 +25,7 @@ const AdminAllAppointments = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -86,11 +88,13 @@ const AdminAllAppointments = () => {
     const searchLower = searchTerm.toLowerCase();
     const appointmentDate = new Date(app.date_time);
     const status = app.status;
+    const doctorId = app.doctor_id;
 
     const matchByName = fullNameLower.includes(searchLower);
     const isInDateRange =
       (!startDate || appointmentDate >= startDate) &&
       (!endDate || appointmentDate <= endDate);
+    const matchByDoctor = selectedDoctorId === '' || doctorId === +selectedDoctorId;
 
     let statusMatch = true;
     if (statusFilter !== 'all') {
@@ -103,7 +107,7 @@ const AdminAllAppointments = () => {
       }
     }
 
-    return matchByName && isInDateRange && statusMatch;
+    return matchByName && isInDateRange && statusMatch && matchByDoctor;
   });
 
   const getDateRangeLabel = () => {
@@ -151,6 +155,23 @@ const AdminAllAppointments = () => {
       </div>
 
       <div className={styles.filterRow}>
+        <select
+          className={styles.select}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">Усі прийоми</option>
+          <option value="upcoming">Майбутні</option>
+          <option value="past">Минулі</option>
+          <option value="canceled">Скасовані</option>
+        </select>
+
+        <SearchByDoctor
+          hospitalId={hospitalId}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+        />
+
         <div className={styles.datePickerWrapper}>
           <button
             onClick={() => setShowCalendar(prev => !prev)}
@@ -173,22 +194,12 @@ const AdminAllAppointments = () => {
             </div>
           )}
         </div>
-
-        <select
-          className={styles.select}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">Усі прийоми</option>
-          <option value="upcoming">Майбутні</option>
-          <option value="past">Минулі</option>
-          <option value="canceled">Скасовані</option>
-        </select>
       </div>
 
       <div className={styles.tableHeader}>
         <span>Дата прийому</span>
         <span>Час прийому</span>
+        <span>ПІБ лікаря</span>
         <span>ПІБ пацієнта</span>
         <span>Статус</span>
       </div>
