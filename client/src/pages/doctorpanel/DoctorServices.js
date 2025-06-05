@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { format } from 'date-fns';
 import { Context } from '../../index';
 
 import 'react-date-range/dist/styles.css';
@@ -96,18 +95,6 @@ const DoctorServices = () => {
   })
   .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
 
-  const getDateRangeLabel = () => {
-    if (!startDate && !endDate) return 'Виберіть діапазон';
-    if (startDate && !endDate) return `Від ${format(startDate, 'dd.MM.yyyy')}`;
-    if (!startDate && endDate) return `До ${format(endDate, 'dd.MM.yyyy')}`;
-    return `${format(startDate, 'dd.MM.yyyy')} - ${format(endDate, 'dd.MM.yyyy')}`;
-  };
-
-  const resetDateFilter = () => {
-    setDateRange([{ startDate: null, endDate: null, key: 'selection' }]);
-    setShowCalendar(false);
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.headerRow}>
@@ -123,28 +110,12 @@ const DoctorServices = () => {
       </div>
 
       <div className={styles.filterRow}>
-        <div className={styles.datePickerWrapper}>
-          <button
-            onClick={() => setShowCalendar(prev => !prev)}
-            className={styles.dateButton}
-          >
-            {getDateRangeLabel()}
-          </button>
-
-          {showCalendar && (
-            <div className={styles.dateRangeWrapper}>
-              <DateRangeFilter
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-                showCalendar={showCalendar}
-                setShowCalendar={setShowCalendar}
-              />
-              <button onClick={resetDateFilter} className={styles.clearDateButton}>
-                Скинути фільтр
-              </button>
-            </div>
-          )}
-        </div>
+        <DateRangeFilter
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          showCalendar={showCalendar}
+          setShowCalendar={setShowCalendar}
+        />
 
         <select
           className={styles.select}
