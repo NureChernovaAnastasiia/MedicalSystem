@@ -13,7 +13,7 @@ const baseStyles = {
     display: 'grid',
     gridTemplateColumns: '3fr 1fr 2.8fr 1.5fr',
     alignItems: 'center',
-    padding: '8px 1rem',
+    padding: '4px 1rem',
     gap: '1rem',
     boxSizing: 'border-box',
     fontFamily: "'Montserrat', sans-serif",
