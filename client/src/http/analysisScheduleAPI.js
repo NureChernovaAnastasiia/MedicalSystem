@@ -22,3 +22,13 @@ export const bookLabTestScheduleById = async (labTestScheduleId, orderId) => {
     throw error;
   }
 };
+
+export const getLabTestSchedulesByHospital = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`/api/lab-test-schedules/by-hospital/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching lab test schedules by hospital:', error);
+    throw error;
+  }
+};

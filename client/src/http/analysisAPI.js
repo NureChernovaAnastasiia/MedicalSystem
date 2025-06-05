@@ -64,3 +64,13 @@ export const markLabTestReady = async (labTestId) => {
   const { data } = await $authHost.patch(`api/lab-tests/mark-ready/${labTestId}`);
   return data;
 };
+
+export const getLabTestsByHospital = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`/api/lab-tests/by-hospital/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні лабораторних тестів:', error);
+    throw error;
+  }
+};
