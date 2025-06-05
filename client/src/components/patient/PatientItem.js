@@ -66,7 +66,6 @@ const baseStyles = {
 
     transition: 'color 0.3s ease',
   },
-
   infoIcon: {
     width: '35px',
     height: '35px',

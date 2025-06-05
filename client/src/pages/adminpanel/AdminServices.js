@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { NavLink } from 'react-router-dom';
 import { Context } from '../../index'; 
 import SearchInput from '../../components/options/SearchInput';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
@@ -8,6 +9,7 @@ import { getMedicalServicesByHospital } from '../../http/servicesAPI';
 import { getLabTestsByHospital } from '../../http/analysisAPI';
 
 import styles from '../../style/adminpanel/AdminServices.module.css';
+import { ADMIN_SERVICESHOSP_ROUTE } from '../../utils/consts';
 
 const AdminServices = () => {
   const { hospital } = useContext(Context);
@@ -81,8 +83,9 @@ const AdminServices = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Послуги</h1>
         <div className={styles.orderButtonWrapper}>
-          <button className={styles.orderButton}>Список послуг</button>
-          <button className={styles.orderButton}>Розклад надання</button>
+          <NavLink to={ADMIN_SERVICESHOSP_ROUTE}>
+            <button className={styles.orderButton}>Список послуг</button>
+          </NavLink>
         </div>
       </div>
 

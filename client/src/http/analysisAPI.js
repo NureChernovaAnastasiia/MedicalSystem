@@ -74,3 +74,13 @@ export const getLabTestsByHospital = async (hospitalId) => {
     throw error;
   }
 };
+
+export const deleteHospitalLabService = async (serviceId) => {
+  try {
+    const { data } = await $authHost.delete(`/api/hospital-lab-services/${serviceId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні лабораторного аналізу:', error);
+    throw error;
+  }
+};

@@ -74,3 +74,13 @@ export const getMedicalServicesByHospital = async (hospitalId) => {
     throw error;
   }
 };
+
+export const deleteHospitalMedicalService = async (serviceId) => {
+  try {
+    const { data } = await $authHost.delete(`/api/hospital-medical-services/${serviceId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні медичної послуги:', error);
+    throw error;
+  }
+};
