@@ -65,7 +65,7 @@ const ServiceHospitalItem = ({ service }) => {
     txt: { ...base.txt, ...(small && { fontSize: 14 }) },
   };
 
-  const title = service.test_name || service.procedure_name || '—';
+  const title = service.test_name || service.service_name || '—';
   const doctor = service.doctor_name || `${service.Doctor.last_name} ${service.Doctor.first_name}` || '—';
   const patient = service.patient_name || `${service.Patient.last_name} ${service.Patient.first_name}` || '—';
   const start = fmtTime(service.start_time || service.MedicalServiceSchedule.start_time);
