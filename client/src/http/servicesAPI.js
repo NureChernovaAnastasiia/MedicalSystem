@@ -104,3 +104,13 @@ export const createHospitalMedicalService = async (serviceData) => {
     throw error;
   }
 };
+
+export const fetchAvailableMedicalServices = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`/api/hospital-medical-services/available/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні медичних послуг:', error);
+    throw error;
+  }
+};

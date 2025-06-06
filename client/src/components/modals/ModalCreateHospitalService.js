@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import styles from '../../style/modalstyle/ModalCreateHospitalService.module.css';
 import { Context } from '../../index';
 import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
-import { fetchLabTestInfo, createHospitalLabService } from '../../http/analysisAPI';
-import { fetchMedicalServicesInfo, createHospitalMedicalService } from '../../http/servicesAPI';
+import { fetchAvailableLabServices, createHospitalLabService } from '../../http/analysisAPI';
+import { fetchAvailableMedicalServices, createHospitalMedicalService } from '../../http/servicesAPI';
 import AlertPopup from "../../components/elements/AlertPopup";
 
 const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
@@ -29,10 +29,10 @@ const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
         setDoctors(doctorsData);
 
         if (isAnalysis) {
-          const tests = await fetchLabTestInfo();
+          const tests = await fetchAvailableLabServices(hospitalId);
           setServices(tests);
         } else {
-          const medServices = await fetchMedicalServicesInfo();
+          const medServices = await fetchAvailableMedicalServices(hospitalId);
           setServices(medServices);
         }
       } catch (e) {

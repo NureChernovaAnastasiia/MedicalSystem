@@ -104,3 +104,13 @@ export const createHospitalLabService = async (labData) => {
     throw error;
   }
 };
+
+export const fetchAvailableLabServices = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`/api/hospital-lab-services/available/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні лабораторних послуг:', error);
+    throw error;
+  }
+};
