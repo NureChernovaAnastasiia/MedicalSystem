@@ -84,3 +84,23 @@ export const deleteHospitalLabService = async (serviceId) => {
     throw error;
   }
 };
+
+export const fetchLabTestInfo = async () => {
+  try {
+    const { data } = await $authHost.get('/api/lab-test-info');
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні аналізів:', error);
+    throw error;
+  }
+};
+
+export const createHospitalLabService = async (labData) => {
+  try {
+    const { data } = await $authHost.post('api/hospital-lab-services', labData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні аналізу в лікарні:', error);
+    throw error;
+  }
+};

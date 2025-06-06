@@ -15,7 +15,7 @@ const AdminServices = () => {
   const { hospital } = useContext(Context);
   const hospitalId = hospital?.hospitalId;
 
-  const [activeTab, setActiveTab] = useState('services');
+  const [activeTab, setActiveTab] = useState('analyses');
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState([{ startDate: null, endDate: null, key: 'selection' }]);
   const [showCalendar, setShowCalendar] = useState(false);

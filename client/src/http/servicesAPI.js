@@ -84,3 +84,23 @@ export const deleteHospitalMedicalService = async (serviceId) => {
     throw error;
   }
 };
+
+export const fetchMedicalServicesInfo = async () => {
+  try {
+    const { data } = await $authHost.get('api/medical-service-info');
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні списку послуг:', error);
+    throw error;
+  }
+};
+
+export const createHospitalMedicalService = async (serviceData) => {
+  try {
+    const { data } = await $authHost.post('api/hospital-medical-services', serviceData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні медичної послуги в лікарні:', error);
+    throw error;
+  }
+};
