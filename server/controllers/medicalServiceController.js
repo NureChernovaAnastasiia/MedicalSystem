@@ -357,82 +357,85 @@ class MedicalServiceController {
       return next(ApiError.internal("Не вдалося оновити статус процедури"));
     }
   }
-  async getByHospital(req, res, next) {
-    try {
-      const { hospitalId } = req.params;
+ async getByHospital(req, res, next) {
+  try {
+    const { hospitalId } = req.params;
 
-      if (!["Admin", "Doctor"].includes(req.user.role)) {
-        return next(
-          ApiError.forbidden("Недостатньо прав для перегляду послуг")
-        );
-      }
+    if (!["Admin", "Doctor"].includes(req.user.role)) {
+      return next(
+        ApiError.forbidden("Недостатньо прав для перегляду послуг")
+      );
+    }
 
-      const services = await MedicalService.findAll({
-        include: [
+    const services = await MedicalService.findAll({
+      order: [["id", "DESC"]],
+    });
+
+    const results = await Promise.all(
+      services.map(async (service) => {
+        const schedule = await MedicalServiceSchedule.findByPk(
+          service.medical_service_schedule_id,
           {
-            model: MedicalServiceSchedule,
             include: [
               {
                 model: HospitalMedicalService,
-                required: true,
                 include: [
                   {
                     model: Hospital,
                     attributes: ["id", "name"],
-                    where: { id: hospitalId },
-                    required: true,
                   },
                 ],
               },
             ],
-            required: true,
-          },
-        ],
-        order: [["id", "DESC"]],
-      });
+          }
+        );
 
-      const results = await Promise.all(
-        services.map(async (service) => {
-          const schedule = service.MedicalServiceSchedule;
-          const hospitalMedicalService = schedule?.HospitalMedicalService;
+        const hospitalMedicalService = schedule?.HospitalMedicalService;
 
-          const patient = await Patient.findByPk(service.patient_id, {
-            attributes: ["id", "first_name", "last_name", "email"],
-          });
+        // Перевіряємо, чи цей запис належить потрібній лікарні
+        if (hospitalMedicalService?.Hospital?.id.toString() !== hospitalId) {
+          return null; // пропускаємо, якщо не той hospitalId
+        }
 
-          const doctor = await Doctor.findByPk(service.doctor_id, {
-            attributes: ["id", "first_name", "last_name", "specialization"],
-          });
+        const medicalServiceInfo =
+          hospitalMedicalService?.medical_service_info_id
+            ? await MedicalServiceInfo.findByPk(
+                hospitalMedicalService.medical_service_info_id
+              )
+            : null;
 
-          const medicalServiceInfo =
-            hospitalMedicalService?.medical_service_info_id
-              ? await MedicalServiceInfo.findByPk(
-                  hospitalMedicalService.medical_service_info_id
-                )
-              : null;
+        const patient = await Patient.findByPk(service.patient_id, {
+          attributes: ["id", "first_name", "last_name", "email"],
+        });
 
-          return {
-            ...service.toJSON(),
-            Patient: patient,
-            Doctor: doctor,
-            MedicalServiceSchedule: {
-              ...schedule?.toJSON(),
-              HospitalMedicalService: {
-                ...hospitalMedicalService?.toJSON(),
-                Hospital: hospitalMedicalService?.Hospital || null,
-              },
+        const doctor = await Doctor.findByPk(service.doctor_id, {
+          attributes: ["id", "first_name", "last_name", "specialization"],
+        });
+
+        return {
+          ...service.toJSON(),
+          Patient: patient,
+          Doctor: doctor,
+          MedicalServiceSchedule: {
+            ...schedule?.toJSON(),
+            HospitalMedicalService: {
+              ...hospitalMedicalService?.toJSON(),
+              Hospital: hospitalMedicalService?.Hospital || null,
             },
-            MedicalServiceInfo: medicalServiceInfo,
-          };
-        })
-      );
+          },
+          MedicalServiceInfo: medicalServiceInfo,
+          service_name: medicalServiceInfo?.name || null,
+        };
+      })
+    );
 
-      return res.json(results);
-    } catch (e) {
-      console.error("getByHospital error:", e);
-      return next(ApiError.internal("Не вдалося отримати послуги для лікарні"));
-    }
+    // Видаляємо всі null-результати (які не належать вказаній лікарні)
+    return res.json(results.filter((r) => r !== null));
+  } catch (e) {
+    console.error("getByHospital error:", e);
+    return next(ApiError.internal("Не вдалося отримати послуги для лікарні"));
   }
+}
 }
 
 module.exports = new MedicalServiceController();
