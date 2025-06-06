@@ -5,7 +5,7 @@ const roleMiddleware = require("../middleware/checkRoleMiddleware");
 
 router.use(authMiddleware);
 
-// Специфічні маршрути — спочатку
+router.get('/available/:hospitalId', hospitalMedicalServiceController.getAvailableForHospital);
 router.get('/hospital/:hospitalId', hospitalMedicalServiceController.getByHospital);
 router.get('/doctor/:doctorId', hospitalMedicalServiceController.getByDoctor);
 
