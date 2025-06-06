@@ -4,8 +4,9 @@ import styles from '../../style/patientpanel/PatientEditPersonalInfo.module.css'
 
 import { genderMap } from '../../constants/gender';
 import { iconContacts } from '../../utils/icons';
+import ConfirmModal from '../../components/elements/ConfirmModal';
 
-import { updatePatientData, fetchPatientByUserId } from '../../http/patientAPI';
+import { updatePatientData, fetchPatientByUserId, deletePatientById } from '../../http/patientAPI';
 import { ADMIN_PATIENTS_ROUTE } from '../../utils/consts';
 
 const Field = ({ label, name, value, onChange, type = 'text' }) => (
@@ -59,6 +60,8 @@ const AdminEditPatientData = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     lastName: '', firstName: '', middleName: '', birthDate: '',
@@ -97,6 +100,24 @@ const AdminEditPatientData = () => {
   const handleChange = ({ target: { name, value } }) =>
     setFormData((prev) => ({ ...prev, [name]: value }));
 
+  const openDeleteConfirm = () => setIsConfirmOpen(true);
+  const closeDeleteConfirm = () => setIsConfirmOpen(false);
+
+  const handleDeleteConfirmed = async () => {
+    if (!patient?.id) return;
+    setDeleteLoading(true);
+    setError(null);
+    try {
+      await deletePatientById(patient.id);
+      navigate(ADMIN_PATIENTS_ROUTE);
+    } catch (err) {
+      setError('Не вдалося видалити пацієнта. Спробуйте пізніше.');
+    } finally {
+      setDeleteLoading(false);
+      closeDeleteConfirm();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!patient?.id) return;
@@ -122,41 +143,56 @@ const AdminEditPatientData = () => {
   };
 
   return (
-    <form className={styles.container} onSubmit={handleSubmit}>
-      <h1 className={styles.title}>Внесення даних пацієнта</h1>
-      {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
+    <>
+      <form className={styles.container} onSubmit={handleSubmit}>
+        <h1 className={styles.title}>Внесення даних пацієнта</h1>
+        {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
 
-      <div className={styles.containerInfo}>
-        <div className={styles.topSection}>
-          <div className={styles.personalInfoFields}>
-            <Field label="Прізвище" name="lastName" value={formData.lastName} onChange={handleChange} />
-            <Field label="Ім’я" name="firstName" value={formData.firstName} onChange={handleChange} />
-            <Field label="По батькові" name="middleName" value={formData.middleName} onChange={handleChange} />
-            <Field label="Дата народження" name="birthDate" value={formData.birthDate} onChange={handleChange} type="date" />
-            <SelectField
-              label="Стать"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              options={Object.entries(genderMap).map(([key, label]) => ({ key, label }))}
-            />
+        <div className={styles.containerInfo}>
+          <div className={styles.topSection}>
+            <div className={styles.personalInfoFields}>
+              <Field label="Прізвище" name="lastName" value={formData.lastName} onChange={handleChange} />
+              <Field label="Ім’я" name="firstName" value={formData.firstName} onChange={handleChange} />
+              <Field label="По батькові" name="middleName" value={formData.middleName} onChange={handleChange} />
+              <Field label="Дата народження" name="birthDate" value={formData.birthDate} onChange={handleChange} type="date" />
+              <SelectField label="Стать" name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                options={Object.entries(genderMap).map(([key, label]) => ({ key, label }))}
+              />
+            </div>
           </div>
+
+          <InfoBlock icon={iconContacts} title="Контактна інформація">
+            <Field label="Електронна пошта" name="email" value={formData.email} onChange={handleChange} />
+            <Field label="Номер телефону" name="phone" value={formData.phone} onChange={handleChange} />
+            <Field label="Адреса проживання" name="address" value={formData.address} onChange={handleChange} />
+          </InfoBlock>
+
         </div>
 
-        <InfoBlock icon={iconContacts} title="Контактна інформація">
-          <Field label="Електронна пошта" name="email" value={formData.email} onChange={handleChange} />
-          <Field label="Номер телефону" name="phone" value={formData.phone} onChange={handleChange} />
-          <Field label="Адреса проживання" name="address" value={formData.address} onChange={handleChange} />
-        </InfoBlock>
+        <div className={styles.buttonGroup}>
+          <button type="button" className={styles.cancelButton} onClick={openDeleteConfirm}>
+            <span className={styles.closeIcon}>×</span>
+            <span className={styles.closeText}>Видалити пацієнта</span>
+          </button>
+          <button type="submit" className={styles.saveButton} disabled={loading}>
+            {loading ? 'Збереження...' : 'Зберегти'}
+          </button>
+        </div>
+      </form>
 
-      </div>
-
-      <div className={styles.buttonGroup}>
-        <button type="submit" className={styles.saveButton} disabled={loading}>
-          {loading ? 'Збереження...' : 'Зберегти'}
-        </button>
-      </div>
-    </form>
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Підтвердження видалення"
+        message="Ви дійсно хочете видалити пацієнта?"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={closeDeleteConfirm}
+        confirmText="Видалити"
+        cancelText="Відміна"
+        loading={deleteLoading}
+      />
+    </>
   );
 };
 

@@ -64,3 +64,23 @@ export const markMedicalServiceReady = async (serviceId) => {
   const { data } = await $authHost.patch(`api/medical-services/mark-ready/${serviceId}`);
   return data;
 };
+
+export const getMedicalServicesByHospital = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`api/medical-services/hospital/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні медичних сервісів:', error);
+    throw error;
+  }
+};
+
+export const deleteHospitalMedicalService = async (serviceId) => {
+  try {
+    const { data } = await $authHost.delete(`/api/hospital-medical-services/${serviceId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні медичної послуги:', error);
+    throw error;
+  }
+};

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorAppointments.module.css';
 import ModalAppointmentDetails from "../../components/modals/ModalAppointmentDetails";
 import ModalCancelAppointment from "../../components/modals/ModalCancelAppointment";
-import DoctorAppointmentCard from "../../components/appointment/DoctorAppointmentCard";
+import AppointmentCard from "../../components/appointment/AppointmentCard";
 import SearchInput from "../../components/options/SearchInput";
 import { Context } from '../../index';
 import { fetchDoctorByUserId } from '../../http/doctorAPI';
@@ -113,7 +113,7 @@ const DoctorAppointments = () => {
       <div className={styles.appointmentsCards}>
         {filteredAppointments.length > 0 ? (
           filteredAppointments.map((appointment, index) => (
-            <DoctorAppointmentCard
+            <AppointmentCard
               key={index}
               appointment={appointment}
               onDetailsClick={handleOpenAppointmentModal}

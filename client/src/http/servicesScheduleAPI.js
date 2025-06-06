@@ -22,3 +22,13 @@ export const bookMedicalServiceScheduleById = async (medicalServiceScheduleId, o
     throw error;
   }
 };
+
+export const getMedicalServiceSchedulesByHospital = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`/api/medical-service-schedules/by-hospital/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching medical service schedules by hospital:', error);
+    throw error;
+  }
+};

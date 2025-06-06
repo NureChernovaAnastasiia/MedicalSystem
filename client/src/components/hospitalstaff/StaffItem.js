@@ -10,7 +10,7 @@ const baseStyles = {
     borderStyle: 'solid',
     borderColor: 'rgba(0, 195, 161, 0.42)',
     display: 'grid',
-    gridTemplateColumns: '3.5fr 2fr 2.5fr 2fr',
+    gridTemplateColumns: '3fr 2.5fr 2.5fr 2fr',
     alignItems: 'center',
     padding: '8px 1rem',
     gap: '1rem',

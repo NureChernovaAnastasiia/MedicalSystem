@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Context } from '../../index';
-import { format } from 'date-fns';
 
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -75,18 +74,6 @@ const PatientMedicalRecords = () => {
 
   const sortedDiagnoses = filteredDiagnoses.slice().sort((a, b) => new Date(b.record_date) - new Date(a.record_date));
 
-  const getDateRangeLabel = () => {
-    if (!startDate && !endDate) return 'Виберіть діапазон';
-    if (startDate && !endDate) return `Від ${format(startDate, 'dd.MM.yyyy')}`;
-    if (!startDate && endDate) return `До ${format(endDate, 'dd.MM.yyyy')}`;
-    return `${format(startDate, 'dd.MM.yyyy')} - ${format(endDate, 'dd.MM.yyyy')}`;
-  };
-
-  const resetDateFilter = () => {
-    setDateRange([{ startDate: null, endDate: null, key: 'selection' }]);
-    setShowCalendar(false);
-  };
-
   if (loading) return <div className={styles.loading}>Завантаження...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -98,24 +85,12 @@ const PatientMedicalRecords = () => {
       </p>
 
       <div className={styles.filterRow}>
-        <div className={styles.datePickerWrapper}>
-          <button onClick={() => setShowCalendar((prev) => !prev)} className={styles.dateButton}>
-            {getDateRangeLabel()}
-          </button>
-          {showCalendar && (
-            <div className={styles.dateRangeWrapper}>
-              <DateRangeFilter
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-                showCalendar={showCalendar}
-                setShowCalendar={setShowCalendar}
-              />
-              <button onClick={resetDateFilter} className={styles.clearDateButton}>
-                Скинути фільтр
-              </button>
-            </div>
-          )}
-        </div>
+        <DateRangeFilter
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          showCalendar={showCalendar}
+          setShowCalendar={setShowCalendar}
+        />    
 
         <div className={styles.searchBox}>
           <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Введіть назву діагнозу" />

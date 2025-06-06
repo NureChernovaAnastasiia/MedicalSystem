@@ -5,7 +5,7 @@ import { Context } from "../../index";
 import "../../style/Sidebar.css";
 
 import logo from "../../img/Logo.png";
-import avatar from '../../img/icons/people.png';  
+//import avatar from '../../img/icons/people.png';  
 import logoutIcon from '../../img/icons/exit.png';
 
 import { ADMIN_ANALYTICS_ROUTE, ADMIN_APPOINTMENTS_ROUTE, ADMIN_DOCTORS_ROUTE, ADMIN_HOSPITAL_ROUTE, ADMIN_PANEL_ROUTE, ADMIN_PATIENTS_ROUTE, ADMIN_SCHEDULES_ROUTE, ADMIN_SERVICES_ROUTE, DOCTOR_APPOINTMENTS_ROUTE, DOCTOR_HOSPITALDETAILS_ROUTE, DOCTOR_PANEL_ROUTE, DOCTOR_PATIENTS_ROUTE, DOCTOR_SERVICES_ROUTE, PATIENT_ANALYSIS_ROUTE, PATIENT_APPOINTMENTS_ROUTE, PATIENT_DOCAPPOINTMENT_ROUTE, PATIENT_HOSPITALDETAIL_ROUTE, PATIENT_MEDCARD_ROUTE, PATIENT_PANEL_ROUTE, PATIENT_SERVICE_ROUTE } from "../../utils/consts";
@@ -76,10 +76,10 @@ const Sidebar = ({ userRole, fullName }) => {
       </div>
 
       <div className="sidebar_profile">
-        <img src={avatar} alt="Avatar" className="sidebar_avatar" />
+        {/*<img src={avatar} alt="Avatar" className="sidebar_avatar" />
         <div className="sidebar_name">
           {fullName ? fullName : 'Немає даних'}
-        </div>
+        </div>*/}
       </div>
 
       <nav className="sidebar_nav">

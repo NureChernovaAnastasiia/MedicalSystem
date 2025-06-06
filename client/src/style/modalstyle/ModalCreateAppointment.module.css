@@ -41,8 +41,32 @@
 
 .topSection {
   display: flex;
-  gap: 40px;
+  gap: 10px;
   flex-grow: 1;
+  width: 95%;
+  padding: 0 20px;
+}
+
+.topSection.threeColumns > div {
+  width: 33.33%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px;
+}
+
+.topSection.twoColumns > div {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px;
+}
+
+.sectionTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: #333;
 }
 
 .leftSection {
@@ -57,14 +81,6 @@
   display: flex;
   flex-direction: column;
   padding-right: 35px;
-}
-
-.sectionTitle {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  font-size: 24px;
-  margin-bottom: 10px;
-  color: #333333;
 }
 
 .searchInput {
@@ -118,13 +134,14 @@
   font-style: italic;
   border: 1px solid #D9D9D9;
   border-radius: 5px;
+  margin-bottom: 15px;
 }
 
 .timeSlotsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 12px;
-  max-height: 280px;
+  max-height: 175px; 
   overflow-y: auto;
 }
 
@@ -298,30 +315,127 @@
 
 @media (max-width: 1024px) {
   .modal {
-    width: 90%;
+    width: 95%;
     max-width: 800px;
-    margin: 1rem auto;
+    margin: 0.5rem auto;
+    border-radius: 20px;
+  }
+
+  .header {
+    padding: 1rem 1rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
   }
 
   .topSection {
     flex-direction: column;
-    gap: 20px;
+    width: 100%;
+    padding: 0 15px;
+    gap: 15px;
+  }
+
+  .topSection > div {
+    width: 95% !important;
+    padding: 0;
   }
 
   .leftSection,
   .rightSection {
-    padding-left: 15px;
-    padding-right: 15px;
-    flex: none;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .patientList {
-    max-height: 150px;
+    max-height: 120px;
   }
 
   .timeSlotsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    max-height: 220px;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    max-height: 180px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .searchInput,
+  .dateSelector,
+  .commentTextarea {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .patientCard {
+    padding: 8px 12px;
+  }
+
+  .patientName {
+    font-size: 16px;
+  }
+
+  .patientDate {
+    font-size: 12px;
+  }
+
+  .timeSlot {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .selectedInfo h3 {
+    font-size: 18px;
+  }
+
+  .selectedPatientName,
+  .selectedTime {
+    font-size: 16px;
+  }
+
+  .commentLabel {
+    font-size: 15px;
+    margin: 0 15px 8px;
+  }
+
+  .footerButtons {
+    margin: 10px 20px;
+  }
+
+  .cancelButton,
+  .createButton {
+    font-size: 18px;
   }
 }
 
+@media (max-width: 580px) {
+  .modal {
+    width: 90%;
+    max-width: 600px;
+  }
+
+  .topSection {
+    flex-direction: column;
+    width: 90%;
+    padding: 0 15px;
+    gap: 15px;
+  }
+
+  .patientList {
+    max-height: 100px; 
+    overflow-y: auto;
+  }
+
+  .timeSlotsGrid {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch; 
+  }
+
+  .timeSlot {
+    flex: 0 0 auto; 
+    min-width: 80px;
+  }
+}

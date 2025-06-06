@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { CITIES } from "../../constants/cities";
+import React, { useState, useEffect } from "react";
+import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
 
 const baseStyle = {
   width: "100%",
@@ -25,9 +25,25 @@ const glowStyle = {
   boxShadow: "0 0 5px rgba(0, 195, 161, 0.5)",
 };
 
-const SearchByCity = ({ value, onChange }) => {
+const SearchByDoctor = ({ hospitalId, value, onChange }) => {
+  const [doctors, setDoctors] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!hospitalId) return;
+
+    const loadDoctors = async () => {
+      try {
+        const doctorData = await fetchDoctorsByHospitalId(hospitalId);
+        setDoctors(doctorData);
+      } catch (error) {
+        console.error("Помилка при завантаженні лікарів:", error);
+      }
+    };
+
+    loadDoctors();
+  }, [hospitalId]);
 
   const combinedStyle = {
     ...baseStyle,
@@ -44,13 +60,14 @@ const SearchByCity = ({ value, onChange }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <option value="">Місто</option>
-      {CITIES.map((city) => (
-        <option key={city} value={city}>{city}</option>
+      <option value="">Лікар</option>
+      {doctors.map((doctor) => (
+        <option key={doctor.id} value={doctor.id}>
+          {`${doctor.last_name || ''} ${doctor.first_name || ''} ${doctor.middle_name || ''}`.trim() || '—'}
+        </option>
       ))}
     </select>
   );
 };
 
-export default SearchByCity;
-
+export default SearchByDoctor;

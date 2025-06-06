@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import {
-  formatAppointmentDateOnly,
-  formatAppointmentTimeOnly,
-} from '../../utils/formatDate';
+import { Context } from '../../index';
+import { formatAppointmentDateOnly, formatAppointmentTimeOnly, } from '../../utils/formatDate';
 import { DOCTOR_DETAPPOINTMENT_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
@@ -27,8 +25,11 @@ const baseStyles = {
     color: '#333333',
     position: 'relative',
     top: '6px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
-  appointmentDate: {
+    appointmentDate: {
     fontStyle: 'italic',
     fontWeight: 500,
     fontSize: '18px',
@@ -41,17 +42,14 @@ const baseStyles = {
     fontWeight: 500,
     fontSize: '20px',
     lineHeight: '24px',
-    position: 'relative',
-    fontFamily: "'Montserrat', sans-serif",
     fontStyle: 'italic',
-    alignItems: 'center',
+    position: 'relative',
     top: '6px',
   },
   plannedButton: {
     background: 'rgba(0, 195, 161, 0.42)',
     borderRadius: '10px',
     color: '#FFFFFF',
-    fontFamily: "'Montserrat', sans-serif",
     fontStyle: 'italic',
     fontWeight: 600,
     fontSize: '18px',
@@ -63,13 +61,11 @@ const baseStyles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    
   },
   pastCancelledButton: {
     background: '#FFFFFF',
     borderRadius: '10px',
     color: '#333333',
-    fontFamily: "'Montserrat', sans-serif",
     fontStyle: 'italic',
     fontWeight: 600,
     fontSize: '18px',
@@ -81,13 +77,10 @@ const baseStyles = {
     gap: '4px',
   },
   questionMark: {
-    fontFamily: "'Montserrat', sans-serif",
-    fontStyle: 'italic',
     fontWeight: 700,
     fontSize: '32px',
     lineHeight: '42px',
     color: '#FBDA03',
-    position: 'relative',
   },
 };
 
@@ -107,17 +100,19 @@ const getStatusLabel = (status) => {
 const getStatusColor = (status) => {
   switch (status) {
     case 'Scheduled':
-      return '#00C3A1'; 
+      return '#00C3A1';
     case 'Cancelled':
-      return '#FF0000'; 
+      return '#FF0000';
     case 'Past':
-      return '#A0A0A0'; 
+      return '#A0A0A0';
     default:
       return '#333333';
   }
 };
 
-const AppointmentItem = ({ appointment }) => {
+const AppointmentItem = ({ appointment, onDetailsClick }) => {
+  const { user } = useContext(Context); 
+  const role = user._role;
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
@@ -133,46 +128,67 @@ const AppointmentItem = ({ appointment }) => {
   const combinedStyles = {
     appointmentItem: {
       ...baseStyles.appointmentItem,
-      ...(isSmallScreen && {
-        gridTemplateColumns: '1fr',
-        padding: '0.5rem',
-        gap: '0.5rem',
-      }),
+      gridTemplateColumns: isSmallScreen
+        ? '1fr'
+        : role === 'Admin'
+        ? '1.2fr 1.2fr 2.2fr 2.5fr 1fr 1.2fr'
+        : '1.2fr 1.2fr 2.5fr 1.2fr 1.3fr',
+      padding: isSmallScreen ? '0.5rem' : '6px 1rem',
+      gap: isSmallScreen ? '0.5rem' : '1rem',
     },
     patientName: {
       ...baseStyles.patientName,
-      ...(isSmallScreen && { fontSize: '16px', lineHeight: '22px' }),
+      fontSize: isSmallScreen ? '16px' : '20px',
     },
     appointmentDate: {
       ...baseStyles.appointmentDate,
-      ...(isSmallScreen && { fontSize: '16px' }),
+      fontSize: isSmallScreen ? '16px' : '18px',
     },
     status: {
       ...baseStyles.status,
       color: getStatusColor(appointment.computed_status),
-      ...(isSmallScreen && { fontSize: '14px' }),
-    },
-    viewCardButton: {
-      ...baseStyles.viewCardButton,
-      ...(isSmallScreen && { width: '100%', height: '40px', fontSize: '14px' }),
+      fontSize: isSmallScreen ? '14px' : '20px',
     },
   };
 
   const patient = appointment.Patient || {};
+  const doctor = appointment.Doctor || {};
 
   const renderButton = () => {
-    if (appointment.computed_status === 'Scheduled') {
-      return <button style={baseStyles.plannedButton}>Внести дані</button>;
-    }
-    if (appointment.computed_status === 'Past' || appointment.computed_status === 'Cancelled') {
+    if (role === 'Admin') {
       return (
-        <button style={baseStyles.pastCancelledButton}>
-          <span style={baseStyles.questionMark}>?</span>
-          Деталі прийому
+        <button
+          style={baseStyles.pastCancelledButton}
+          onClick={() => onDetailsClick(appointment)}
+        >
+          <span style={baseStyles.questionMark}>?</span>Деталі прийому
         </button>
       );
     }
-    return null;
+
+    const isScheduled = appointment.computed_status === 'Scheduled';
+    const btnContent = isScheduled ? 'Внести дані' : (
+      <>
+        <span style={baseStyles.questionMark}>?</span>Деталі прийому
+      </>
+    );
+
+    return (
+      <NavLink
+        to={`${DOCTOR_DETAPPOINTMENT_ROUTE}/${appointment.id}`}
+        style={{ textDecoration: 'none' }}
+      >
+        <button
+          style={
+            isScheduled
+              ? baseStyles.plannedButton
+              : baseStyles.pastCancelledButton
+          }
+        >
+          {btnContent}
+        </button>
+      </NavLink>
+    );
   };
 
   return (
@@ -183,15 +199,30 @@ const AppointmentItem = ({ appointment }) => {
       <span style={combinedStyles.appointmentDate}>
         {formatAppointmentTimeOnly(appointment)}
       </span>
-      <span style={combinedStyles.patientName}>
+      {role === 'Admin' && (
+        <span
+          style={{
+            ...combinedStyles.patientName,
+            maxWidth: isSmallScreen ? '100%' : '100%',
+            display: 'inline-block',
+          }}
+        >
+          {`${doctor.last_name || ''} ${doctor.first_name || ''} ${doctor.middle_name || ''}`.trim() || '—'}
+        </span>
+      )}
+      <span
+          style={{
+            ...combinedStyles.patientName,
+            maxWidth: isSmallScreen ? '100%' : '100%',
+            display: 'inline-block',
+          }}
+        >
         {`${patient.last_name || ''} ${patient.first_name || ''} ${patient.middle_name || ''}`.trim() || '—'}
       </span>
       <span style={combinedStyles.status}>
         {getStatusLabel(appointment.computed_status)}
       </span>
-      <NavLink to={`${DOCTOR_DETAPPOINTMENT_ROUTE}/${appointment.id}`} style={{ textDecoration: 'none' }}>
-        {renderButton()}
-      </NavLink>
+      {renderButton()}
     </div>
   );
 };

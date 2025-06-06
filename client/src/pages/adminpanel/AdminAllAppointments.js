@@ -6,53 +6,51 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
 import SearchInput from '../../components/options/SearchInput';
+import SearchByDoctor from '../../components/options/SearchByDoctor';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import AppointmentItem from '../../components/appointment/AppointmentItem';
 import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
+import ModalAppointmentDetails from '../../components/modals/ModalAppointmentDetails';
 
-import styles from '../../style/doctorpanel/DoctorAllAppointments.module.css';
+import styles from '../../style/adminpanel/AdminAllAppointments.module.css';
 
-import { fetchDoctorByUserId } from '../../http/doctorAPI';
-import { fetchAllDoctorAppointments } from '../../http/appointmentAPI';
+import { fetchAppointmentsByHospital } from '../../http/appointmentAPI';
 
-const DoctorAllAppointments = () => {
-  const { user } = useContext(Context);
-  const [doctor, setDoctor] = useState(null);
+const AdminAllAppointments = () => {
+  const { hospital } = useContext(Context);
+  const hospitalId = hospital?.hospitalId;
+
   const [appointments, setAppointments] = useState([]);
   const [dateRange, setDateRange] = useState([{ startDate: null, endDate: null, key: 'selection' }]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const loadAppointments = useCallback(async (doctorId) => {
-    const data = await fetchAllDoctorAppointments(doctorId);
-    const formatted = data.map(app => formatAppointment(app)).sort((a, b) => b.date_time - a.date_time);
-    setAppointments(formatted);
-  }, []); 
+  const loadAppointments = useCallback(async () => {
+    if (!hospitalId) return;
+    try {
+      const data = await fetchAppointmentsByHospital(hospitalId);
+      const formatted = data.map(app => formatAppointment(app)).sort((a, b) => b.date_time - a.date_time);
+      setAppointments(formatted);
+    } catch (err) {
+      setError('Помилка при завантаженні прийомів');
+    }
+  }, [hospitalId]);
 
   useEffect(() => {
-    if (!user?.user?.id) return;
+    if (!hospitalId) return;
 
-    const getDoctorAndAppointments = async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const doctorData = await fetchDoctorByUserId(user.user.id);
-        setDoctor(doctorData);
-        await loadAppointments(doctorData.id);
-      } catch (error) {
-        setError('Помилка при завантаженні прийомів');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getDoctorAndAppointments();
-  }, [user?.user?.id, loadAppointments]);
+    loadAppointments().finally(() => setLoading(false));
+  }, [hospitalId, loadAppointments]);
 
   const formatAppointment = (app) => {
     const dateStr = app.appointment_date;
@@ -74,9 +72,8 @@ const DoctorAllAppointments = () => {
   };
 
   const handleCreateAppointment = async () => {
-    if (!doctor?.id) return;
     try {
-      await loadAppointments(doctor.id);
+      await loadAppointments();
     } catch (err) {
       console.error('Помилка при оновленні прийомів:', err);
     } finally {
@@ -91,11 +88,13 @@ const DoctorAllAppointments = () => {
     const searchLower = searchTerm.toLowerCase();
     const appointmentDate = new Date(app.date_time);
     const status = app.status;
+    const doctorId = app.doctor_id;
 
     const matchByName = fullNameLower.includes(searchLower);
     const isInDateRange =
       (!startDate || appointmentDate >= startDate) &&
       (!endDate || appointmentDate <= endDate);
+    const matchByDoctor = selectedDoctorId === '' || doctorId === +selectedDoctorId;
 
     let statusMatch = true;
     if (statusFilter !== 'all') {
@@ -108,8 +107,18 @@ const DoctorAllAppointments = () => {
       }
     }
 
-    return matchByName && isInDateRange && statusMatch;
+    return matchByName && isInDateRange && statusMatch && matchByDoctor;
   });
+ 
+  const handleOpenDetails = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowDetailsModal(true);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedAppointment(null);
+    setShowDetailsModal(false);
+  };
 
   return (
     <div className={styles.container}>
@@ -134,13 +143,6 @@ const DoctorAllAppointments = () => {
       </div>
 
       <div className={styles.filterRow}>
-        <DateRangeFilter
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          showCalendar={showCalendar}
-          setShowCalendar={setShowCalendar}
-        />    
-
         <select
           className={styles.select}
           value={statusFilter}
@@ -151,11 +153,25 @@ const DoctorAllAppointments = () => {
           <option value="past">Минулі</option>
           <option value="canceled">Скасовані</option>
         </select>
+
+        <SearchByDoctor
+          hospitalId={hospitalId}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+        />
+
+        <DateRangeFilter
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          showCalendar={showCalendar}
+          setShowCalendar={setShowCalendar}
+        />
       </div>
 
       <div className={styles.tableHeader}>
         <span>Дата прийому</span>
         <span>Час прийому</span>
+        <span>ПІБ лікаря</span>
         <span>ПІБ пацієнта</span>
         <span>Статус</span>
       </div>
@@ -168,7 +184,7 @@ const DoctorAllAppointments = () => {
         )}
         {!loading && !error && filteredAppointments.length > 0 &&
           filteredAppointments.map(app => (
-            <AppointmentItem key={app.id} appointment={app} />
+            <AppointmentItem key={app.id} appointment={app} onDetailsClick={handleOpenDetails}/>
           ))
         }
       </div>
@@ -176,12 +192,27 @@ const DoctorAllAppointments = () => {
       {showCreateModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <ModalCreateAppointment doctorId={doctor?.id} onClose={() => setShowCreateModal(false)} onCreate={handleCreateAppointment} />
+            <ModalCreateAppointment
+              hospitalId={hospitalId}
+              onClose={() => setShowCreateModal(false)}
+              onCreate={handleCreateAppointment}
+            />
           </div>
         </div>
       )}
+
+      {showDetailsModal && selectedAppointment && (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+            <ModalAppointmentDetails
+                appointment={selectedAppointment}
+                onClose={handleCloseDetails}
+            />
+            </div>
+        </div>
+       )}
     </div>
   );
 };
 
-export default DoctorAllAppointments;
+export default AdminAllAppointments;

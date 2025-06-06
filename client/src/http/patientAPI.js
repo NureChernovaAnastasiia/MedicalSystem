@@ -58,3 +58,13 @@ export const fetchPatientsByHospitalId = async (hospitalId) => {
     throw error;
   }
 };
+
+export const deletePatientById = async (id) => {
+  try {
+    const { data } = await $authHost.delete(`api/patients/${id}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при видаленні пацієнта", error);
+    throw error;
+  }
+};

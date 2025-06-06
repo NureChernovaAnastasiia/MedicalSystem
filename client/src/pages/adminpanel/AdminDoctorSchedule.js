@@ -1,71 +1,107 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from 'react-router-dom';
 import styles from "../../style/adminpanel/AdminDoctorSchedule.module.css";
-import ModalConfirmAppointment from "../../components/modals/ModalConfirmAppointment";
 import { daysOfWeekShort } from '../../constants/daysOfWeek';
-import { fetchDoctorScheduleByIdAndDate } from "../../http/doctorScheduleAPI";
+import { fetchDoctorScheduleByIdAndDate, fetchDoctorScheduleById, deleteDoctorScheduleById } from "../../http/doctorScheduleAPI";
 import { fetchDoctorById } from "../../http/doctorAPI";
+import ModalScheduleDetail from "../../components/modals/ModalScheduleDetail"; 
+import ConfirmModal from '../../components/elements/ConfirmModal';
 
 const AdminDoctorSchedule = () => {
   const [weekData, setWeekData] = useState([]);
   const [doctorInfo, setDoctorInfo] = useState(null);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false); 
 
   const { id } = useParams();
   const doctorId = Number(id);
 
-  useEffect(() => {
-    const loadSchedule = async () => {
+  const loadSchedule = useCallback(async () => {
+    try {
+      const doctor = await fetchDoctorById(doctorId);
+      setDoctorInfo(doctor);
+    } catch (error) {
+      console.error("Помилка при завантаженні лікаря:", error);
+    }
+
+    const today = new Date();
+    const week = [];
+
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(today);
+      currentDate.setDate(today.getDate() + i);
+
+      const dayName = daysOfWeekShort[currentDate.getDay()];
+      const date = String(currentDate.getDate()).padStart(2, "0");
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const year = currentDate.getFullYear();
+      const apiDate = `${year}-${month}-${date}`;
+      const formattedDate = `${dayName} ${date}.${month}.${year}`;
+
       try {
-        const doctor = await fetchDoctorById(doctorId);
-        setDoctorInfo(doctor);
-      } catch (error) {
-        console.error("Помилка при завантаженні лікаря:", error);
-      }
-
-      const today = new Date();
-      const week = [];
-
-      for (let i = 0; i < 7; i++) {
-        const currentDate = new Date(today);
-        currentDate.setDate(today.getDate() + i);
-
-        const dayName = daysOfWeekShort[currentDate.getDay()];
-        const date = String(currentDate.getDate()).padStart(2, "0");
-        const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-        const year = currentDate.getFullYear();
-        const apiDate = `${year}-${month}-${date}`;
-        const formattedDate = `${dayName} ${date}.${month}.${year}`;
-
-        try {
-          const slots = await fetchDoctorScheduleByIdAndDate(doctorId, apiDate);
-          const formattedSlots = slots
+        const slots = await fetchDoctorScheduleByIdAndDate(doctorId, apiDate);
+        const formattedSlots = slots
           .sort((a, b) => a.start_time.localeCompare(b.start_time))
           .map(slot => ({
             time: `${slot.start_time.slice(0, 5)}-${slot.end_time.slice(0, 5)}`,
             active: !slot.is_booked,
             id: slot.id,
           }));
-          week.push({
-            formattedDate,
-            apiDate,
-            timeSlots: formattedSlots,
-            freeSlots: formattedSlots.filter(slot => slot.active).length
-          });
-        } catch (error) {
-          console.error("Помилка при завантаженні слотів на", apiDate, error);
-          week.push({ formattedDate, apiDate, timeSlots: [], freeSlots: 0 });
-        }
+        week.push({
+          formattedDate,
+          apiDate,
+          timeSlots: formattedSlots,
+          freeSlots: formattedSlots.filter(slot => slot.active).length
+        });
+      } catch (error) {
+        console.error("Помилка при завантаженні слотів на", apiDate, error);
+        week.push({ formattedDate, apiDate, timeSlots: [], freeSlots: 0 });
       }
+    }
 
-      setWeekData(week);
-    };
-
-    loadSchedule();
+    setWeekData(week);
   }, [doctorId]);
 
-  const handleSlotClick = (slot, day) => {
-    setSelectedSlot({ ...slot, date: day.formattedDate });
+  useEffect(() => {
+    loadSchedule();
+  }, [loadSchedule]);
+
+  const handleSlotClick = async (slot) => {
+    try {
+      const fullSchedule = await fetchDoctorScheduleById(slot.id);
+      setSelectedSchedule(fullSchedule); 
+    } catch (error) {
+      console.error("Помилка при завантаженні розкладу:", error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedSchedule(null);
+  };
+
+  const handleDeleteSchedule = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!selectedSchedule) return;
+
+    try {
+      setDeleteLoading(true);
+      await deleteDoctorScheduleById(selectedSchedule.id);
+      setSelectedSchedule(null);
+      await loadSchedule();
+    } catch (error) {
+      console.error("Помилка при видаленні розкладу:", error);
+    } finally {
+      setDeleteLoading(false);
+      setIsConfirmOpen(false);
+    }
+  };
+
+  const closeDeleteConfirm = () => {
+    setIsConfirmOpen(false);
   };
 
   return (
@@ -93,7 +129,7 @@ const AdminDoctorSchedule = () => {
                   <div
                     key={idx}
                     className={`${styles.timeSlot} ${slot.active ? styles.availableSlot : styles.unavailableSlot}`}
-                    onClick={slot.active ? () => handleSlotClick(slot, day) : undefined}
+                    onClick={() => handleSlotClick(slot)}
                   >
                     {slot.time}
                   </div>
@@ -106,14 +142,25 @@ const AdminDoctorSchedule = () => {
         ))}
       </div>
 
-      {selectedSlot && doctorInfo && (
-        <ModalConfirmAppointment
-          doctor={doctorInfo}
-          slot={selectedSlot}
-          date={selectedSlot.date}
-          onClose={() => setSelectedSlot(null)}
+      {selectedSchedule && (
+        <ModalScheduleDetail
+          schedule={selectedSchedule}
+          onClose={handleCloseModal}
+          onDelete={handleDeleteSchedule}
         />
       )}
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Підтвердження видалення"
+        message="Ви дійсно хочете видалити розклад прийому?"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={closeDeleteConfirm}
+        confirmText="Видалити"
+        cancelText="Відміна"
+        loading={deleteLoading}
+      />
+
     </div>
   );
 };

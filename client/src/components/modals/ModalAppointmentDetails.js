@@ -41,7 +41,7 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
             <br />
             <strong>Дата та час: </strong> {formattedDateTime}
             <br />
-            <strong>Статус: </strong> {formatStatus(appointment.status)}
+            <strong>Статус: </strong> {formatStatus(appointment.computed_status || appointment.status)}
             <br />
             <strong>Кабінет: </strong> {appointment.Doctor?.room_number || "—"}
             <br />

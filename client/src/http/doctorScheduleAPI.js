@@ -39,3 +39,23 @@ export const createDoctorSchedule = async (scheduleData) => {
     throw error;
   }
 };
+
+export const fetchDoctorScheduleById = async (scheduleId) => {
+  try {
+    const { data } = await $authHost.get(`api/doctor-schedules/${scheduleId}`);
+    return data;
+  } catch (error) {
+    console.error("Error fetching doctor schedule by ID:", error);
+    throw error;
+  }
+};
+
+export const deleteDoctorScheduleById = async (scheduleId) => {
+  try {
+    const { data } = await $authHost.delete(`api/doctor-schedules/${scheduleId}`);
+    return data;
+  } catch (error) {
+    console.error("Error deleting doctor schedule by ID:", error);
+    throw error;
+  }
+};
