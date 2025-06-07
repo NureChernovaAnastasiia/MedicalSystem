@@ -114,3 +114,13 @@ export const fetchAvailableLabServices = async (hospitalId) => {
     throw error;
   }
 };
+
+export const createLabTestInfo = async (labData) => {
+  try {
+    const { data } = await $authHost.post('/api/lab-test-info', labData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні інформації про аналіз:', error);
+    throw error;
+  }
+};

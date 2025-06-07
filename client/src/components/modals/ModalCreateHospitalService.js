@@ -4,6 +4,7 @@ import { Context } from '../../index';
 import { fetchDoctorsByHospitalId } from '../../http/doctorAPI';
 import { fetchAvailableLabServices, createHospitalLabService } from '../../http/analysisAPI';
 import { fetchAvailableMedicalServices, createHospitalMedicalService } from '../../http/servicesAPI';
+import ModalCreateServiceInfo from './ModalCreateServiceInfo';
 import AlertPopup from "../../components/elements/AlertPopup";
 
 const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
@@ -11,6 +12,8 @@ const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
   const hospitalId = hospital?.hospitalId;
 
   const [isAnalysis, setIsAnalysis] = useState(true);
+  const [showCreateServiceModal, setShowCreateServiceModal] = useState(false);
+  const [createType, setCreateType] = useState('lab'); // 'lab' або 'medical'
   const [doctors, setDoctors] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -97,8 +100,24 @@ const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
   };
 
   const handleCreateNewService = () => {
-    setAlert({ message: `Функція створення нової ${isAnalysis ? 'аналізу' : 'послуги'} поки не реалізована.`, type: 'info' });
-    };
+    setCreateType(isAnalysis ? 'lab' : 'medical');
+    setShowCreateServiceModal(true);
+  };
+
+  const updateServices = async () => {
+    try {
+      if (isAnalysis) {
+        const updatedTests = await fetchAvailableLabServices(hospitalId);
+        setServices(updatedTests);
+      } else {
+        const updatedMedServices = await fetchAvailableMedicalServices(hospitalId);
+        setServices(updatedMedServices);
+      }
+    } catch (e) {
+      console.error('Помилка оновлення списку послуг:', e);
+      setAlert({ message: 'Помилка оновлення списку послуг.', type: 'error' });
+    }
+  };
 
   return (
     <div className={styles.overlay}>
@@ -195,6 +214,16 @@ const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
             </span>
           </button>
         </div>
+        {showCreateServiceModal && (
+          <ModalCreateServiceInfo
+            onClose={() => setShowCreateServiceModal(false)}
+            type={createType}
+            onCreated={async () => {
+              await updateServices();
+              setShowCreateServiceModal(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );
