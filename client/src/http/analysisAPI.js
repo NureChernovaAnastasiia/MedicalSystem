@@ -124,3 +124,13 @@ export const createLabTestInfo = async (labData) => {
     throw error;
   }
 };
+
+export const deleteLabTest = async (testId) => {
+  try {
+    const { data } = await $authHost.delete(`/api/lab-tests/${testId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні лабораторного тесту:', error);
+    throw error;
+  }
+};

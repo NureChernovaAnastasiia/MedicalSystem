@@ -143,6 +143,7 @@ const AdminServicesHospital = () => {
 
       <div className={styles.tableHeader}>
         <span>Назва</span>
+        <span></span>
         <span>Лікар</span>
       </div>
 

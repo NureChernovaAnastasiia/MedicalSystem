@@ -153,6 +153,26 @@
   margin-top: 1rem;
 }
 
+
+.pdfWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem; 
+}
+
+.viewPdf {
+  background: none;
+  border: none;
+  display: block;
+  margin-top: 1rem;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .commentTextarea {
   width: 87%;
   min-height: 120px;

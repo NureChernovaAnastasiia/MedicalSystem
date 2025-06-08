@@ -36,6 +36,7 @@ import iconReminder from '../img/icons/reminder.png';
 import iconServices from '../img/icons/analysis.png';
 import iconDrugs from '../img/icons/drugs.png';
 import iconMedCard from '../img/icons/medcard.png';
+import iconPeople from '../img/icons/people.png';
 
 export {
   iconDate,
@@ -76,4 +77,5 @@ export {
   iconServices,
   iconDrugs,
   iconMedCard,
+  iconPeople,
 };

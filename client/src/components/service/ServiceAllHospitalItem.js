@@ -67,11 +67,10 @@ const baseStyles = {
     cursor: 'pointer',
     padding: 0,
     textAlign: 'left',
-
+    marginTop: 'auto',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '8px',  
-
     transition: 'color 0.3s ease',
   },
   cancelButton: {
@@ -111,6 +110,16 @@ const smallScreenStyles = {
   },
   actionButtons: {
     width: '100%',
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: '0.5rem',
+  },
+  infoIcon:{
+    width: '25px',
+    height: '25px',
+  },
+  editButton:{
+    fontSize: '16px',
   },
   cancelButton: {
     fontSize: '16px',
@@ -151,9 +160,14 @@ const ServiceAllHospitalItem = ({ service, onDelete }) => {
       ...baseStyles.actionButtons,
       ...(isSmallScreen ? smallScreenStyles.actionButtons : {}),
     },
+    infoIcon:{
+      ...baseStyles.infoIcon,
+      ...(isSmallScreen ? smallScreenStyles.infoIcon : {}),
+    },
     editButton: {
       ...baseStyles.button,
       ...baseStyles.editButton,
+      ...(isSmallScreen ? smallScreenStyles.editButton : {}),
     },
     cancelButton: {
       ...baseStyles.cancelButton,
@@ -184,7 +198,7 @@ const ServiceAllHospitalItem = ({ service, onDelete }) => {
         <div style={combinedStyles.actionButtons}>
           <NavLink to={`${ADMIN_SERVICESCHEDULE_ROUTE}/${service.LabTestInfo ? 'analysis' : 'service'}/${service.id}`}>
             <button style={combinedStyles.editButton}>
-              <img src={iconSchedule} alt="Розклад" style={baseStyles.infoIcon} />
+              <img src={iconSchedule} alt="Розклад" style={combinedStyles.infoIcon} />
               Розклад
             </button>
           </NavLink>

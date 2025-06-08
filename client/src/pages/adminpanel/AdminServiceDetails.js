@@ -3,11 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorDetailsAppointment.module.css';
 import AlertPopup from '../../components/elements/AlertPopup';
 import { formatAppointmentDate } from '../../utils/formatDate';
-import { iconDoctor, iconHospital } from '../../utils/icons';
-import { fetchLabTestById, updateLabTest, markLabTestReady, fetchLabTestPdf } from '../../http/analysisAPI';
-import { fetchMedicalServiceById, updateMedicalService, markMedicalServiceReady, fetchMedicalServicePdf } from '../../http/servicesAPI';
+import { iconDoctor, iconPeople } from '../../utils/icons';
+import { fetchLabTestById, deleteLabTest, fetchLabTestPdf} from '../../http/analysisAPI';
+import { fetchMedicalServiceById, deleteMedicalService, fetchMedicalServicePdf } from '../../http/servicesAPI';
 
-const DoctorServicesResults = () => {
+const AdminServiceDetails = () => {
   const navigate = useNavigate();
   const { serviceType, id } = useParams();
   const [data, setData] = useState(null);
@@ -15,12 +15,9 @@ const DoctorServicesResults = () => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [alert, setAlert] = useState(null);
 
   const isReady = data?.is_ready === true;
-
-  const isEditable = !isReady || isEditing;
 
   const formattedDateTime = data ? formatAppointmentDate(data) : '';
   const serviceName =
@@ -28,10 +25,10 @@ const DoctorServicesResults = () => {
     data?.LabTestSchedule?.HospitalLabService?.LabTestInfo?.name ||
     'Послуга';
 
-  const hospitalName =
-    data?.MedicalServiceSchedule?.HospitalMedicalService?.Hospital?.name ||
-    data?.Doctor?.Hospital?.name ||
-    'Невідомий заклад';
+  const doctor = data?.Doctor;
+  const doctorName = doctor
+    ? `${doctor.last_name || ''} ${doctor.first_name || ''} (${doctor.specialization || ''})`.trim()
+    : 'Невідомий лікар';
 
   const patient = data?.Patient;
   const patientName = patient
@@ -59,7 +56,6 @@ const DoctorServicesResults = () => {
       setData(fetched);
       setResults(fetched.results || '');
       setNotes(fetched.notes || '');
-      setIsEditing(false); 
     } catch (err) {
       console.error(err);
       setError('Не вдалося завантажити деталі послуги');
@@ -68,53 +64,22 @@ const DoctorServicesResults = () => {
     }
   }, [id, serviceType]);
 
-  const handleComplete = async () => {
+  const handleDelete = async () => {
     try {
-      const payload = { results, notes };
+        if (!window.confirm('Ви дійсно хочете видалити цю послугу?')) return;
 
-      if (serviceType === 'lab-test') {
-        await updateLabTest(id, payload);
-        await markLabTestReady(id);
-      } else if (serviceType === 'medical-service') {
-        await updateMedicalService(id, payload);
-        await markMedicalServiceReady(id);
-      }
+        if (serviceType === 'lab-test') {
+        await deleteLabTest(id);
+        } else if (serviceType === 'medical-service') {
+        await deleteMedicalService(id);
+        }
 
-      setAlert({ message: 'Дані збережені та позначені як готові', type: 'success' });
-      await loadData();
-      setIsEditing(false); 
+        setAlert({ message: 'Послугу успішно видалено', type: 'success' });
+        setTimeout(() => navigate(-1), 1500); // Повернення назад через 1.5 секунди
     } catch (error) {
-      console.error(error);
-      setAlert({ message: 'Помилка при збереженні та позначенні готовності', type: 'error' });
+        console.error(error);
+        setAlert({ message: 'Помилка при видаленні послуги', type: 'error' });
     }
-  };
-
-  const handleSaveNotes = async () => {
-    try {
-      const payload = { results, notes };
-
-      if (serviceType === 'lab-test') {
-        await updateLabTest(id, payload);
-      } else if (serviceType === 'medical-service') {
-        await updateMedicalService(id, payload);
-      }
-
-      setAlert({ message: 'Дані успішно збережені', type: 'success' });
-      await loadData();
-      setIsEditing(false);
-    } catch (error) {
-      console.error(error);
-      setAlert({
-        message:
-          'Помилка збереження: ' +
-          (error.response?.data?.message || error.message || 'невідома помилка'),
-        type: 'error',
-      });
-    }
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
   };
 
   useEffect(() => {
@@ -148,11 +113,10 @@ const DoctorServicesResults = () => {
           {!isReady && (
             <button
               className={styles.completeButton}
-              onClick={handleComplete}
-              disabled={!results.trim()}
+              onClick={handleDelete}
             >
-              <span className={styles.completeIcon}>✓</span>
-              <span className={styles.completeText}>Позначити готовим</span>
+              <span className={styles.closeIcon}>×</span>
+              <span className={styles.closeText}>Видалити</span>
             </button>
           )}
 
@@ -161,84 +125,54 @@ const DoctorServicesResults = () => {
 
       <div className={styles.detailsSection}>
         <div className={styles.detailItem}>
-          <img src={iconDoctor} alt="Doctor Icon" className={styles.icon} />
+          <img src={iconPeople} alt="People Icon" className={styles.icon} />
           <p className={styles.detailText}>
             <strong>Пацієнт:</strong> {patientName}
           </p>
         </div>
         <div className={styles.detailItem}>
-          <img src={iconHospital} alt="Hospital Icon" className={styles.icon} />
+          <img src={iconDoctor} alt="Doctor Icon" className={styles.icon} />
           <p className={styles.detailText}>
-            <strong>Місце проведення:</strong> {hospitalName}
-          </p>
+            <strong>Лікар:</strong> {doctorName}
+           </p>
         </div>
       </div>
 
       <section>
         <h3 className={styles.resultsTitle}>Результати</h3>
-        {isEditable ? (
-          <textarea
-            className={styles.commentTextarea}
-            value={results}
-            onChange={(e) => setResults(e.target.value)}
-            placeholder="Введіть результати"
-          />
-        ) : (
           <div className={styles.resultsBlock}>
             <div className={styles.resultsText}>{renderMultilineText(results)}</div>
             <div className={styles.pdfWrapper}>
-              <button
-                onClick={() => {
-                if (serviceType === 'lab-test') {
-                  fetchLabTestPdf(id);
-                } else if (serviceType === 'medical-service') {
-                  fetchMedicalServicePdf(id);
-                }
-                }}
-                className={styles.viewPdf}
+                <button
+                    onClick={() => {
+                    if (serviceType === 'lab-test') {
+                        fetchLabTestPdf(id);
+                    } else if (serviceType === 'medical-service') {
+                        fetchMedicalServicePdf(id);
+                    }
+                    }}
+                    className={styles.viewPdf}
                 >
-                  Переглянути PDF
-               </button>
+                    Переглянути PDF
+                </button>
             </div>
           </div>
-        )}
       </section>
 
       <section>
         <h3 className={styles.resultsTitle}>Коментар лікаря</h3>
-        {isEditable ? (
-          <textarea
-            className={styles.commentTextarea}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Введіть коментар"
-          />
-        ) : (
           <div className={styles.commentBlock}>
             <div className={styles.commentText}>{renderMultilineText(notes)}</div>
           </div>
-        )}
       </section>
 
       <div className={styles.footerActions}>
         <button onClick={goBack} className={styles.backButton}>
           ‹ Повернутися назад
         </button>
-
-        {(isEditing) && results.trim() && (
-          <button onClick={handleSaveNotes} className={styles.saveButton}>
-            Зберегти
-          </button>
-        )}
-        
-        {isReady && !isEditing && (
-          <button className={styles.saveButton} onClick={handleEdit}>
-            Внести зміни
-          </button>
-        )}
       </div>
     </div>
   );
 };
 
-export default DoctorServicesResults;
+export default AdminServiceDetails;

@@ -124,3 +124,13 @@ export const createMedicalServiceInfo = async (serviceData) => {
     throw error;
   }
 };
+
+export const deleteMedicalService = async (serviceId) => {
+  try {
+    const { data } = await $authHost.delete(`/api/medical-services/${serviceId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні медичної послуги:', error);
+    throw error;
+  }
+};
