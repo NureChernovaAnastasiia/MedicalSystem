@@ -32,3 +32,23 @@ export const getLabTestSchedulesByHospital = async (hospitalId) => {
     throw error;
   }
 };
+
+export const getLabTestScheduleById = async (id) => {
+  try {
+    const { data } = await $authHost.get(`/api/lab-test-schedules/${id}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні розкладу лабораторного тесту по ID:', error);
+    throw error;
+  }
+};
+
+export const deleteLabTestScheduleById = async (id) => {
+  try {
+    const { data } = await $authHost.delete(`/api/lab-test-schedules/${id}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні розкладу лабораторного тесту по ID:', error);
+    throw error;
+  }
+};

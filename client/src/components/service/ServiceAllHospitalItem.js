@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import ModalAnalysInfo from '../modals/ModalAnalysInfo';
 import { iconSchedule } from '../../utils/icons';
+import { ADMIN_SERVICESCHEDULE_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   analyseItem: {
@@ -180,13 +182,12 @@ const ServiceAllHospitalItem = ({ service, onDelete }) => {
         <span style={combinedStyles.doctorName}>{doctorName}</span>
 
         <div style={combinedStyles.actionButtons}>
-          <button
-            style={combinedStyles.editButton}
-            onClick={() => setIsModalOpen(true)}
-          >
-            <img src={iconSchedule} alt="Розклад" style={baseStyles.infoIcon} />
-            Розклад
-          </button>
+          <NavLink to={`${ADMIN_SERVICESCHEDULE_ROUTE}/${service.LabTestInfo ? 'analysis' : 'service'}/${service.id}`}>
+            <button style={combinedStyles.editButton}>
+              <img src={iconSchedule} alt="Розклад" style={baseStyles.infoIcon} />
+              Розклад
+            </button>
+          </NavLink>
           <button
             style={combinedStyles.cancelButton}
             onClick={() => onDelete && onDelete(service.id)}
