@@ -52,3 +52,13 @@ export const deleteMedicalServiceScheduleById = async (id) => {
     throw error;
   }
 };
+
+export const createMedicalServiceSchedule = async (scheduleData) => {
+  try {
+    const { data } = await $authHost.post('api/medical-service-schedules', scheduleData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні розкладу медичної послуги:', error);
+    throw error;
+  }
+};

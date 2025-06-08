@@ -27,6 +27,7 @@
   border-radius: 30px 30px 0 0;
   padding: 1rem 2rem;
   text-align: center;
+  margin-bottom: 10px;
 }
 
 .title {
@@ -39,7 +40,7 @@
 }
 
 .selectGroup {
-  padding: 30px 40px 0;
+  padding: 20px 40px 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -137,6 +138,7 @@
 }
 
 .dayRow label {
+  font-family: 'Montserrat', sans-serif;
   min-width: 90px;
   font-weight: 500;
   font-size: 18px;

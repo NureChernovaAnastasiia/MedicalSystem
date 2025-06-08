@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useParams, NavLink } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styles from "../../style/adminpanel/AdminDoctorSchedule.module.css";
 import { daysOfWeekShort } from '../../constants/daysOfWeek';
 import ModalScheduleDetail from "../../components/modals/ModalScheduleDetail"; 
+import ModalCreateServiceSchedule from "../../components/modals/ModalCreateServiceSchedule";
 import ConfirmModal from '../../components/elements/ConfirmModal';
 
 import { getAvailableLabTestTimes, getLabTestScheduleById, deleteLabTestScheduleById } from "../../http/analysisScheduleAPI"; 
@@ -28,6 +29,7 @@ const AdminServiceSchedule = () => {
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false); 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { serviceType, id } = useParams();
   const entityId = Number(id);
@@ -130,14 +132,20 @@ const AdminServiceSchedule = () => {
     setIsConfirmOpen(false);
   };
 
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div className={styles.scheduleContainer}>
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Розклад надання</h1>
         <div className={styles.orderButtonWrapper}>
-          <NavLink to="#">
-            <button className={styles.orderButton}>Додати розклад</button>
-          </NavLink>
+          <button className={styles.orderButton} onClick={openCreateModal}>Додати розклад</button>
         </div>
       </div>
       <h4 className={styles.subtitle}>
@@ -191,6 +199,15 @@ const AdminServiceSchedule = () => {
         cancelText="Відміна"
         loading={deleteLoading}
       />
+
+      {isCreateModalOpen && (
+        <ModalCreateServiceSchedule
+          id={entityId}
+          type={serviceType}
+          onClose={closeCreateModal}
+          onSubmit={loadSchedule}
+        />
+      )}
     </div>
   );
 };

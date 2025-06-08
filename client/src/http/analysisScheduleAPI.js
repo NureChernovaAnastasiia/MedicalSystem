@@ -52,3 +52,13 @@ export const deleteLabTestScheduleById = async (id) => {
     throw error;
   }
 };
+
+export const createLabTestSchedule = async (scheduleData) => {
+  try {
+    const { data } = await $authHost.post('api/lab-test-schedules', scheduleData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні розкладу лабораторного тесту:', error);
+    throw error;
+  }
+};
