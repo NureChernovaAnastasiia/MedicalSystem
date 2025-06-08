@@ -11,7 +11,7 @@ const base = {
     display: 'grid',
     gridTemplateColumns: '2.5fr 1.7fr 1.7fr 1fr 1fr 1.2fr',
     alignItems: 'center',
-    padding: '6px 1rem',
+    padding: '10px 1rem',
     gap: '1rem',
     boxSizing: 'border-box',
     fontFamily: "'Montserrat',sans-serif",
