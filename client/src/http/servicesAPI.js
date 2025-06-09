@@ -84,3 +84,53 @@ export const deleteHospitalMedicalService = async (serviceId) => {
     throw error;
   }
 };
+
+export const fetchMedicalServicesInfo = async () => {
+  try {
+    const { data } = await $authHost.get('api/medical-service-info');
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні списку послуг:', error);
+    throw error;
+  }
+};
+
+export const createHospitalMedicalService = async (serviceData) => {
+  try {
+    const { data } = await $authHost.post('api/hospital-medical-services', serviceData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні медичної послуги в лікарні:', error);
+    throw error;
+  }
+};
+
+export const fetchAvailableMedicalServices = async (hospitalId) => {
+  try {
+    const { data } = await $authHost.get(`/api/hospital-medical-services/available/${hospitalId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні медичних послуг:', error);
+    throw error;
+  }
+};
+
+export const createMedicalServiceInfo = async (serviceData) => {
+  try {
+    const { data } = await $authHost.post('/api/medical-service-info', serviceData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні медичної послуги:', error);
+    throw error;
+  }
+};
+
+export const deleteMedicalService = async (serviceId) => {
+  try {
+    const { data } = await $authHost.delete(`/api/medical-services/${serviceId}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні медичної послуги:', error);
+    throw error;
+  }
+};

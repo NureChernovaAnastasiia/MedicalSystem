@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { format, parseISO, isValid } from 'date-fns';
 import uk from 'date-fns/locale/uk';
+import { ADMIN_SERVICEDETAILS_ROUTE } from '../../utils/consts';
 
 const base = {
   item: {
@@ -9,7 +11,7 @@ const base = {
     display: 'grid',
     gridTemplateColumns: '2.5fr 1.7fr 1.7fr 1fr 1fr 1.2fr',
     alignItems: 'center',
-    padding: '6px 1rem',
+    padding: '10px 1rem',
     gap: '1rem',
     boxSizing: 'border-box',
     fontFamily: "'Montserrat',sans-serif",
@@ -65,7 +67,9 @@ const ServiceHospitalItem = ({ service }) => {
     txt: { ...base.txt, ...(small && { fontSize: 14 }) },
   };
 
-  const title = service.test_name || service.procedure_name || '—';
+  const serviceType = service?.test_name ? 'lab-test' : 'medical-service';
+  const serviceId = service?.id;
+  const title = service.test_name || service.service_name || '—';
   const doctor = service.doctor_name || `${service.Doctor.last_name} ${service.Doctor.first_name}` || '—';
   const patient = service.patient_name || `${service.Patient.last_name} ${service.Patient.first_name}` || '—';
   const start = fmtTime(service.start_time || service.MedicalServiceSchedule.start_time);
@@ -80,7 +84,11 @@ const ServiceHospitalItem = ({ service }) => {
       <span style={st.txt}>
         {start && end ? `${start} – ${end}` : start ?? end ?? '—'}
       </span>
-      <button style={base.btn}>Детальніше</button>
+      <NavLink to={`${ADMIN_SERVICEDETAILS_ROUTE}/${serviceType}/${serviceId}`}
+        style={{ ...base.btn, textDecoration: 'none', textAlign: 'center' }}
+      >
+        Детальніше
+      </NavLink>
     </div>
   );
 };

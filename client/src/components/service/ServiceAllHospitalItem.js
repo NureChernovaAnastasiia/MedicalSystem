@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import ModalAnalysInfo from '../modals/ModalAnalysInfo';
 import { iconSchedule } from '../../utils/icons';
+import { ADMIN_SERVICESCHEDULE_ROUTE } from '../../utils/consts';
 
 const baseStyles = {
   analyseItem: {
@@ -65,11 +67,10 @@ const baseStyles = {
     cursor: 'pointer',
     padding: 0,
     textAlign: 'left',
-
+    marginTop: 'auto',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '8px',  
-
     transition: 'color 0.3s ease',
   },
   cancelButton: {
@@ -109,6 +110,16 @@ const smallScreenStyles = {
   },
   actionButtons: {
     width: '100%',
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: '0.5rem',
+  },
+  infoIcon:{
+    width: '25px',
+    height: '25px',
+  },
+  editButton:{
+    fontSize: '16px',
   },
   cancelButton: {
     fontSize: '16px',
@@ -149,9 +160,14 @@ const ServiceAllHospitalItem = ({ service, onDelete }) => {
       ...baseStyles.actionButtons,
       ...(isSmallScreen ? smallScreenStyles.actionButtons : {}),
     },
+    infoIcon:{
+      ...baseStyles.infoIcon,
+      ...(isSmallScreen ? smallScreenStyles.infoIcon : {}),
+    },
     editButton: {
       ...baseStyles.button,
       ...baseStyles.editButton,
+      ...(isSmallScreen ? smallScreenStyles.editButton : {}),
     },
     cancelButton: {
       ...baseStyles.cancelButton,
@@ -180,13 +196,12 @@ const ServiceAllHospitalItem = ({ service, onDelete }) => {
         <span style={combinedStyles.doctorName}>{doctorName}</span>
 
         <div style={combinedStyles.actionButtons}>
-          <button
-            style={combinedStyles.editButton}
-            onClick={() => setIsModalOpen(true)}
-          >
-            <img src={iconSchedule} alt="Розклад" style={baseStyles.infoIcon} />
-            Розклад
-          </button>
+          <NavLink to={`${ADMIN_SERVICESCHEDULE_ROUTE}/${service.LabTestInfo ? 'analysis' : 'service'}/${service.id}`}>
+            <button style={combinedStyles.editButton}>
+              <img src={iconSchedule} alt="Розклад" style={combinedStyles.infoIcon} />
+              Розклад
+            </button>
+          </NavLink>
           <button
             style={combinedStyles.cancelButton}
             onClick={() => onDelete && onDelete(service.id)}

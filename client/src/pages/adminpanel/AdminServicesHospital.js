@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { Context } from '../../index';
 import SearchInput from '../../components/options/SearchInput';
 import ServiceAllHospitalItem from '../../components/service/ServiceAllHospitalItem';
 import ConfirmModal from '../../components/elements/ConfirmModal'; 
+import ModalCreateHospitalService from '../../components/modals/ModalCreateHospitalService';
 
 import { getHospitalMedicalServicesByHospitalId, deleteHospitalMedicalService } from '../../http/servicesAPI';
 import { getHospitalLabServicesByHospitalId, deleteHospitalLabService } from '../../http/analysisAPI';
@@ -13,7 +14,7 @@ const AdminServicesHospital = () => {
   const { hospital } = useContext(Context);
   const hospitalId = hospital?.hospitalId;
 
-  const [activeTab, setActiveTab] = useState('services');
+  const [activeTab, setActiveTab] = useState('analyses');
   const [searchTerm, setSearchTerm] = useState('');
   const [services, setServices] = useState([]);
   const [analyses, setAnalyses] = useState([]);
@@ -23,28 +24,29 @@ const AdminServicesHospital = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [deleteType, setDeleteType] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [servicesData, analysesData] = await Promise.all([
+        getHospitalMedicalServicesByHospitalId(hospitalId).catch(() => []),
+        getHospitalLabServicesByHospitalId(hospitalId).catch(() => []),
+      ]);
+      setServices(servicesData);
+      setAnalyses(analysesData);
+    } catch (error) {
+      console.error('Помилка завантаження даних:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [hospitalId]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [servicesData, analysesData] = await Promise.all([
-          getHospitalMedicalServicesByHospitalId(hospitalId).catch(() => []),
-          getHospitalLabServicesByHospitalId(hospitalId).catch(() => []),
-        ]);
-        setServices(servicesData);
-        setAnalyses(analysesData);
-      } catch (error) {
-        console.error('Помилка завантаження даних:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (hospitalId) {
       fetchData();
     }
-  }, [hospitalId]);
+  }, [hospitalId, fetchData]);
 
   useEffect(() => {
     if (services.length === 0 && analyses.length > 0) {
@@ -56,9 +58,10 @@ const AdminServicesHospital = () => {
 
   const handleSearch = (item) => {
     const term = searchTerm.toLowerCase();
-    const fullName = (`${item.Doctor?.last_name} ${item.Doctor?.first_name} ${item.Doctor?.middle_name}` || '').toLowerCase();
-    const title = (item.LabTestInfo?.name || item.MedicalServiceInfo?.name || '').toLowerCase();
-    return title.includes(term) || fullName.includes(term);
+    const doctor = item.Doctor || {};
+    const doctorFullName = `${doctor.last_name ?? ''} ${doctor.first_name ?? ''} ${doctor.middle_name ?? ''}`.toLowerCase();
+    const serviceName = (item.LabTestInfo?.name || item.MedicalServiceInfo?.name || '').toLowerCase();
+    return doctorFullName.includes(term) || serviceName.includes(term);
   };
 
   const filteredData = (activeTab === 'services' ? services : analyses)
@@ -102,8 +105,12 @@ const AdminServicesHospital = () => {
       <div className={styles.headerRow}>
         <h1 className={styles.title}>Послуги лікарні</h1>
         <div className={styles.orderButtonWrapper}>
-          <button className={styles.orderButton}>Створити послугу</button>
-          <button className={styles.orderButton}>Додати розклад</button>
+          <button
+            className={styles.orderButton}
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Створити послугу
+          </button>
         </div>
       </div>
 
@@ -136,6 +143,7 @@ const AdminServicesHospital = () => {
 
       <div className={styles.tableHeader}>
         <span>Назва</span>
+        <span></span>
         <span>Лікар</span>
       </div>
 
@@ -165,6 +173,15 @@ const AdminServicesHospital = () => {
         onCancel={() => setModalOpen(false)}
         loading={deleteLoading}
       />
+
+      {isCreateModalOpen && (
+        <ModalCreateHospitalService
+          onClose={() => setIsCreateModalOpen(false)}
+          onServiceCreated={() => {
+            fetchData();
+          }}
+        />
+      )}
     </div>
   );
 };

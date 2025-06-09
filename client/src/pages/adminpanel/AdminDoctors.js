@@ -3,6 +3,7 @@ import { Context } from '../../index';
 
 import SearchInput from '../../components/options/SearchInput';
 import SearchBySpecialization from '../../components/options/SearchBySpecialization';
+import SearchByPosition from '../../components/options/SearchByPosition';
 import DoctorItem from '../../components/doctor/DoctorItem';
 import StaffItem from '../../components/hospitalstaff/StaffItem';
 import ModalRegistrationDocStaff from '../../components/modals/ModalRegistrationDocStaff';
@@ -137,11 +138,7 @@ const AdminDoctors = () => {
         <>
           <div className={styles.filterRow}>
             <div className={styles.datePickerWrapper}>
-              <SearchInput
-                value={searchPosition}
-                onChange={setSearchPosition}
-                placeholder="Введіть посаду"
-              />
+              <SearchByPosition value={searchPosition} onChange={setSearchPosition} />
             </div>
             <div className={styles.searchBox}>
               <SearchInput

@@ -45,3 +45,5 @@ export const ADMIN_EDITPATDATA_ROUTE = '/admin-edit-patient-data';
 export const ADMIN_DOCSCHEDULE_ROUTE = '/admin-doc-schedule';
 export const ADMIN_ALLAPPOINTMENTS_ROUTE = '/admin-all-appointments';
 export const ADMIN_SERVICESHOSP_ROUTE = '/admin-services-hospital';
+export const ADMIN_SERVICESCHEDULE_ROUTE = '/admin-services-schedule';
+export const ADMIN_SERVICEDETAILS_ROUTE = '/admin-services-details';

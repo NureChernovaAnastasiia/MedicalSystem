@@ -32,3 +32,33 @@ export const getMedicalServiceSchedulesByHospital = async (hospitalId) => {
     throw error;
   }
 };
+
+export const getMedicalServiceScheduleById = async (id) => {
+  try {
+    const { data } = await $authHost.get(`/api/medical-service-schedules/${id}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при отриманні розкладу медичної послуги по ID:', error);
+    throw error;
+  }
+};
+
+export const deleteMedicalServiceScheduleById = async (id) => {
+  try {
+    const { data } = await $authHost.delete(`/api/medical-service-schedules/${id}`);
+    return data;
+  } catch (error) {
+    console.error('Помилка при видаленні розкладу медичної послуги по ID:', error);
+    throw error;
+  }
+};
+
+export const createMedicalServiceSchedule = async (scheduleData) => {
+  try {
+    const { data } = await $authHost.post('api/medical-service-schedules', scheduleData);
+    return data;
+  } catch (error) {
+    console.error('Помилка при створенні розкладу медичної послуги:', error);
+    throw error;
+  }
+};

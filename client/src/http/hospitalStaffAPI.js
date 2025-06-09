@@ -49,3 +49,8 @@ export const deleteStaffById = async (id) => {
     throw error;
   }
 };
+
+export const fetchUniqueHospitalPositions = async () => {
+  const { data } = await $authHost.get('/api/hospital-staff/positions/unique');
+  return data;
+};
