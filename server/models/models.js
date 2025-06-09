@@ -556,6 +556,8 @@ Review.belongsTo(Hospital, { foreignKey: "target_id", constraints: false, as: "h
 Review.belongsTo(Patient, { foreignKey: 'user_id', targetKey: 'user_id' });
 Patient.hasMany(Review, { foreignKey: 'user_id', sourceKey: 'user_id' });
 
+FinancialReport.belongsTo(Hospital, { foreignKey: 'hospital_id' });
+
 // Many-to-Many via HospitalLabService
 Hospital.belongsToMany(LabTestInfo, {
   through: HospitalLabService,
