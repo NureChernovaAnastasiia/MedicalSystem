@@ -19,3 +19,18 @@ export const fetchAllReviews = async () => {
     throw error;
   }
 };
+
+export const fetchReviewsByTarget = async (targetType, targetId) => {
+  try {
+    const { data } = await $host.get(`api/reviews/target/${targetType}/${targetId}`);
+    return data;
+  } catch (error) {
+    console.error("Помилка при отриманні коментарів:", error);
+    throw error;
+  }
+};
+
+export const deleteReview = async (id) => {
+  const { data } = await $authHost.delete(`/api/reviews/${id}`);
+  return data;
+};

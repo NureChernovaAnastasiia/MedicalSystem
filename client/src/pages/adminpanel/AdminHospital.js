@@ -1,11 +1,40 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from 'react';
+import styles from '../../style/patientpanel/PatientHospitalDetails.module.css';
 
-function App() {
+import { Context } from '../../index';
+import { fetchHospitalById } from '../../http/hospitalAPI';
+
+import HospitalHeader from '../../components/hospital/HospitalHeader';
+import HospitalReviewsBlock from '../../components/hospital/HospitalReviewsBlock';
+
+const PatientHospitalDetails = () => {
+  const { hospital } = useContext(Context); 
+  const [hospitalData, setHospitalData] = useState(null);
+
+  useEffect(() => {
+    const fetchHospitalData = async () => {
+      if (!hospital?.hospital?.id) return;
+
+      try {
+        const hospitalInfo = await fetchHospitalById(hospital.hospital.id);
+        setHospitalData(hospitalInfo);
+
+      } catch (error) {
+        console.error('Помилка при завантаженні даних лікарні:', error);
+      }
+    };
+
+    fetchHospitalData();
+  }, [hospital]);
+
   return (
-    <div>
-      <h1>Hello,!</h1>
+    <div className={styles.container}>
+      {hospitalData && <HospitalHeader hospital={hospitalData} />}
+
+      {hospitalData && <HospitalReviewsBlock hospitalId={hospitalData.id} />}
+
     </div>
   );
-}
+};
 
-export default App;
+export default PatientHospitalDetails;

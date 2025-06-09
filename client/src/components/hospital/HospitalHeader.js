@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   iconHospital,
   iconAddress,
   iconTelephone,
   iconEmail
 } from '../../utils/icons';
+import { Context } from '../..'; 
 
 const baseStyles = {
   headerContainer: {
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
+    position: 'relative', // додано для позиціювання кнопки
   },
   headerBox: {
     background: '#f6f6f6',
@@ -21,6 +23,7 @@ const baseStyles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '1px',
+    position: 'relative',
   },
   hospitalNameBlock: {
     display: 'flex',
@@ -62,7 +65,6 @@ const baseStyles = {
   headerInfo: {
     display: 'flex',
     flexBasis: 'calc(50% - 25px)',
-    padding: '0 40px',
     gap: '40%',
   },
   leftSide: {
@@ -100,6 +102,31 @@ const baseStyles = {
     fontSize: '19px',
     color: '#333',
   },
+  cardHeader: {
+    position: 'absolute',
+    top: '10px',
+    right: '20px',
+  },
+  detailsButton: {
+    display: 'flex',
+    alignItems: 'center',
+    background: 'none',
+    border: 'none',
+    fontFamily: 'Montserrat, sans-serif',
+    fontWeight: 300,
+    fontSize: '16px',
+    color: '#333333',
+    cursor: 'pointer',
+  },
+  detailsIcon: {
+    marginRight: '8px',
+    fontFamily: 'Montserrat, sans-serif',
+    fontStyle: 'italic',
+    fontWeight: 700,
+    fontSize: '30px',
+    lineHeight: 1,
+    color: '#FBDA03',
+  },
 };
 
 const ContactInfo = ({ icon, text, isSmallScreen }) => (
@@ -112,7 +139,10 @@ const ContactInfo = ({ icon, text, isSmallScreen }) => (
   </div>
 );
 
-const HospitalHeader = ({ hospital }) => {
+const HospitalHeader = ({ hospital, handleOpenModal }) => {
+  const { user } = useContext(Context);
+  const role = user?._role;
+
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
@@ -167,6 +197,14 @@ const HospitalHeader = ({ hospital }) => {
   return (
     <div style={baseStyles.headerContainer}>
       <div style={responsiveStyles.headerBox}>
+        {role === 'Admin' && (
+          <div style={baseStyles.cardHeader}>
+            <button style={baseStyles.detailsButton} onClick={handleOpenModal}>
+              <span style={baseStyles.detailsIcon}>!</span> Редагувати дані
+            </button>
+          </div>
+        )}
+
         <div style={baseStyles.hospitalNameBlock}>
           <img src={iconHospital} alt="Hospital Icon" style={responsiveStyles.hospitalIcon} />
           <span style={responsiveStyles.hospitalName}>{hospital.name}</span>
