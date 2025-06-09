@@ -1,18 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  iconHospital,
-  iconAddress,
-  iconTelephone,
-  iconEmail
-} from '../../utils/icons';
+import { iconHospital, iconAddress, iconTelephone, iconEmail } from '../../utils/icons';
 import { Context } from '../..'; 
+import ModalEditHospital from '../modals/ModalEditHospital';
 
 const baseStyles = {
   headerContainer: {
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
-    position: 'relative', // додано для позиціювання кнопки
+    position: 'relative', 
   },
   headerBox: {
     background: '#f6f6f6',
@@ -139,11 +135,17 @@ const ContactInfo = ({ icon, text, isSmallScreen }) => (
   </div>
 );
 
-const HospitalHeader = ({ hospital, handleOpenModal }) => {
+const HospitalHeader = ({ hospital }) => {
   const { user } = useContext(Context);
   const role = user?._role;
 
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hospitalData, setHospitalData] = useState(hospital);
+  
+  useEffect(() => {
+    setHospitalData(hospital);
+  }, [hospital]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -155,7 +157,14 @@ const HospitalHeader = ({ hospital, handleOpenModal }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  if (!hospital) return null;
+  const handleSaveChanges = (updatedData) => {
+    setHospitalData(updatedData);
+  };
+
+  if (!hospital || !hospitalData) return null;
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   const responsiveStyles = {
     headerBox: {
@@ -207,27 +216,35 @@ const HospitalHeader = ({ hospital, handleOpenModal }) => {
 
         <div style={baseStyles.hospitalNameBlock}>
           <img src={iconHospital} alt="Hospital Icon" style={responsiveStyles.hospitalIcon} />
-          <span style={responsiveStyles.hospitalName}>{hospital.name}</span>
+          <span style={responsiveStyles.hospitalName}>{hospitalData.name}</span>
         </div>
 
         <div style={responsiveStyles.middleRow}>
-          <div style={baseStyles.clinicType}>{hospital.type} лікарня</div>
-          <div style={baseStyles.schedule}>{hospital.working_hours}</div>
+          <div style={baseStyles.clinicType}>{hospitalData.type} лікарня</div>
+          <div style={baseStyles.schedule}>{hospitalData.working_hours}</div>
         </div>
 
         <div style={responsiveStyles.headerInfo}>
           <div style={baseStyles.leftSide}>
             <div style={baseStyles.addressBox}>
               <img src={iconAddress} alt="Address Icon" style={baseStyles.iconSmall} />
-              <span style={responsiveStyles.address}>{hospital.address}</span>
+              <span style={responsiveStyles.address}>{hospitalData.address}</span>
             </div>
           </div>
 
           <div style={baseStyles.rightSide}>
-            <ContactInfo icon={iconTelephone} text={hospital.phone} isSmallScreen={isSmallScreen} />
-            <ContactInfo icon={iconEmail} text={hospital.email} isSmallScreen={isSmallScreen} />
+            <ContactInfo icon={iconTelephone} text={hospitalData.phone} isSmallScreen={isSmallScreen} />
+            <ContactInfo icon={iconEmail} text={hospitalData.email} isSmallScreen={isSmallScreen} />
           </div>
         </div>
+        
+        {isModalOpen && (
+          <ModalEditHospital
+            hospital={hospitalData}
+            onClose={handleCloseModal}
+            onSave={handleSaveChanges}
+          />
+        )}
       </div>
     </div>
   );

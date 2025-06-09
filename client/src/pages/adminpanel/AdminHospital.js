@@ -7,7 +7,7 @@ import { fetchHospitalById } from '../../http/hospitalAPI';
 import HospitalHeader from '../../components/hospital/HospitalHeader';
 import HospitalReviewsBlock from '../../components/hospital/HospitalReviewsBlock';
 
-const PatientHospitalDetails = () => {
+const AdminHospital = () => {
   const { hospital } = useContext(Context); 
   const [hospitalData, setHospitalData] = useState(null);
 
@@ -37,4 +37,4 @@ const PatientHospitalDetails = () => {
   );
 };
 
-export default PatientHospitalDetails;
+export default AdminHospital;
