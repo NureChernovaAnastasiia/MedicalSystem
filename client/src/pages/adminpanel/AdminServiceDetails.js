@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../style/doctorpanel/DoctorDetailsAppointment.module.css';
 import AlertPopup from '../../components/elements/AlertPopup';
+import Loader from '../../components/elements/Loader';
 import { formatAppointmentDate } from '../../utils/formatDate';
 import { iconDoctor, iconPeople } from '../../utils/icons';
 import { fetchLabTestById, deleteLabTest, fetchLabTestPdf} from '../../http/analysisAPI';
@@ -86,7 +87,7 @@ const AdminServiceDetails = () => {
     loadData();
   }, [loadData]);
 
-  if (loading) return <p className={styles.loading}>Завантаження...</p>;
+  if (loading) return <Loader />;
   if (error) return <p className={styles.error}>{error}</p>;
   if (!data) return null;
 

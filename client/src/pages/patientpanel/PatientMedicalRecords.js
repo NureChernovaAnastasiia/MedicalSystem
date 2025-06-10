@@ -7,6 +7,7 @@ import 'react-date-range/dist/theme/default.css';
 import SearchInput from '../../components/options/SearchInput';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import DiagnosisCard from '../../components/medcard/DiagnosisCard';
+import Loader from '../../components/elements/Loader';
 import styles from '../../style/patientpanel/PatientMedicalRecords.module.css';
 
 import { fetchMedicalRecordsByPatientId } from '../../http/medicalRecordAPI';
@@ -74,7 +75,7 @@ const PatientMedicalRecords = () => {
 
   const sortedDiagnoses = filteredDiagnoses.slice().sort((a, b) => new Date(b.record_date) - new Date(a.record_date));
 
-  if (loading) return <div className={styles.loading}>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className={styles.error}>{error}</div>;
 
   return (

@@ -4,6 +4,7 @@ import { Context } from '../../index';
 import SearchInput from '../../components/options/SearchInput';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import ServiceHospitalItem from '../../components/service/ServiceHospitalItem';
+import Loader from '../../components/elements/Loader';
 
 import { getMedicalServicesByHospital } from '../../http/servicesAPI';
 import { getLabTestsByHospital } from '../../http/analysisAPI';
@@ -74,9 +75,7 @@ const AdminServices = () => {
   .filter(handleSearch)
   .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
 
-  if (loading) {
-    return <p className={styles.loading}>Завантаження даних...</p>;
-  }
+  if (loading) return <Loader />;
 
   return (
     <div className={styles.container}>

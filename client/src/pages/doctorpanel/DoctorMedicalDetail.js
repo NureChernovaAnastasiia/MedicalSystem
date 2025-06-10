@@ -8,6 +8,7 @@ import { fetchMedicalRecordById } from '../../http/medicalRecordAPI';
 import { fetchPatientData } from '../../http/patientAPI';  
 
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo';
+import Loader from '../../components/elements/Loader'; 
 
 const DoctorMedicalDetail = () => {
   const { id } = useParams();
@@ -47,7 +48,7 @@ const DoctorMedicalDetail = () => {
   const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString('uk-UA');
 
-  if (loading) return <div>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div>{error}</div>;
   if (!record) return <div>Діагноз не знайдено</div>;
 

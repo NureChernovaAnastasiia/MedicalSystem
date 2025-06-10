@@ -7,6 +7,7 @@ import SearchByPosition from '../../components/options/SearchByPosition';
 import DoctorItem from '../../components/doctor/DoctorItem';
 import StaffItem from '../../components/hospitalstaff/StaffItem';
 import ModalRegistrationDocStaff from '../../components/modals/ModalRegistrationDocStaff';
+import Loader from '../../components/elements/Loader';
 
 import styles from '../../style/adminpanel/AdminDoctors.module.css';
 
@@ -78,7 +79,7 @@ const AdminDoctors = () => {
     );
   });
 
-  if (loading) return <div className={styles.loading}>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className={styles.error}>{error}</div>;
 
   return (

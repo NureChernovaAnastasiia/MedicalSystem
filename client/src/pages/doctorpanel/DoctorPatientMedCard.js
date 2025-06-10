@@ -15,6 +15,7 @@ import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreati
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo';
 import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
 import SearchInput from '../../components/options/SearchInput';
+import Loader from '../../components/elements/Loader';
 import { iconDrugs } from '../../utils/icons';
 
 const DoctorPatientMedCard = () => {
@@ -145,7 +146,7 @@ const DoctorPatientMedCard = () => {
     </>
   );
 
-  if (!patient || !doctor) return <div>Завантаження даних...</div>;
+  if (!patient || !doctor) return <Loader />;
 
   return (
     <div className={styles.container}>

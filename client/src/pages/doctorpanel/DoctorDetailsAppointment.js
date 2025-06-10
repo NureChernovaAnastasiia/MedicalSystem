@@ -4,6 +4,7 @@ import styles from '../../style/doctorpanel/DoctorDetailsAppointment.module.css'
 import DiagnosisCard from '../../components/medcard/DiagnosisCard';
 import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreation';
 import AlertPopup from "../../components/elements/AlertPopup";
+import Loader from '../../components/elements/Loader'; 
 import { formatAppointmentDate } from '../../utils/formatDate';
 import { iconDoctor, iconHospital } from '../../utils/icons';
 import { fetchAppointmentById, completeAppointment, cancelAppointment, updateAppointment } from '../../http/appointmentAPI';
@@ -120,7 +121,7 @@ const handleSaveNotes = async () => {
     }
   };
 
-  if (loading) return <p className={styles.loading}>Завантаження...</p>;
+  if (loading) return <Loader />;
   if (error) return <p className={styles.error}>{error}</p>;
   if (!appointment) return null;
 

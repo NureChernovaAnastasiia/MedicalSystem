@@ -10,6 +10,7 @@ import { fetchDoctorWorkingHoursByIdAndDate } from '../../http/doctorScheduleAPI
 
 import HospitalHeader from '../../components/hospital/HospitalHeader';
 import DoctorScheduleTable from '../../components/doctor/DoctorScheduleTable'; 
+import Loader from '../../components/elements/Loader';
 
 const getWeekDates = () => {
   const today = new Date();
@@ -81,7 +82,7 @@ const PatientHospitalSchedule = () => {
     if (id) loadData();
   }, [id, weekDates]);
 
-  if (loading) return <div>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className={styles.error}>{error}</div>;
   if (!hospital) return <div>Лікарня не знайдена</div>;
 

@@ -6,6 +6,7 @@ import { fetchDoctorScheduleByIdAndDate, fetchDoctorScheduleById, deleteDoctorSc
 import { fetchDoctorById } from "../../http/doctorAPI";
 import ModalScheduleDetail from "../../components/modals/ModalScheduleDetail"; 
 import ConfirmModal from '../../components/elements/ConfirmModal';
+import Loader from "../../components/elements/Loader";
 
 const AdminDoctorSchedule = () => {
   const [weekData, setWeekData] = useState([]);
@@ -110,7 +111,7 @@ const AdminDoctorSchedule = () => {
       <h4 className={styles.subtitle}>
         {doctorInfo
           ? `${doctorInfo.last_name} ${doctorInfo.first_name} | ${doctorInfo.specialization}`
-          : "Завантаження інформації..."}
+          : <Loader />}
       </h4>
 
       <div className={styles.calendarWrapper}>

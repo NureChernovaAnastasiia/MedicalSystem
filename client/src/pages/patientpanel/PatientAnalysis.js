@@ -10,6 +10,7 @@ import { fetchPatientByUserId } from '../../http/patientAPI';
 import { Context } from '../../index';
 
 import Card from '../../components/service/ServiceCard'; 
+import Loader from '../../components/elements/Loader';
 
 const PatientAnalysis = () => {
   const { user } = useContext(Context);
@@ -89,7 +90,7 @@ const PatientAnalysis = () => {
         />
       </div>
 
-      {loading && <p>Завантаження...</p>}
+      {loading && <Loader />}
       {error && <p className={styles.errorMessage}>{error}</p>}
 
       <div className={styles.cardsContainer}>

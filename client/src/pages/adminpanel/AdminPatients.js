@@ -8,6 +8,7 @@ import SearchInput from '../../components/options/SearchInput';
 import DateRangeFilter from '../../components/options/DateRangeFilter';
 import PatientItem from '../../components/patient/PatientItem'; 
 import ModalRegisterPatient from '../../components/modals/ModalRegisterPatient';
+import Loader from '../../components/elements/Loader';
 
 import styles from '../../style/doctorpanel/DoctorPatients.module.css';
 
@@ -59,7 +60,7 @@ const AdminPatients = () => {
     return matchByName && isInDateRange;
   });
 
-  if (loading) return <div className={styles.loading}>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className={styles.error}>{error}</div>;
 
   return (

@@ -7,7 +7,7 @@ import { check } from "./http/userAPI";
 import NavBar from "./components/navbars/NavBar";
 import DefaultFooter from "./components/navbars/DefaultFooter";
 import AppRouter from "./components/AppRouter";
-import "./style/Loader.css";
+import Loader from "./components/elements/Loader";
 import "./style/App.css";
 
 const App = observer(() => {
@@ -42,11 +42,7 @@ const App = observer(() => {
   }, [user, hospital]);
 
   if (loading) {
-    return (
-      <div className="loader-wrapper">
-        <div className="loader-spin" />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

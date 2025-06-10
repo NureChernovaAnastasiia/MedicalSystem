@@ -7,6 +7,7 @@ import { fetchDoctorWorkingHoursByIdAndDate } from '../../http/doctorScheduleAPI
 
 import DoctorScheduleTable from '../../components/doctor/DoctorScheduleTable';
 import ModalCreateDoctorSchedule from '../../components/modals/ModalCreateDoctorSchedule';
+import Loader from '../../components/elements/Loader';
 
 const getWeekDates = () => {
   const today = new Date();
@@ -82,7 +83,7 @@ const AdminSchedules = () => {
     await loadData(); 
   };
 
-  if (loading) return <div>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className={styles.error}>{error}</div>;
 
   return (

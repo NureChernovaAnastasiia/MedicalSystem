@@ -11,6 +11,7 @@ import DateRangeFilter from '../../components/options/DateRangeFilter';
 import AppointmentItem from '../../components/appointment/AppointmentItem';
 import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
 import ModalAppointmentDetails from '../../components/modals/ModalAppointmentDetails';
+import Loader from '../../components/elements/Loader';
 
 import styles from '../../style/adminpanel/AdminAllAppointments.module.css';
 
@@ -177,7 +178,7 @@ const AdminAllAppointments = () => {
       </div>
 
       <div className={styles.cardsGrid}>
-        {loading && <p className={styles.loading}>Завантаження...</p>}
+        {loading && <Loader />}
         {error && !loading && <p className={styles.error}>{error}</p>}
         {!loading && !error && filteredAppointments.length === 0 && (
           <p className={styles.noResults}>Прийомів не знайдено</p>

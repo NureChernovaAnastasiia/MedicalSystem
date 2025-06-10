@@ -4,6 +4,7 @@ import styles from '../../style/patientpanel/PatientAnalyseDetail.module.css';
 
 import { iconDoctor, iconHospital } from '../../utils/icons';
 import { fetchMedicalServiceById, fetchMedicalServicePdf } from '../../http/servicesAPI'; 
+import Loader from '../../components/elements/Loader';
 
 const PatientServiceDetails = () => {
   const navigate = useNavigate();
@@ -31,7 +32,10 @@ const PatientServiceDetails = () => {
     loadService();
   }, [id]);
 
-  if (loading) return <p className={styles.loading}>Завантаження...</p>;
+  const renderMultilineText = (text) =>
+    (text || 'Відсутні дані').split('\n').map((line, i) => <p key={i}>{line}</p>);
+
+  if (loading) return <Loader />;
   if (error) return <p className={styles.error}>{error}</p>;
   if (!service) return null;
 
@@ -71,7 +75,7 @@ const PatientServiceDetails = () => {
 
       <h3 className={styles.resultsTitle}>Результати</h3>
       <div className={styles.resultsBlock}>
-        <p className={styles.resultsText}>{resultsText}</p>
+        <p className={styles.resultsText}>{renderMultilineText(resultsText)}</p>
           <div className={styles.pdfWrapper}>
             <button onClick={() => fetchMedicalServicePdf(service.id)} className={styles.viewPdf}>
               Переглянути PDF
@@ -81,7 +85,7 @@ const PatientServiceDetails = () => {
 
       <h3 className={styles.commentTitle}>Коментар лікаря</h3>
       <div className={styles.commentBlock}>
-        <p className={styles.commentText}>{doctorComment}</p>
+        <p className={styles.commentText}>{renderMultilineText(doctorComment)}</p>
       </div>
 
       <div className={styles.backLink}>

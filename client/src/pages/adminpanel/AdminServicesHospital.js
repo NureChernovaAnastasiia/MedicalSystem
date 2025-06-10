@@ -4,6 +4,7 @@ import SearchInput from '../../components/options/SearchInput';
 import ServiceAllHospitalItem from '../../components/service/ServiceAllHospitalItem';
 import ConfirmModal from '../../components/elements/ConfirmModal'; 
 import ModalCreateHospitalService from '../../components/modals/ModalCreateHospitalService';
+import Loader from '../../components/elements/Loader';
 
 import { getHospitalMedicalServicesByHospitalId, deleteHospitalMedicalService } from '../../http/servicesAPI';
 import { getHospitalLabServicesByHospitalId, deleteHospitalLabService } from '../../http/analysisAPI';
@@ -96,9 +97,7 @@ const AdminServicesHospital = () => {
     }
   };
 
-  if (loading) {
-    return <p className={styles.loading}>Завантаження даних...</p>;
-  }
+  if (loading) return <Loader />;
 
   return (
     <div className={styles.container}>

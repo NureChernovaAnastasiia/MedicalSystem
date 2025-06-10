@@ -10,6 +10,7 @@ import PatientCardFull from '../../components/patient/PatientCardFull';
 import DiagnosisCard from '../../components/medcard/DiagnosisCard';
 import SearchInput from '../../components/options/SearchInput';
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo';
+import Loader from '../../components/elements/Loader';
 import { iconDrugs } from '../../utils/icons';
 
 const AdminPatientMedCard = () => {
@@ -118,7 +119,7 @@ const AdminPatientMedCard = () => {
     </>
   );
 
-  if (!patient) return <div>Завантаження даних...</div>;
+  if (!patient) return  <Loader />;
 
   return (
     <div className={styles.container}>

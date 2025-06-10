@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import styles from '../../style/adminpanel/AdminAnalytics.module.css';
 import FinanceReportItem from '../../components/finance/FinanceReportItem';
+import Loader from '../../components/elements/Loader';
 
 import {
   fetchTopDoctors,
@@ -277,7 +278,7 @@ const AdminAnalytics = () => {
 
       <TabButtons activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {loading && <div className={styles.loading}>Завантаження...</div>}
+      {loading && <Loader />}
       {error && <div className={styles.error}>{error}</div>}
       {!loading && !error && (
         <div className={styles.chartWrapper}>{renderChart()}</div>

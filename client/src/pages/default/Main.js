@@ -19,7 +19,6 @@ const InfoCard = ({ icon, title, text }) => (
 const ReviewCard = ({ img, name, age, stars, quote, targetType, doctorName, hospitalName }) => {
   const photo = img || noPhoto;
 
-  // Визначаємо, для кого відгук
   let targetLabel = '';
   if (targetType === 'Doctor') {
     targetLabel = doctorName ? `лікаря: ${doctorName}` : 'лікаря';
@@ -101,7 +100,7 @@ const Main = () => {
         <div className="info-cards">
           <InfoCard icon={iconBooking} title="Онлайн-запис" text="Зручне бронювання без дзвінків та очікувань" />
           <InfoCard icon={iconHealth} title="Медична картка" text="Зберігайте історію хвороби в безпеці" />
-          <InfoCard icon={iconReminder} title="Нагадування" text="Отримуйте автоматичні нагадування про прийоми" />
+          <InfoCard icon={iconReminder} title="Розклад лікарів" text="Переглядайте доступний графік роботи медичного персоналу" />
           <InfoCard icon={iconServices} title="Аналізи та результати" text="Переглядайте результати онлайн без візиту в лікарню" />
         </div>
       </div>

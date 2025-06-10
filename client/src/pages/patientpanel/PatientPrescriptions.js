@@ -6,6 +6,7 @@ import { Context } from '../../index';
 import { fetchPrescriptionsByPatientId } from '../../http/prescriptionAPI';
 import { fetchPatientByUserId } from '../../http/patientAPI';
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo'; 
+import Loader from '../../components/elements/Loader';
 
 const isActive = (validUntil) => {
   if (!validUntil) return false;
@@ -107,7 +108,7 @@ const PatientPrescriptions = () => {
       </div>
 
       {loading ? (
-        <p>Завантаження...</p>
+        <Loader />
       ) : error ? (
         <p className={styles.error}>{error}</p>
       ) : (
