@@ -84,9 +84,9 @@ const AdminAppointments = () => {
   const filteredAppointments = appointments
     .filter(a => a.type === 'upcoming' && matchesSearchQuery(a))
     .sort((a, b) => {
-      const dateTimeA = new Date(`${a.appointment_date}T${a.DoctorSchedule.start_time}`);
-      const dateTimeB = new Date(`${b.appointment_date}T${b.DoctorSchedule.start_time}`);
-      return dateTimeA - dateTimeB;
+    const dateTimeA = new Date(`${a.appointment_date}T${a.DoctorSchedule?.start_time || '00:00'}`);
+    const dateTimeB = new Date(`${b.appointment_date}T${b.DoctorSchedule?.start_time || '00:00'}`);
+    return dateTimeA - dateTimeB;
   });
 
   return (

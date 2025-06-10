@@ -8,10 +8,11 @@ import AdminCard from "../../components/hospitalstaff/AdminCard";
 import ModalDocInformation from '../../components/modals/ModalDocInformation';
 import ModalRegisterPatient from "../../components/modals/ModalRegisterPatient";
 import ModalCreateAppointment from "../../components/modals/ModalCreateAppointment";
+import ModalRegistrationDocStaff from "../../components/modals/ModalRegistrationDocStaff";
 
-import { iconMedCard, iconSchedule, iconDuration } from "../../utils/icons";
+import { iconPeople, iconDoctor ,iconSchedule, iconDuration } from "../../utils/icons";
 
-import { DOCTOR_ALLAPPOINTMENTS_ROUTE } from "../../utils/consts";
+import { ADMIN_ALLAPPOINTMENTS_ROUTE,} from "../../utils/consts";
 
 const AdminDashboard = () => {
   const { user, hospital } = useContext(Context);
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [isRegisterStaffModalOpen, setIsRegisterStaffModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,14 +62,14 @@ const AdminDashboard = () => {
       <h1 className={styles.welcomeMessage}>Вітаємо, {fullName}!</h1>
 
       <div className={styles.cardsContainer}>
-        <InfoCard icon={iconMedCard} title="Зареєструвати пацієнта" onClick={() => setIsRegisterModalOpen(true)} />
-        <InfoCard icon={iconSchedule} title="Всі прийоми" to={DOCTOR_ALLAPPOINTMENTS_ROUTE} />
+        <InfoCard icon={iconPeople} title="Зареєструвати пацієнта" onClick={() => setIsRegisterModalOpen(true)} />
+        <InfoCard icon={iconDoctor} title="Зареєструвати працівника" onClick={() => setIsRegisterStaffModalOpen(true)} />
+        <InfoCard icon={iconSchedule} title="Всі прийоми" to={ADMIN_ALLAPPOINTMENTS_ROUTE} />
         <InfoCard icon={iconDuration} title="Назначити прийом" onClick={() => setIsAppointmentModalOpen(true)} />
       </div>
 
       {isRegisterModalOpen && staff && (
         <ModalRegisterPatient
-          doctor={staff} 
           onClose={() => setIsRegisterModalOpen(false)}
         />
       )}
@@ -76,6 +78,12 @@ const AdminDashboard = () => {
         <ModalCreateAppointment
           doctorId={staff.id}
           onClose={() => setIsAppointmentModalOpen(false)}
+        />
+      )}
+
+      {isRegisterStaffModalOpen && (
+        <ModalRegistrationDocStaff
+          onClose={() => setIsRegisterStaffModalOpen(false)}
         />
       )}
 
