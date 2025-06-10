@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Context } from '../../index';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  LineChart, Line
-} from 'recharts';
 import styles from '../../style/adminpanel/AdminAnalytics.module.css';
-import FinanceReportItem from '../../components/finance/FinanceReportItem';
 import Loader from '../../components/elements/Loader';
+import {
+  renderDoctorsChart,
+  renderPatientsChart,
+  renderVisitsChart,
+  renderFinanceChart
+} from '../../components/analytics/AnalyticsCharts';
+import { FinancePeriods } from '../../components/analytics/FinancePeriodButtons';
 
 import {
   fetchTopDoctors,
@@ -23,12 +25,6 @@ const TAB_PATIENTS = 'patients';
 const TAB_VISITS = 'visits';
 const TAB_FINANCES = 'finances';
 
-const FinancePeriods = {
-  DAY: 'day',
-  MONTH: 'month',
-  YEAR: 'year'
-};
-
 const TabButtons = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { key: TAB_DOCTORS, label: 'Лікарі' },
@@ -44,29 +40,6 @@ const TabButtons = ({ activeTab, setActiveTab }) => {
           key={key}
           className={`${styles.tabButton} ${activeTab === key ? styles.active : ''}`}
           onClick={() => setActiveTab(key)}
-          type="button"
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-};
-
-const FinancePeriodButtons = ({ financePeriod, setFinancePeriod }) => {
-  const periods = [
-    { key: FinancePeriods.DAY, label: 'День' },
-    { key: FinancePeriods.MONTH, label: 'Місяць' },
-    { key: FinancePeriods.YEAR, label: 'Рік' }
-  ];
-
-  return (
-    <div className={styles.financeButtons}>
-      {periods.map(({ key, label }) => (
-        <button
-          key={key}
-          className={`${styles.periodButton} ${financePeriod === key ? styles.activePeriod : ''}`}
-          onClick={() => setFinancePeriod(key)}
           type="button"
         >
           {label}
@@ -171,100 +144,16 @@ const AdminAnalytics = () => {
     fetchDataForTab();
   }, [fetchDataForTab]);
 
-  const renderDoctorsChart = () => (
-    <div>
-      {avgDoctorRating && (
-        <p className={styles.avgRating}>
-          Середній рейтинг лікарів: <strong>{avgDoctorRating}</strong>
-        </p>
-      )}
-      <div className={styles.chartContainer}>
-      <div>
-        <p className={styles.chartTitle}>Найактивніші лікарі</p>
-        <BarChart width={600} height={300} data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="appointments" fill="#4c8fe5" radius={[6, 6, 0, 0]} name="Кількість прийомів" />
-        </BarChart>
-      </div>
-      </div>
-    </div>
-  );
-
-  const renderPatientsChart = () => (
-    <div className={styles.chartContainer}>
-      <div>
-        <p className={styles.chartTitle}>Найактивніші пацієнти</p>
-        <BarChart width={600} height={300} data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="visits" fill="#82ca9d" radius={[6, 6, 0, 0]} name="Візити" />
-        </BarChart>
-      </div>
-    </div>
-  );
-
-  const renderVisitsChart = () => (
-    <div className={styles.chartContainer}>
-      <div>
-        <p className={styles.chartTitle}>Відвідування за тиждень</p>
-        <LineChart width={600} height={300} data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="day" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="count" stroke="#ff7300" strokeWidth={3} name="Візити" />
-        </LineChart>
-      </div>
-    </div>
-  );
-
-  const renderFinanceChart = () => (
-    <>
-      <div className={styles.chartContainer}>
-        <div>
-          <p className={styles.chartTitle}>Фінансовий звіт</p>
-          <BarChart width={600} height={300} data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="amount" fill="#ffc658" radius={[6, 6, 0, 0]} name="Дохід (₴)" />
-          </BarChart>
-        </div>
-      </div>
-
-      <FinancePeriodButtons financePeriod={financePeriod} setFinancePeriod={setFinancePeriod} />
-
-      <div className={styles.financeReportList}>
-        {financeDetails[financePeriod]
-          ?.slice()
-          .sort((a, b) => new Date(b.report_date) - new Date(a.report_date))
-          .map(report => (
-            <FinanceReportItem key={report.id} report={report} />
-          ))}
-      </div>
-    </>
-  );
-
   const renderChart = () => {
     switch (activeTab) {
       case TAB_DOCTORS:
-        return renderDoctorsChart();
+        return renderDoctorsChart(data, avgDoctorRating);
       case TAB_PATIENTS:
-        return renderPatientsChart();
+        return renderPatientsChart(data);
       case TAB_VISITS:
-        return renderVisitsChart();
+        return renderVisitsChart(data);
       case TAB_FINANCES:
-        return renderFinanceChart();
+        return renderFinanceChart(data, financePeriod, setFinancePeriod, financeDetails);
       default:
         return null;
     }
