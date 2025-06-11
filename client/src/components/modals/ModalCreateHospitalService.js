@@ -13,7 +13,7 @@ const ModalCreateHospitalService = ({ onClose, onServiceCreated }) => {
 
   const [isAnalysis, setIsAnalysis] = useState(true);
   const [showCreateServiceModal, setShowCreateServiceModal] = useState(false);
-  const [createType, setCreateType] = useState('lab'); // 'lab' або 'medical'
+  const [createType, setCreateType] = useState('lab'); 
   const [doctors, setDoctors] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);

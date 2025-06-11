@@ -2,7 +2,6 @@ import React from "react";
 import styles from "../../style/modalstyle/ModalScheduleDetail.module.css";
 import { formatAppointmentDate } from "../../utils/formatDate";
 
-// Функція для форматування часу у форматі "HH:MM"
 const formatTime = (isoString) => {
   if (!isoString) return "—";
   const date = new Date(isoString);
@@ -11,12 +10,11 @@ const formatTime = (isoString) => {
   return `${hours}:${minutes}`;
 };
 
-// Форматування дати з "2025-06-09" у "09.06.2025"
 const formatDate = (dateString) => {
   if (!dateString) return "—";
   const date = new Date(dateString);
   const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Місяці 0-11
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); 
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
 };
@@ -25,11 +23,9 @@ const formatDate = (dateString) => {
 const ModalScheduleDetail = ({ schedule, onClose, onDelete }) => {
   if (!schedule) return null;
 
-  // Визначаємо, чи це стандартний розклад лікаря чи аналіз/послуга (перевіряємо наявність певних полів)
   const isDoctorSchedule = !!schedule.Doctor;
   const isAnalysisOrService = !isDoctorSchedule && (schedule.test_name || schedule.hospital);
 
-  // Якщо розклад лікаря — форматування за вашим початковим кодом
   if (isDoctorSchedule) {
     const appointment = { DoctorSchedule: schedule };
     const doctorFullName = `${schedule.Doctor.last_name} ${schedule.Doctor.first_name} ${schedule.Doctor.middle_name}` || schedule.doctor;

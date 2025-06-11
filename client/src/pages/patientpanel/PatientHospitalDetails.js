@@ -120,7 +120,7 @@ const PatientHospitalDetails = () => {
         <ModalServicesOrdering
           onClose={() => setIsOrderModalOpen(false)}
           analyse={selectedAnalyse}
-          hospital={hospital}
+          hospital={hospital.hospital}
         />
       )}
       {isDoctorModalOpen && selectedDoctor && (
