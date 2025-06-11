@@ -7,6 +7,7 @@ import SearchByPosition from '../../components/options/SearchByPosition';
 import DoctorItem from '../../components/doctor/DoctorItem';
 import StaffItem from '../../components/hospitalstaff/StaffItem';
 import ModalRegistrationDocStaff from '../../components/modals/ModalRegistrationDocStaff';
+import TabButtons from '../../components/navbars/TabButtons';
 import Loader from '../../components/elements/Loader';
 
 import styles from '../../style/adminpanel/AdminDoctors.module.css';
@@ -93,20 +94,17 @@ const AdminDoctors = () => {
         </div>
       </div>
 
-      <div className={styles.tabButtons}>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'doctors' ? styles.active : ''}`}
-          onClick={() => setActiveTab('doctors')}
-        >
-          Лікарі
-        </button>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'staff' ? styles.active : ''}`}
-          onClick={() => setActiveTab('staff')}
-        >
-          Медичний персонал
-        </button>
-      </div>
+      <TabButtons
+        tabs={[
+          { key: 'doctors', label: 'Лікарі' },
+          { key: 'staff', label: 'Медичний персонал' },
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        className={styles.tabButton}
+        activeClassName={styles.active}
+        wrapperClassName={styles.tabButtons}
+      />
 
       {activeTab === 'doctors' ? (
         <>

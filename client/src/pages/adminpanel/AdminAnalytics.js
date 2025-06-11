@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Context } from '../../index';
 import styles from '../../style/adminpanel/AdminAnalytics.module.css';
+import TabButtons from '../../components/navbars/TabButtons';
 import Loader from '../../components/elements/Loader';
 import {
   renderDoctorsChart,
@@ -24,30 +25,6 @@ const TAB_DOCTORS = 'doctors';
 const TAB_PATIENTS = 'patients';
 const TAB_VISITS = 'visits';
 const TAB_FINANCES = 'finances';
-
-const TabButtons = ({ activeTab, setActiveTab }) => {
-  const tabs = [
-    { key: TAB_DOCTORS, label: 'Лікарі' },
-    { key: TAB_PATIENTS, label: 'Пацієнти' },
-    { key: TAB_VISITS, label: 'Відвідування' },
-    { key: TAB_FINANCES, label: 'Фінанси' }
-  ];
-
-  return (
-    <div className={styles.tabButtons}>
-      {tabs.map(({ key, label }) => (
-        <button
-          key={key}
-          className={`${styles.tabButton} ${activeTab === key ? styles.active : ''}`}
-          onClick={() => setActiveTab(key)}
-          type="button"
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-};
 
 const AdminAnalytics = () => {
   const { hospital } = useContext(Context);
@@ -165,7 +142,19 @@ const AdminAnalytics = () => {
         <h1 className={styles.title}>Аналітика</h1>
       </div>
 
-      <TabButtons activeTab={activeTab} setActiveTab={setActiveTab} />
+      <TabButtons
+        tabs={[
+          { key: TAB_DOCTORS, label: 'Лікарі' },
+          { key: TAB_PATIENTS, label: 'Пацієнти' },
+          { key: TAB_VISITS, label: 'Відвідування' },
+          { key: TAB_FINANCES, label: 'Фінанси' }
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        className={styles.tabButton}
+        activeClassName={styles.active}
+        wrapperClassName={styles.tabButtons}
+      />
 
       {loading && <Loader />}
       {error && <div className={styles.error}>{error}</div>}

@@ -10,13 +10,12 @@ import { fetchDoctorByUserId, fetchDoctorById } from '../../http/doctorAPI';
 import { Context } from '../../index';
 
 import PatientCardFull from '../../components/patient/PatientCardFull';
-import DiagnosisCard from '../../components/medcard/DiagnosisCard';
 import ModalMedRecordCreation from '../../components/modals/ModalMedRecordCreation';
 import ModalPrescriptionInfo from '../../components/modals/ModalPrescriptionInfo';
 import ModalCreateAppointment from '../../components/modals/ModalCreateAppointment';
-import SearchInput from '../../components/options/SearchInput';
+import DiagnosesSection from '../../components/medcard/DiagnosesSection';
+import PrescriptionsSection from '../../components/medcard/PrescriptionsSection';
 import Loader from '../../components/elements/Loader';
-import { iconDrugs } from '../../utils/icons';
 
 const DoctorPatientMedCard = () => {
   const { id } = useParams();
@@ -60,19 +59,6 @@ const DoctorPatientMedCard = () => {
     }
   }, [id, user]);
 
-
-  const formatDate = (dateStr) => {
-    return dateStr ? new Date(dateStr).toLocaleDateString('uk-UA') : 'Немає даних';
-  };
-
-  const filteredDiagnoses = diagnoses.filter(d =>
-    (d.diagnosis || '').toLowerCase().includes(searchDiagnosis.toLowerCase())
-  );
-
-  const filteredRecipes = recipes.filter(r =>
-    (r.medication || '').toLowerCase().includes(searchRecipe.toLowerCase())
-  );
-
   const handleCreateRecord = (newRecord) => {
     setDiagnoses(prev => [newRecord, ...prev]);
     setShowModal(false);
@@ -86,65 +72,8 @@ const DoctorPatientMedCard = () => {
   const handleCloseAppointmentModal = () => setShowAppointmentModal(false);
 
   const handleCreate = (newAppointment) => {
-  setShowAppointmentModal(false);
-};
-
-  const renderDiagnoses = () => (
-    <>
-      <div className={styles.searchWrapper}>
-        <SearchInput
-          placeholder="Введіть назву діагнозу"
-          value={searchDiagnosis}
-          onChange={setSearchDiagnosis}
-        />
-      </div>
-      <div className={styles.listDiagnosis}>
-        {filteredDiagnoses.length > 0 ? (
-          filteredDiagnoses.map(({ id, diagnosis, record_date }) => (
-            <DiagnosisCard key={id} id={id} diagnosis={diagnosis} record_date={record_date} />
-          ))
-        ) : (
-          <div>Діагнози не знайдені</div>
-        )}
-      </div>
-    </>
-  );
-
-  const renderPrescriptions = () => (
-    <>
-      <div className={styles.searchWrapper}>
-        <SearchInput
-          placeholder="Введіть назву препарату"
-          value={searchRecipe}
-          onChange={setSearchRecipe}
-        />
-      </div>
-      <div className={styles.list}>
-        {filteredRecipes.length > 0 ? (
-          filteredRecipes.map((item, index) => (
-            <div key={index} className={styles.tableRow}>
-              <img src={iconDrugs} alt="icon" className={styles.prescriptionIcon} />
-              <div className={styles.drugName}>{item.medication}</div>
-              <div className={styles.dateAssigned}>
-                Призначено: {formatDate(item.prescribed_date)}
-              </div>
-              <div className={styles.dateValid}>
-                Діє до: {formatDate(item.prescription_expiration)}
-              </div>
-              <div
-                className={styles.details}
-                onClick={() => setSelectedPrescription(item)}
-              >
-                Детальніше
-              </div>
-            </div>
-          ))
-        ) : (
-          <div>Рецепти не знайдені</div>
-        )}
-      </div>
-    </>
-  );
+    setShowAppointmentModal(false);
+  };
 
   if (!patient || !doctor) return <Loader />;
 
@@ -181,7 +110,20 @@ const DoctorPatientMedCard = () => {
         </div>
 
         <div className={styles.tabContent}>
-          {activeTab === 'diagnoses' ? renderDiagnoses() : renderPrescriptions()}
+          {activeTab === 'diagnoses' ? (
+            <DiagnosesSection
+              diagnoses={diagnoses}
+              searchValue={searchDiagnosis}
+              onSearchChange={setSearchDiagnosis}
+            />
+          ) : (
+            <PrescriptionsSection
+              prescriptions={recipes}
+              searchValue={searchRecipe}
+              onSearchChange={setSearchRecipe}
+              onDetailsClick={setSelectedPrescription}
+            />
+          )}
         </div>
       </div>
 

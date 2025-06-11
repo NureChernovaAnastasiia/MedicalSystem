@@ -4,6 +4,7 @@ import SearchInput from '../../components/options/SearchInput';
 import ServiceAllHospitalItem from '../../components/service/ServiceAllHospitalItem';
 import ConfirmModal from '../../components/elements/ConfirmModal'; 
 import ModalCreateHospitalService from '../../components/modals/ModalCreateHospitalService';
+import TabButtons from '../../components/navbars/TabButtons';
 import Loader from '../../components/elements/Loader';
 
 import { getHospitalMedicalServicesByHospitalId, deleteHospitalMedicalService } from '../../http/servicesAPI';
@@ -113,22 +114,14 @@ const AdminServicesHospital = () => {
         </div>
       </div>
 
-      <div className={styles.tabButtons}>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'analyses' ? styles.active : ''}`}
-          onClick={() => setActiveTab('analyses')}
-          disabled={analyses.length === 0}
-        >
-          Аналізи
-        </button>
-        <button
-          className={`${styles.tabButton} ${activeTab === 'services' ? styles.active : ''}`}
-          onClick={() => setActiveTab('services')}
-          disabled={services.length === 0}
-        >
-          Послуги
-        </button>
-      </div>
+      <TabButtons
+        tabs={[
+          { key: 'analyses', label: 'Аналізи', disabled: analyses.length === 0 },
+          { key: 'services', label: 'Послуги', disabled: services.length === 0 },
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       <div className={styles.filterRow}>
         <div className={styles.searchBox}>

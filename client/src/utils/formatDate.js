@@ -110,3 +110,7 @@ export const formatAppointmentTimeOnly = (appointment) => {
 
   return "Час не вказаний";
 };
+
+export const formatDate = (dateStr) => {
+  return dateStr ? new Date(dateStr).toLocaleDateString('uk-UA') : 'Немає даних';
+};
