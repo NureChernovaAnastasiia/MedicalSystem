@@ -35,19 +35,17 @@ const TabButtons = ({ tabs, activeTab, onTabChange }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Стиль для обгортки з адаптивним gap
   const wrapperStyle = {
     ...baseStyles.wrapper,
     gap: windowWidth <= 480 ? '0' : baseStyles.wrapper.gap,
   };
 
-  // Адаптивні стилі для кнопок
   const getButtonStyle = (isActive) => {
     let fontSize = baseStyles.button.fontSize;
     let padding = baseStyles.button.padding;
 
     if (windowWidth <= 480) {
-      fontSize = '15px';      // тут замінив на 15px згідно з медіа-запитом
+      fontSize = '15px';     
       padding = '0.6rem 1rem';
     } else if (windowWidth <= 900) {
       fontSize = '22px';
