@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink } from 'react-router-dom';
 import styles from "../../style/modalstyle/ModalAppointmentDetails.module.css";
 import { PATIENT_MEDCARD_ROUTE } from "../../utils/consts";
-import { formatAppointmentDate } from "../../utils/formatDate"; 
+import { formatAppointmentDate } from "../../utils/formatDate";
+import { Context } from "../../index"; 
 
 const ModalAppointmentDetails = ({ appointment, onClose }) => {
+  const { user } = useContext(Context); 
+  const role = user._role; 
+
   const formatStatus = (status) => {
     switch (status) {
       case "Scheduled":
@@ -53,9 +57,12 @@ const ModalAppointmentDetails = ({ appointment, onClose }) => {
           <button onClick={onClose} className={styles.backButton}>
             &lt; Повернутися назад
           </button>
-          <NavLink to={PATIENT_MEDCARD_ROUTE} className={styles.goToCardButton}>
-            Перейти до медичної картки &gt;
-          </NavLink>
+          
+          {role === 'Patient' && (
+            <NavLink to={PATIENT_MEDCARD_ROUTE} className={styles.goToCardButton}>
+              Перейти до медичної картки &gt;
+            </NavLink>
+          )}
         </div>
       </div>
     </div>
